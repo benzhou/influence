@@ -5,8 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
 var exphbs  = require('express3-handlebars');
 
 var app = express();
@@ -25,7 +23,7 @@ var hbs = exphbs.create({
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 
-
+//Middleware Setup
 app.use(favicon());
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -33,8 +31,20 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
+var routes = {},
+    dataObjects = {},
+    appConfig = require('config'),
+    mongoDbProvider = require('./dbProvider/mongodb/mongoDbProvider')(dataObjects)
+    accountDataObject = require('./dataHandler/authDataHandler')(dataObjects),
+    authDataHandler = require('./dataHandler/authDataHandler')(accountDataObject),
+    authBusiness = require('./business/authBusiness')(authDataHandler);
+
+//Setup routes
+routes.site = require('./routes/index')(express.Router());
+routes.api = require('./routes/api')(express.Router(authBusiness));
+
+app.use('/', routes.site);
+app.use('/api', routes.api);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {

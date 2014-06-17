@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html ng-app>
 <head>
     <meta charset="utf-8" />
     <title>Influence - Give your feedback to any Business</title>
@@ -10,16 +10,16 @@
 
     <link rel="stylesheet" href="stylesheets/style.css">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
+    <script type="application/javascript" src="javascripts/controllers/mainController.js"></script>
 </head>
-<body>
+<body ng-controller="influenceController">
     <div class="site-wrapper">
         <div class="site-wrapper-inner">
             <div class="cover-container">
                 <div class="masthead clearfix">
                     <div class="inner">
-                        <h3 class="masthead-brand">Cover</h3>
+                        <h3 class="masthead-brand">Influence - Your Feedback IS Important!</h3>
                         <ul class="nav masthead-nav">
                             <li class="active"><a href="#">Home</a></li>
                             <li><a href="#">Features</a></li>
@@ -29,16 +29,26 @@
                 </div>
 
                 <div class="inner cover">
-                    <h1 class="cover-heading">Cover your page.</h1>
-                    <p class="lead">Cover is a one-page template for building simple and beautiful home pages. Download, edit the text, and add your own fullscreen background photo to make it your own.</p>
-                    <p class="lead">
-                        <a href="#" class="btn btn-lg btn-default">Learn more</a>
-                    </p>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <label>
+                                    What's in your mind?
+                                </label>
+                                <textarea class="form-control input-lg" rows="6"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <a href="#" class="btn btn-lg btn-default btn-block">Send In</a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="mastfoot">
                     <div class="inner">
-                        <p>Cover template for <a href="http://getbootstrap.com">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
+                        <p>CopyRight by <a href="http://getbootstrap.com">Influence LLC.</a>, 2014</p>
                     </div>
                 </div>
             </div>
