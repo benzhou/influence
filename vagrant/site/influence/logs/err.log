@@ -1,0 +1,44 @@
+Error: Failed to lookup view "error" in views directory "/vagrant/site/influence/views"
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:492:17)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
+    at Layer.module.exports [as handle] (/vagrant/site/influence/app.js:64:9)
+    at trim_prefix (/vagrant/site/influence/node_modules/express/lib/router/index.js:235:17)
+    at /vagrant/site/influence/node_modules/express/lib/router/index.js:208:9
+    at Function.proto.process_params (/vagrant/site/influence/node_modules/express/lib/router/index.js:269:12)
+    at IncomingMessage.next (/vagrant/site/influence/node_modules/express/lib/router/index.js:199:19)
+    at fn (/vagrant/site/influence/node_modules/express/lib/response.js:797:25)
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:494:14)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
+Error: Failed to lookup view "error" in views directory "/vagrant/site/influence/views"
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:492:17)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
+    at Layer.module.exports [as handle] (/vagrant/site/influence/app.js:64:9)
+    at trim_prefix (/vagrant/site/influence/node_modules/express/lib/router/index.js:235:17)
+    at /vagrant/site/influence/node_modules/express/lib/router/index.js:208:9
+    at Function.proto.process_params (/vagrant/site/influence/node_modules/express/lib/router/index.js:269:12)
+    at IncomingMessage.next (/vagrant/site/influence/node_modules/express/lib/router/index.js:199:19)
+    at fn (/vagrant/site/influence/node_modules/express/lib/response.js:797:25)
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:494:14)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
+Error: Failed to lookup view "error" in views directory "/vagrant/site/influence/views"
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:492:17)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
+    at Layer.module.exports [as handle] (/vagrant/site/influence/app.js:64:9)
+    at trim_prefix (/vagrant/site/influence/node_modules/express/lib/router/index.js:235:17)
+    at /vagrant/site/influence/node_modules/express/lib/router/index.js:208:9
+    at Function.proto.process_params (/vagrant/site/influence/node_modules/express/lib/router/index.js:269:12)
+    at IncomingMessage.next (/vagrant/site/influence/node_modules/express/lib/router/index.js:199:19)
+    at fn (/vagrant/site/influence/node_modules/express/lib/response.js:797:25)
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:494:14)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
+Error: Failed to lookup view "error" in views directory "/vagrant/site/influence/views"
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:492:17)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
+    at Layer.module.exports [as handle] (/vagrant/site/influence/app.js:64:9)
+    at trim_prefix (/vagrant/site/influence/node_modules/express/lib/router/index.js:235:17)
+    at /vagrant/site/influence/node_modules/express/lib/router/index.js:208:9
+    at Function.proto.process_params (/vagrant/site/influence/node_modules/express/lib/router/index.js:269:12)
+    at IncomingMessage.next (/vagrant/site/influence/node_modules/express/lib/router/index.js:199:19)
+    at fn (/vagrant/site/influence/node_modules/express/lib/response.js:797:25)
+    at Function.app.render (/vagrant/site/influence/node_modules/express/lib/application.js:494:14)
+    at ServerResponse.res.render (/vagrant/site/influence/node_modules/express/lib/response.js:802:7)
