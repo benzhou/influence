@@ -7,9 +7,11 @@ var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var exphbs  = require('express3-handlebars');
 
 var app = express();
 var hbs = exphbs.create({
+                showTitle : true,
                 // Specify helpers which are only registered on this instance.
                 helpers: {
                     foo: function () { return 'FOO!'; },
@@ -20,7 +22,7 @@ var hbs = exphbs.create({
 // view engine setup
 //app.set('views', path.join(__dirname, 'views'));
 //app.set('view engine', 'jade');
-app.engine('hbs', expressHbs({extname:'hbs', defaultLayout:'main.hbs'}));
+app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 
 

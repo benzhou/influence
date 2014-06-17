@@ -8,3 +8,4 @@ sudo apt-get install nodejs -y
 sudo apt-get install npm -y
 sudo npm install -g express
 sudo npm install -g express-generator
+sudo npm install -g forever
