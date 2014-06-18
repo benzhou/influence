@@ -10,3 +10,5 @@ sudo apt-get install npm -y
 sudo npm install -g express
 sudo npm install -g express-generator
 sudo npm install -g forever
+cd /vagrant/site/influence
+npm install

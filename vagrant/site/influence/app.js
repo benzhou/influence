@@ -4,6 +4,8 @@ var favicon = require('static-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoDb = require('mongodb');
+var Q = require("q");
 
 var exphbs  = require('express3-handlebars');
 
@@ -33,8 +35,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var routes = {},
     dataObjects = {},
-    appConfig = require('config'),
-    mongoDbProvider = require('./dbProvider/mongodb/mongoDbProvider')(dataObjects)
+    appConfig = require('./config'),
+    mongoDbProvider = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, logger),
     accountDataObject = require('./dataHandler/authDataHandler')(dataObjects),
     authDataHandler = require('./dataHandler/authDataHandler')(accountDataObject),
     authBusiness = require('./business/authBusiness')(authDataHandler);
