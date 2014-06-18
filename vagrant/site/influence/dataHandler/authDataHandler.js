@@ -1,4 +1,4 @@
-module.exports = function(accountDataObject){
+module.exports = function(dbProvider){
 
     var getAccountInfo = function(acctId){
         return {};

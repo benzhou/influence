@@ -2,12 +2,15 @@ module.exports = function(baseObj){
 
     baseObj.adminAccount = {
         adminId : 0,
+        tenantId : 0,
         username : null,
         email : null,
         passwordHash : null,
         firstName : null,
         lastName : null,
-        displayName : null
+        displayName : null,
+        createdBy   : null,
+        createdOn : Date.now()
     };
 
     baseObj.tenant = {

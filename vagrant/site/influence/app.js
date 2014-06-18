@@ -33,17 +33,28 @@ app.use(bodyParser.urlencoded());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var routes = {},
-    dataObjects = {},
-    appConfig = require('./config'),
-    mongoDbProvider = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, logger),
-    accountDataObject = require('./dataHandler/authDataHandler')(dataObjects),
-    authDataHandler = require('./dataHandler/authDataHandler')(accountDataObject),
-    authBusiness = require('./business/authBusiness')(authDataHandler);
+var routes              = {},
+
+    //Dependencies initialization
+    appConfig           = require('./config'),
+    dataObjects         = {},
+    errCodes            = require('./error/errorCodes')(),
+    accountDataObject   = require('./dataHandler/authDataHandler')(dataObjects),
+
+    mongoDbProvider     = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, console),
+    influenceDbProvider = require('./dbProvider/influenceDbProvider')(Q, mongoDbProvider),
+
+    accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
+    authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
+
+    accountBusiness     = require('./business/accountBusiness')(errCodes, accountDataHandler),
+    authBusiness        = require('./business/authBusiness')(authDataHandler),
+
+    apiController       =  require('./controllers/apiController')(Q, authBusiness, accountBusiness);
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());
-routes.api = require('./routes/api')(express.Router(authBusiness));
+routes.api = require('./routes/api')(express.Router(), apiController);
 
 app.use('/', routes.site);
 app.use('/api', routes.api);
@@ -79,5 +90,8 @@ app.use(function(err, req, res, next) {
     });
 });
 
+process.on('uncaughtException', function(err) {
+    console.log(err);
+});
 
 module.exports = app;

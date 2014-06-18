@@ -6,6 +6,6 @@ module.exports = function(){
             poolSize :          10
         }
     };
-};
+}();
 
 
