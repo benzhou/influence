@@ -50,7 +50,7 @@ var routes              = {},
     accountBusiness     = require('./business/accountBusiness')(errCodes, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(authDataHandler),
 
-    apiController       =  require('./controllers/apiController')(Q, authBusiness, accountBusiness);
+    apiController       =  require('./controllers/apiController')(Q, console, authBusiness, accountBusiness);
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());

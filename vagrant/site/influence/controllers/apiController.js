@@ -1,4 +1,4 @@
-module.exports = function(Q, authBusiness, accountBusiness){
+module.exports = function(Q, logger, authBusiness, accountBusiness){
 
     var test = function(req,res,next){
             res.json({result:true});
@@ -12,10 +12,14 @@ module.exports = function(Q, authBusiness, accountBusiness){
             Q.when(accountBusiness.getAdminAccountById(adminId)).then(
 
                 function(admin){
+                    logger.log("Success when call accountBusiness.getAdminAccountById in getAdminAccount");
+                    logger.log(admin);
                     res.json(admin);
                 },
 
                 function(err){
+                    logger.log("Failed when call accountBusiness.getAdminAccountById in getAdminAccount");
+                    logger.log(err);
                     res.json(err);
                 }
             );
@@ -44,10 +48,14 @@ module.exports = function(Q, authBusiness, accountBusiness){
             )).then(
 
                 function(admin){
-                    res.json({success : 1});
+                    logger.log("Success when call accountBusiness.createAdminAccount in postAdminAccount");
+                    logger.log(admin);
+                    res.json(admin);
                 },
 
                 function(err){
+                    logger.log("Failed when call accountBusiness.createAdminAccount in postAdminAccount");
+                    logger.log(err);
                     res.json(err);
                 }
             );

@@ -67,21 +67,26 @@ module.exports = function(config, MongoDb, Q, logger){
         findAdminAccountById = function(adminId){
             var df = Q.defer();
 
+
             Q.when(connect()).then(
                 //success callback
                 function(db){
-                    logger.log('mongoDbProvider.js findAdminAccountById: got db object');
-                    var collection = db.collection(collections.AdminAccount);
+                    try{
+                        logger.log('mongoDbProvider.js findAdminAccountById: got db object');
+                        var collection = db.collection(collections.AdminAccount);
 
-                    logger.log('mongoDbProvider.js findAdminAccountById: got db collection');
+                        logger.log('mongoDbProvider.js findAdminAccountById: got db collection');
 
-                    collection.findOne(
-                        { _id    : adminId },
-                        function(err, result){
-                            logger.log('mongoDbProvider.js findAdminAccountById: found!');
-                            _rejectOrResolve(df, err, result);
-                        }
-                    );
+                        collection.findOne(
+                            { _id    : adminId },
+                            function(err, result){
+                                logger.log('mongoDbProvider.js findAdminAccountById: found!');
+                                _rejectOrResolve(df, err, result);
+                            }
+                        );
+                    }catch(e){
+                        _rejectOrResolve(df, e);
+                    }
                 },
                 //fail callback
                 function(){
@@ -94,25 +99,28 @@ module.exports = function(config, MongoDb, Q, logger){
         },
 
         upsertAdminAccountById = function(adminDo){
-            console.log("mongoDbProvider: entered");
             var df = Q.defer();
 
             Q.when(connect()).then(
                 //success callback
                 function(db){
-                    var collection = db.collection(collections.AdminAccount);
-                    logger.log('mongoDbProvider.js upsertAdminAccountById: got db collection');
-                    logger.log(adminDo);
-                    collection.update(
-                        {_id    : adminDo._id},
-                        adminDo,
-                        {
-                            upsert  : true
-                        },
-                        function(err, result){
-                            _rejectOrResolve(df, err, result);
-                        }
-                    );
+                    try{
+                        var collection = db.collection(collections.AdminAccount);
+                        logger.log('mongoDbProvider.js upsertAdminAccountById: got db collection');
+                        logger.log(adminDo);
+                        collection.update(
+                            {_id    : adminDo._id},
+                            adminDo,
+                            {
+                                upsert  : true
+                            },
+                            function(err, result){
+                                _rejectOrResolve(df, err, result);
+                            }
+                        );
+                    }catch(e){
+                        _rejectOrResolve(df, e);
+                    }
                 },
                 //fail callback
                 function(){
@@ -129,18 +137,23 @@ module.exports = function(config, MongoDb, Q, logger){
 
             Q.when(connect()).then(
                 function(db){
-                    var collection = db.collection(collections.AppAccount);
+                    try{
+                        var collection = db.collection(collections.AppAccount);
 
-                    collection.update(
-                        {_id    : appDo._id},
-                        adminDo,
-                        {
-                            upsert  : true
-                        },
-                        function(err, result){
-                            _rejectOrResolve(df, err, result);
-                        }
-                    );
+                        collection.update(
+                            {_id    : appDo._id},
+                            adminDo,
+                            {
+                                upsert  : true
+                            },
+                            function(err, result){
+                                _rejectOrResolve(df, err, result);
+                            }
+                        );
+                    }catch(e){
+                        _rejectOrResolve(df, e);
+                    }
+
                 },
                 //fail callback
                 function(){
