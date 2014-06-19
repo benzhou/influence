@@ -14,7 +14,7 @@ Influence Documentations
     
 2. Setup Github access so you can download all the files that includes VagrantFile for the environment and the source code 
 3. Setup your workspace
-    - Find the place you want to get the remote repo, say ~\dev\
+    - Find the place you want to get the remote repo, say ~dev\
     - Run `github clone git@github.com:benzhou/influence.git` to get the remote repository downloaded
     - Run `Vagrant up` to start the process of building up your development environment, essentially this process will 
         1. Download the virtual machine that is defined in the VagrantFile
