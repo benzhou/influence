@@ -61,14 +61,67 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
             );
         },
 
-        getAppToken = function(req,res,next){
+        getAppAccount = function(req,res,next){
+            //TODO request validation
 
+            var appKey = req.params.appKey;
+
+            Q.when(accountBusiness.getAppAccountByAppKey(appKey)).then(
+
+                function(app){
+                    logger.log("Success when call accountBusiness.getAppAccountByAppKey in getAppAccount");
+                    logger.log(app);
+                    res.json(app);
+                },
+
+                function(err){
+                    logger.log("Failed when call accountBusiness.getAppAccountByAppKey in getAppAccount");
+                    logger.log(err);
+                    res.json(err);
+                }
+            );
+        },
+
+        postAppAccount = function(req,res,next){
+            //TODO request validation
+
+            var reqApp = req.body;
+
+            //authentication/Authorization (Use middleware?)
+
+
+
+            Q.when(
+                accountBusiness
+                    .createAppAccount(
+                    reqApp.appName,
+                    reqApp.appDescripion,
+                    1 //TODO Needs to retrieve from authenticated admin token
+                )).then(
+
+                function(app){
+                    logger.log("Success when call accountBusiness.createAppAccount in postAppAccount");
+                    logger.log(app);
+                    res.json(app);
+                },
+
+                function(err){
+                    logger.log("Failed when call accountBusiness.createAppAccount in postAppAccount");
+                    logger.log(err);
+                    res.json(err);
+                }
+            );
         };
 
     return {
         test : test,
         postAdminAccount    : postAdminAccount,
-        getAdminAccount     : getAdminAccount
+        getAdminAccount     : getAdminAccount,
+
+        getAppAccount       : getAppAccount,
+        postAppAccount      : postAppAccount
+
+
     };
 };
 

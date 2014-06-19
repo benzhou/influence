@@ -9,6 +9,14 @@ module.exports = function(Q, dbProvider){
             return dbProvider.upsertAdminAccountById(adminAccountDo);
         },
 
+        findAppAccountById = function(appId){
+            return dbProvider.findAppAccountById(appId);
+        },
+
+        findAppAccountByAppKey = function(appKey){
+            return dbProvider.findAppAccountByAppKey(appKey);
+        },
+
         upsertAppAccountById = function(adminAccountDo){
             return dbProvider.upsertAppAccountById(adminAccountDo);
         };
@@ -16,6 +24,9 @@ module.exports = function(Q, dbProvider){
     return {
         findAdminAccountById    : findAdminAccountById,
         upsertAdminAccountById  : upsertAdminAccountById,
+
+        findAppAccountById      : findAppAccountById,
+        findAppAccountByAppKey  : findAppAccountByAppKey,
         upsertAppAccountById    : upsertAppAccountById
     };
 };

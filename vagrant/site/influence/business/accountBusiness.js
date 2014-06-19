@@ -1,9 +1,9 @@
-module.exports = function(errCodes, accountDataHandler){
+module.exports = function(uuid, errCodes, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
             if(!adminId){
-                throw new Exception();
+                throw new Error("No adminId found");
             }
 
             return accountDataHandler.getAdminAccountById(adminId);
@@ -22,7 +22,7 @@ module.exports = function(errCodes, accountDataHandler){
             //validation
             //required fields
             if(!email || !passwordPlainText || !createdBy){
-                throw new Exception();
+                throw new Error("Required Fields are missing");
             }
 
             //defaulting values when necessary
@@ -40,24 +40,78 @@ module.exports = function(errCodes, accountDataHandler){
             var passwordHash = passwordPlainText;
 
 
-            var adminDo = {
-                tenantId            : tenantId,
-                username            : username,
-                email               : email,
-                passwordHash        : passwordHash,
-                firstName           : firstName,
-                lastName            : lastName,
-                displayName         : displayName,
-                createdBy           : createdBy,
-                createdOn           : Date.Now()
-            };
+            var
+                currentDate = new Date(),
+                adminDo     = {
+                    tenantId            : tenantId,
+                    username            : username,
+                    email               : email,
+                    passwordHash        : passwordHash,
+                    firstName           : firstName,
+                    lastName            : lastName,
+                    displayName         : displayName,
+                    createdBy           : createdBy,
+                    createdOn           : currentDate,
+                    updatedBy           : createdBy,
+                    updatedOn           : currentDate
+                };
 
-            return accountDataHandler.upsertAdminAccount(adminDo);
-    };
+            return accountDataHandler.upsertAdminAccountById(adminDo);
+        },
+
+        getAppAccountByAppKey = function(appKey){
+            if(!appKey){
+                throw new Error("No adminId found");
+            }
+
+            return accountDataHandler.findAppAccountByAppKey(appKey);
+        },
+
+        createAppAccount = function(
+            appName,
+            appDesc,
+            createdBy
+        ){
+            //validation
+            //required fields
+            if(!appName || !createdBy){
+                throw new Exception();
+            }
+
+            //Generate AppKey and AppSecret
+            var appKey      = _getUrlSafeBase64EncodedToken(),
+                appSecrect  = _getUrlSafeBase64EncodedToken();
+
+            var
+                currentDate = new Date(),
+                appDo       = {
+                    appKey              : appKey,
+                    appSecrect          : appSecrect,
+                    appName             : appName,
+                    appDescription      : appDesc,
+                    createdBy           : createdBy,
+                    createdOn           : currentDate,
+                    updatedBy           : createdBy,
+                    updatedOn           : currentDate
+                };
+
+            return accountDataHandler.upsertAppAccountById(appDo);
+        },
+
+        _getUrlSafeBase64EncodedToken = function(){
+            return
+                (new Buffer(uuid.v4() + (new Date()).getTime()).toString('base64')).
+                    replace(/\+/gi,'-').
+                    replace(/\//, '_').
+                    replace(/=/, ',');
+        };
 
     return {
-        createAdminAccount  : createAdminAccount,
-        getAdminAccountById : getAdminAccountById
+        createAdminAccount      : createAdminAccount,
+        getAdminAccountById     : getAdminAccountById,
+
+        getAppAccountByAppKey   : getAppAccountByAppKey,
+        createAppAccount        : createAppAccount
     };
 };
 

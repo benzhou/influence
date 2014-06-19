@@ -65,37 +65,7 @@ module.exports = function(config, MongoDb, Q, logger){
         },
 
         findAdminAccountById = function(adminId){
-            var df = Q.defer();
-
-
-            Q.when(connect()).then(
-                //success callback
-                function(db){
-                    try{
-                        logger.log('mongoDbProvider.js findAdminAccountById: got db object');
-                        var collection = db.collection(collections.AdminAccount);
-
-                        logger.log('mongoDbProvider.js findAdminAccountById: got db collection');
-
-                        collection.findOne(
-                            { _id    : adminId },
-                            function(err, result){
-                                logger.log('mongoDbProvider.js findAdminAccountById: found!');
-                                _rejectOrResolve(df, err, result);
-                            }
-                        );
-                    }catch(e){
-                        _rejectOrResolve(df, e);
-                    }
-                },
-                //fail callback
-                function(){
-                    logger.log('mongoDbProvider.js findAdminAccountById: failed to obtain the db');
-                    _rejectOrResolve(df, { message : "Failed to connect DB"});
-                }
-            );
-
-            return df.promise;
+            return _findById(collections.AdminAccount, adminId);
         },
 
         upsertAdminAccountById = function(adminDo){
@@ -132,6 +102,14 @@ module.exports = function(config, MongoDb, Q, logger){
             return df.promise;
         },
 
+        findAppAccountById = function(appId){
+            return _findById(collections.AppAccount, appId);
+        },
+
+        findAppAccountByAppKey = function(appKey){
+            return _findOneBy(collections.AppAccount, {appKey : appKey});
+        },
+
         upsertAppAccountById = function(appDo){
             var df = Q.defer();
 
@@ -165,6 +143,44 @@ module.exports = function(config, MongoDb, Q, logger){
             return df.promise;
         },
 
+        _findById = function(collectionName, id){
+            return _findOneBy(collectionName, {_id : id});
+        },
+
+        _findOneBy = function(collectionName, match){
+            var df = Q.defer();
+
+
+            Q.when(connect()).then(
+                //success callback
+                function(db){
+                    try{
+                        logger.log('mongoDbProvider.js _findOneBy - ' + collectionName +': got db object');
+                        var collection = db.collection(collectionName);
+
+                        logger.log('mongoDbProvider.js _findOneBy - ' + collectionName +': got db collection');
+
+                        collection.findOne(
+                            match,
+                            function(err, result){
+                                logger.log('mongoDbProvider.js  _findOneBy - ' + collectionName +': found!');
+                                _rejectOrResolve(df, err, result);
+                            }
+                        );
+                    }catch(e){
+                        _rejectOrResolve(df, e);
+                    }
+                },
+                //fail callback
+                function(){
+                    logger.log('mongoDbProvider.js  _findOneBy - ' + collectionName +': failed to obtain the db');
+                    _rejectOrResolve(df, { message : "Failed to connect DB"});
+                }
+            );
+
+            return df.promise;
+        },
+
         _rejectOrResolve = function(df, err, result){
             if(err){
                 df.reject(err);
@@ -179,6 +195,9 @@ module.exports = function(config, MongoDb, Q, logger){
 
         findAdminAccountById        : findAdminAccountById,
         upsertAdminAccountById      : upsertAdminAccountById,
+
+        findAppAccountById          : findAppAccountById,
+        findAppAccountByAppKey      : findAppAccountByAppKey,
         upsertAppAccountById        : upsertAppAccountById
     };
 };

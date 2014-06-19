@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoDb = require('mongodb');
 var Q = require("q");
+var uuid = require("node-uuid");
 
 var exphbs  = require('express3-handlebars');
 
@@ -47,7 +48,7 @@ var routes              = {},
     accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
 
-    accountBusiness     = require('./business/accountBusiness')(errCodes, accountDataHandler),
+    accountBusiness     = require('./business/accountBusiness')(uuid, errCodes, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(authDataHandler),
 
     apiController       =  require('./controllers/apiController')(Q, console, authBusiness, accountBusiness);
