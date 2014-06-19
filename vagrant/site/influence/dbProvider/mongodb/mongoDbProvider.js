@@ -5,7 +5,8 @@ module.exports = function(config, MongoDb, Q, logger){
     var mongoClient = MongoDb.MongoClient,
         collections = {
             AdminAccount    : "AdminAccount",
-            AppAccount      : "AppAccount"
+            AppAccount      : "AppAccount",
+            AdminToken      : "AdminToken"
         },
         db = null,
         connectionDefer = null,
@@ -64,85 +65,37 @@ module.exports = function(config, MongoDb, Q, logger){
             return df.promise;
         },
 
+        //Admin Account CURD
         findAdminAccountById = function(adminId){
-            return _findById(collections.AdminAccount, adminId);
+            return  _findOneBy(collections.AdminAccount, {_id : adminId});
         },
-
+        findAdminAccountByEmail = function(email){
+            return  _findOneBy(collections.AdminAccount, {email : email});
+        },
         upsertAdminAccountById = function(adminDo){
-            var df = Q.defer();
-
-            Q.when(connect()).then(
-                //success callback
-                function(db){
-                    try{
-                        var collection = db.collection(collections.AdminAccount);
-                        logger.log('mongoDbProvider.js upsertAdminAccountById: got db collection');
-                        logger.log(adminDo);
-                        collection.update(
-                            {_id    : adminDo._id},
-                            adminDo,
-                            {
-                                upsert  : true
-                            },
-                            function(err, result){
-                                _rejectOrResolve(df, err, result);
-                            }
-                        );
-                    }catch(e){
-                        _rejectOrResolve(df, e);
-                    }
-                },
-                //fail callback
-                function(){
-                    logger.log('mongoDbProvider.js upsertAdminAccountById: failed to obtain the db');
-                    _rejectOrResolve(df, { message : "Failed to connect DB"});
-                }
-            );
-
-            return df.promise;
+            return _upsertByMatch(collections.AdminAccount, {_id:adminDo._id}, adminDo);
         },
 
+        //App Account CURD
         findAppAccountById = function(appId){
             return _findById(collections.AppAccount, appId);
         },
-
         findAppAccountByAppKey = function(appKey){
             return _findOneBy(collections.AppAccount, {appKey : appKey});
         },
-
         upsertAppAccountById = function(appDo){
-            var df = Q.defer();
-
-            Q.when(connect()).then(
-                function(db){
-                    try{
-                        var collection = db.collection(collections.AppAccount);
-
-                        collection.update(
-                            {_id    : appDo._id},
-                            adminDo,
-                            {
-                                upsert  : true
-                            },
-                            function(err, result){
-                                _rejectOrResolve(df, err, result);
-                            }
-                        );
-                    }catch(e){
-                        _rejectOrResolve(df, e);
-                    }
-
-                },
-                //fail callback
-                function(){
-                    logger.log('mongoDbProvider.js upsertAppAccountById: failed to obtain the db');
-                    _rejectOrResolve(df, { message : "Failed to connect DB"});
-                }
-            );
-
-            return df.promise;
+            return _upsertByMatch(collections.AppAccount, {_id:appDo._id}, appDo);
         },
 
+        //Admin Token CURD
+        findAdminToken = function(adminToken){
+            return _findOneBy(collections.AdminToken, {token : adminToken});
+        },
+        upsertAdminTokenByToken = function(adminTokenDo){
+            return _upsertByMatch(collections.AdminToken, {token:adminTokenDo.tokenn}, adminTokenDo);
+        },
+
+        //Private Helper methods
         _findById = function(collectionName, id){
             return _findOneBy(collectionName, {_id : id});
         },
@@ -181,6 +134,39 @@ module.exports = function(config, MongoDb, Q, logger){
             return df.promise;
         },
 
+        _upsertByMatch = function(collectionName, match, updateDo){
+            var df = Q.defer();
+
+            Q.when(connect()).then(
+                function(db){
+                    try{
+                        var collection = db.collection(collectionName);
+
+                        collection.update(
+                            match,
+                            updateDo,
+                            {
+                                upsert  : true
+                            },
+                            function(err, result){
+                                _rejectOrResolve(df, err, result);
+                            }
+                        );
+                    }catch(e){
+                        _rejectOrResolve(df, e);
+                    }
+
+                },
+                //fail callback
+                function(){
+                    logger.log('mongoDbProvider.js _upsertByMatch -' + collectionName + ': failed to obtain the db');
+                    _rejectOrResolve(df, { message : "Failed to connect DB"});
+                }
+            );
+
+            return df.promise;
+        },
+
         _rejectOrResolve = function(df, err, result){
             if(err){
                 df.reject(err);
@@ -194,11 +180,15 @@ module.exports = function(config, MongoDb, Q, logger){
         close                       : close,
 
         findAdminAccountById        : findAdminAccountById,
+        findAdminAccountByEmail     : findAdminAccountByEmail,
         upsertAdminAccountById      : upsertAdminAccountById,
 
         findAppAccountById          : findAppAccountById,
         findAppAccountByAppKey      : findAppAccountByAppKey,
-        upsertAppAccountById        : upsertAppAccountById
+        upsertAppAccountById        : upsertAppAccountById,
+
+        findAdminToken              : findAdminToken,
+        upsertAdminTokenByToken     : upsertAdminTokenByToken
     };
 };
 

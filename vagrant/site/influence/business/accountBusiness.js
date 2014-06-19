@@ -1,4 +1,4 @@
-module.exports = function(uuid, errCodes, accountDataHandler){
+module.exports = function(Q, uuid, logger, errCodes, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
@@ -19,11 +19,19 @@ module.exports = function(uuid, errCodes, accountDataHandler){
             displayName,
             createdBy
         ){
+            var df = Q.defer();
+
             //validation
             //required fields
             if(!email || !passwordPlainText || !createdBy){
-                throw new Error("Required Fields are missing");
+                df.reject({
+                    code : errCodes.C_400_001.code,
+                    message : "Missing parameters"
+                });
+                return df.promise;
             }
+
+            //TODO: validate the password complexity
 
             //defaulting values when necessary
             if(!username) {
@@ -32,31 +40,43 @@ module.exports = function(uuid, errCodes, accountDataHandler){
 
             //TODO:validate createdBy AdminId has rights to create a new admin account for passed in tenant
 
-            //TODO: validate the password complexity
+            //Ensure Email/Username uniqueness
+            Q.when(accountDataHandler.findAdminAccountByEmail(email)).then(
+
+                function(){
+                    //TODO: hash plain text password
+                    var passwordHash = passwordPlainText;
 
 
+                    var
+                        currentDate = new Date(),
+                        adminDo     = {
+                            tenantId            : tenantId,
+                            username            : username,
+                            email               : email,
+                            passwordHash        : passwordHash,
+                            firstName           : firstName,
+                            lastName            : lastName,
+                            displayName         : displayName,
+                            createdBy           : createdBy,
+                            createdOn           : currentDate,
+                            updatedBy           : createdBy,
+                            updatedOn           : currentDate
+                        };
 
-            //TODO: hash plain text password
-            var passwordHash = passwordPlainText;
+                    return accountDataHandler.upsertAdminAccountById(adminDo);
+                }
+            ).catch(
 
+                function(err){
+                    logger.log('');
+                }
+            ).done(function(){
 
-            var
-                currentDate = new Date(),
-                adminDo     = {
-                    tenantId            : tenantId,
-                    username            : username,
-                    email               : email,
-                    passwordHash        : passwordHash,
-                    firstName           : firstName,
-                    lastName            : lastName,
-                    displayName         : displayName,
-                    createdBy           : createdBy,
-                    createdOn           : currentDate,
-                    updatedBy           : createdBy,
-                    updatedOn           : currentDate
-                };
+                }
+            );
 
-            return accountDataHandler.upsertAdminAccountById(adminDo);
+            return df.promise;
         },
 
         getAppAccountByAppKey = function(appKey){

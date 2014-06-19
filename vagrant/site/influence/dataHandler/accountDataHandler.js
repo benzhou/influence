@@ -4,7 +4,9 @@ module.exports = function(dbProvider, accountDataObject){
         getAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
         },
-
+        findAdminAccountByEmail = function(email){
+            return dbProvider.findAdminAccountByEmail(email);
+        },
         upsertAdminAccountById = function(adminDo){
             return dbProvider.upsertAdminAccountById(adminDo);
         },
@@ -12,22 +14,31 @@ module.exports = function(dbProvider, accountDataObject){
         findAppAccountById = function(appId){
             return dbProvider.findAppAccountById(appId);
         },
-
         findAppAccountByAppKey = function(appKey){
             return dbProvider.findAppAccountByAppKey(appKey);
         },
-
         upsertAppAccountById = function(adminAccountDo){
             return dbProvider.upsertAppAccountById(adminAccountDo);
+        },
+
+        findAdminToken = function(adminToken){
+            return dbProvider.findAdminToken(adminToken);
+        },
+        upsertAdminTokenByToken = function(adminTokenDo){
+            return dbProvider.upsertAdminTokenByToken(adminTokenDo);
         };
 
     return {
-        getAdminAccountById     : getAdminAccountById,
-        upsertAdminAccountById  : upsertAdminAccountById,
+        getAdminAccountById         : getAdminAccountById,
+        findAdminAccountByEmail     : findAdminAccountByEmail,
+        upsertAdminAccountById      : upsertAdminAccountById,
 
-        findAppAccountById      : findAppAccountById,
-        findAppAccountByAppKey  : findAppAccountByAppKey,
-        upsertAppAccountById    : upsertAppAccountById
+        findAppAccountById          : findAppAccountById,
+        findAppAccountByAppKey      : findAppAccountByAppKey,
+        upsertAppAccountById        : upsertAppAccountById,
+
+        findAdminToken              : findAdminToken,
+        upsertAdminTokenByToken     : upsertAdminTokenByToken
     };
 };
 
