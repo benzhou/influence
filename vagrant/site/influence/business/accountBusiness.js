@@ -66,15 +66,18 @@ module.exports = function(Q, uuid, logger, errCodes, accountDataHandler){
 
                     return accountDataHandler.upsertAdminAccountById(adminDo);
                 }
-            ).catch(
-
-                function(err){
-                    logger.log('');
-                }
-            ).done(function(){
-
-                }
-            );
+            ).then(function(admin){
+                    //accountDataHandler.upsertAdminAccountById is resolved!
+                    logger.log('accountBusiness.createAdminAccount accountDataHandler.upsertAdminAccountById is resolved');
+                    df.resolve(admin);
+                }).catch(function(err){
+                    //one of the promise was rejected
+                    logger.log('accountBusiness.createAdminAccount catch block got an err');
+                    logger.log(err);
+                    df.reject(err);
+                }).done(function(){
+                    logger.log('accountBusiness.createAdminAccount done block was called');
+                });
 
             return df.promise;
         },
