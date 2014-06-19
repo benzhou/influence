@@ -72,8 +72,14 @@ module.exports = function(config, MongoDb, Q, logger){
         findAdminAccountByEmail = function(email){
             return  _findOneBy(collections.AdminAccount, {email : email});
         },
-        upsertAdminAccountById = function(adminDo){
-            return _upsertByMatch(collections.AdminAccount, {_id:adminDo._id}, adminDo);
+        findAdminAccountByTenantAndEmail = function(tenantId, email){
+            return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, email : email});
+        },
+        findAdminAccountByTenantAndUsername = function(tenantId, username){
+            return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, username : username});
+        },
+        upsertAdminAccount = function(adminDo){
+            return _upsertByMatch(collections.AdminAccount, {tenantId:adminDo.tenantId,email:adminDo.email}, adminDo);
         },
 
         //App Account CURD
@@ -176,19 +182,21 @@ module.exports = function(config, MongoDb, Q, logger){
         };
 
     return {
-        connect                     : connect,
-        close                       : close,
+        connect                             : connect,
+        close                               : close,
 
-        findAdminAccountById        : findAdminAccountById,
-        findAdminAccountByEmail     : findAdminAccountByEmail,
-        upsertAdminAccountById      : upsertAdminAccountById,
+        findAdminAccountById                : findAdminAccountById,
+        findAdminAccountByEmail             : findAdminAccountByEmail,
+        findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
+        findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
+        upsertAdminAccount                  : upsertAdminAccount,
 
-        findAppAccountById          : findAppAccountById,
-        findAppAccountByAppKey      : findAppAccountByAppKey,
-        upsertAppAccountById        : upsertAppAccountById,
+        findAppAccountById                  : findAppAccountById,
+        findAppAccountByAppKey              : findAppAccountByAppKey,
+        upsertAppAccountById                : upsertAppAccountById,
 
-        findAdminToken              : findAdminToken,
-        upsertAdminTokenByToken     : upsertAdminTokenByToken
+        findAdminToken                      : findAdminToken,
+        upsertAdminTokenByToken             : upsertAdminTokenByToken
     };
 };
 

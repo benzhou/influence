@@ -7,8 +7,14 @@ module.exports = function(dbProvider, accountDataObject){
         findAdminAccountByEmail = function(email){
             return dbProvider.findAdminAccountByEmail(email);
         },
-        upsertAdminAccountById = function(adminDo){
-            return dbProvider.upsertAdminAccountById(adminDo);
+        findAdminAccountByTenantAndEmail = function(tenantId, email){
+            return dbProvider.findAdminAccountByTenantAndEmail(tenantId, email);
+        },
+        findAdminAccountByTenantAndUsername = function(tenantId, username){
+            return dbProvider.findAdminAccountByTenantAndUsername(tenantId, username);
+        },
+        upsertAdminAccount = function(adminDo){
+            return dbProvider.upsertAdminAccount(adminDo);
         },
 
         findAppAccountById = function(appId){
@@ -29,16 +35,18 @@ module.exports = function(dbProvider, accountDataObject){
         };
 
     return {
-        getAdminAccountById         : getAdminAccountById,
-        findAdminAccountByEmail     : findAdminAccountByEmail,
-        upsertAdminAccountById      : upsertAdminAccountById,
+        getAdminAccountById                 : getAdminAccountById,
+        findAdminAccountByEmail             : findAdminAccountByEmail,
+        findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
+        findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
+        upsertAdminAccount                  : upsertAdminAccount,
 
-        findAppAccountById          : findAppAccountById,
-        findAppAccountByAppKey      : findAppAccountByAppKey,
-        upsertAppAccountById        : upsertAppAccountById,
+        findAppAccountById                  : findAppAccountById,
+        findAppAccountByAppKey              : findAppAccountByAppKey,
+        upsertAppAccountById                : upsertAppAccountById,
 
-        findAdminToken              : findAdminToken,
-        upsertAdminTokenByToken     : upsertAdminTokenByToken
+        findAdminToken                      : findAdminToken,
+        upsertAdminTokenByToken             : upsertAdminTokenByToken
     };
 };
 
