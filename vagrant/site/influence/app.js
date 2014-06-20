@@ -8,6 +8,8 @@ var mongoDb = require('mongodb');
 var Q = require("q");
 var uuid = require("node-uuid");
 var util = require("util");
+var crypto = require('crypto');
+
 
 var exphbs  = require('express3-handlebars');
 
@@ -44,6 +46,7 @@ var routes              = {},
     accountDataObject   = require('./dataHandler/authDataHandler')(dataObjects),
 
     Pif                 = require('./lib/pif'),
+    helpers                 = require('./lib/helpers'),
 
     mongoDbProvider     = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, console),
     influenceDbProvider = require('./dbProvider/influenceDbProvider')(Q, mongoDbProvider),
@@ -51,10 +54,10 @@ var routes              = {},
     accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
 
-    accountBusiness     = require('./business/accountBusiness')(Q, Pif, uuid, util, console, errCodes, accountDataHandler),
-    authBusiness        = require('./business/authBusiness')(authDataHandler),
+    accountBusiness     = require('./business/accountBusiness')(Q, helpers, Pif, uuid, util, console, errCodes, accountDataHandler),
+    authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, errCodes, accountDataHandler),
 
-    apiController       =  require('./controllers/apiController')(Q, console, authBusiness, accountBusiness);
+    apiController       =  require('./controllers/apiController')(Q, console, errCodes, authBusiness, accountBusiness);
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());

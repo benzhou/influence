@@ -1,4 +1,4 @@
-module.exports = function(Q, logger, authBusiness, accountBusiness){
+module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
 
     var test = function(req,res,next){
             res.json({result:true});
@@ -61,6 +61,31 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
             );
         },
 
+        getAdminAccountLogin = function(req,res,next){
+
+            Q.when(authBusiness.adminAccountLogin(req.params.tenantId,req.params.username,req.params.password)).then(
+                function(admin){
+                    if(!admin){
+                        res.json({
+                            code : errCodes.S_500_000_001,
+                            message: "System Error!"
+                        });
+                        return;
+                    }
+
+                    res.json({
+                        code : 200,
+                        message : "Login Successful"
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js getAdminAccountLogin: catch an error!");
+                    logger.log(err);
+                }).done(function(){
+                    logger.log("apiController.js getAdminAccountLogin: done!");
+                });
+        },
+
         getAppAccount = function(req,res,next){
             //TODO request validation
 
@@ -69,17 +94,19 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
             Q.when(accountBusiness.getAppAccountByAppKey(appKey)).then(
 
                 function(app){
-                    logger.log("Success when call accountBusiness.getAppAccountByAppKey in getAppAccount");
+                    logger.log("apiController.js getAppAccount: Success when call accountBusiness.getAppAccountByAppKey in getAppAccount");
                     logger.log(app);
                     res.json(app);
                 },
 
                 function(err){
-                    logger.log("Failed when call accountBusiness.getAppAccountByAppKey in getAppAccount");
+                    logger.log("apiController.js getAppAccount: Failed when call accountBusiness.getAppAccountByAppKey in getAppAccount");
                     logger.log(err);
                     res.json(err);
                 }
-            );
+            ).done(function(){
+                    logger.log("apiController.js getAppAccount: done!");
+                });
         },
 
         postAppAccount = function(req,res,next){

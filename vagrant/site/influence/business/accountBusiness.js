@@ -1,4 +1,4 @@
-module.exports = function(Q, Pif, uuid, util, logger, errCodes, accountDataHandler){
+module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
@@ -81,8 +81,9 @@ module.exports = function(Q, Pif, uuid, util, logger, errCodes, accountDataHandl
                         };
                     }
 
-                    //TODO: hash plain text password
-                    var passwordHash = passwordPlainText;
+                    //hash plain text password
+                    var salt = crypto.randomBytes(128).toString('base64');
+                    passwordHash = helpers.sha256Hash(passwordPlainText + '.' + salt);
 
 
                     var
@@ -92,6 +93,7 @@ module.exports = function(Q, Pif, uuid, util, logger, errCodes, accountDataHandl
                             username            : username,
                             email               : email,
                             passwordHash        : passwordHash,
+                            passwordSalt        : salt,
                             firstName           : firstName,
                             lastName            : lastName,
                             displayName         : displayName,
