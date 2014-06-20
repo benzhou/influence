@@ -1,3 +1,5 @@
+var InfluenceError = require('../error/influenceError');
+
 module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler){
 
     var
@@ -7,11 +9,10 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             //validation
             //required fields
             if(!tenantId || !username || !password){
-                df.reject({
-                    code : errCodes.C_400_002_001.code,
-                    message : "Missing parameters"
-                });
-                return df.promise;
+                throw new InfluenceError(
+                    errCodes.C_400_002_001.code,
+                    "Missing parameters"
+                );
             }
 
             Q.when(accountDataHandler.findAdminAccountByTenantAndUsername(tenantId, username)).then(
@@ -23,10 +24,10 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
 
                     if(!admin){
                         //if admin is false value, means we didn't find the admin by the tenantId and username
-                        throw {
-                            code : errCodes.C_400_002_002,
-                            message : "Invalid Username/Password"
-                        }
+                        throw new InfluenceError(
+                            errCodes.C_400_002_002.code,
+                            "Invalid Username/Password"
+                        );
                     }
 
                     //TODO Validate retrieved admin has passwordHash and passwordSalt
@@ -35,10 +36,10 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                     logger.log("calculated hash is %s", calculatedHash);
 
                     if(admin.passwordHash !== calculatedHash){
-                        throw {
-                            code : errCodes.C_400_002_003,
-                            message : "Invalid Username/Password"
-                        }
+                        throw new InfluenceError(
+                            errCodes.C_400_002_003.code,
+                            "Invalid Username/Password"
+                        );
                     }
 
                     df.resolve(admin);

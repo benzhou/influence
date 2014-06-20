@@ -1,3 +1,5 @@
+var InfluenceError = require('../error/influenceError');
+
 module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
 
     var test = function(req,res,next){
@@ -20,7 +22,14 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                 function(err){
                     logger.log("Failed when call accountBusiness.getAdminAccountById in getAdminAccount");
                     logger.log(err);
-                    res.json(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
                 }
             );
         },
@@ -51,14 +60,23 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                     logger.log("Success when call accountBusiness.createAdminAccount in postAdminAccount");
                     logger.log(admin);
                     res.json(admin);
-                },
-
+                }
+            ).catch(
                 function(err){
                     logger.log("Failed when call accountBusiness.createAdminAccount in postAdminAccount");
                     logger.log(err);
-                    res.json(err);
-                }
-            );
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    logger.log(err);
+
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+
+                }).done(function(){logger.log("apiController.js postAdminAccount: done");});
         },
 
         getAdminAccountLogin = function(req,res,next){
@@ -81,6 +99,14 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
             ).catch(function(err){
                     logger.log("apiController.js getAdminAccountLogin: catch an error!");
                     logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
                 }).done(function(){
                     logger.log("apiController.js getAdminAccountLogin: done!");
                 });
@@ -102,7 +128,14 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                 function(err){
                     logger.log("apiController.js getAppAccount: Failed when call accountBusiness.getAppAccountByAppKey in getAppAccount");
                     logger.log(err);
-                    res.json(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
                 }
             ).done(function(){
                     logger.log("apiController.js getAppAccount: done!");
@@ -135,7 +168,14 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                 function(err){
                     logger.log("Failed when call accountBusiness.createAppAccount in postAppAccount");
                     logger.log(err);
-                    res.json(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
                 }
             );
         };

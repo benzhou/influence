@@ -42,7 +42,8 @@ var routes              = {},
     //Dependencies initialization
     appConfig           = require('./config'),
     dataObjects         = {},
-    errCodes            = require('./error/errorCodes')(),
+    errCodes            = require('./error/errorCodes'),
+
     accountDataObject   = require('./dataHandler/authDataHandler')(dataObjects),
 
     Pif                 = require('./lib/pif'),

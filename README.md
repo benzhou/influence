@@ -20,3 +20,8 @@ Influence Documentations
         1. Download the virtual machine that is defined in the VagrantFile
         2. the bootstrap.sh is the Vagrant provision file we defined in the VagrantFile, therefore, it will be executed as well. 
     - Once the above steps are completed, Congratulations, you've completed the setup process pretty much.
+    
+- Topics
+---
+    - Flow Control with promises and Q library. 
+    - Error Handling

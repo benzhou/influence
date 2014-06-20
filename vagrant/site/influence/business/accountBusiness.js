@@ -1,9 +1,12 @@
+var InfluenceError = require('../error/influenceError');
+var crypto = require('crypto');
+
 module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
             if(!adminId){
-                throw new Error("No adminId found");
+                throw new InfluenceError("No adminId found");
             }
 
             return accountDataHandler.getAdminAccountById(adminId);
@@ -24,11 +27,10 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
             //validation
             //required fields
             if(!tenantId || !email || !passwordPlainText || !createdBy){
-                df.reject({
-                    code : errCodes.C_400_001.code,
-                    message : "Missing parameters"
-                });
-                return df.promise;
+                throw new InfluenceError(
+                    errCodes.C_400_001_001.code,
+                    "Missing parameters"
+                );
             }
 
             //TODO: validate Email format (length, invalid characters etc.)
@@ -52,10 +54,10 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
 
                     if(admin){
                         logger.log('accountBusiness.createAdminAccount findAdminAccountByEmail found an admin with the same email : ', email);
-                        throw {
-                            code    : errCodes.C_400_002.code,
-                            message : util.format(errCodes.C_400_002.desc, email)
-                        };
+                        throw new InfluenceError(
+                            errCodes.C_400_001_002.code,
+                            util.format(errCodes.C_400_001_002.desc, email)
+                        );
                     }
 
                     logger.log("Cannnot find admin by their email, email === username? %s", email === username);
@@ -75,10 +77,10 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
                     //findAdminAccountByEmail, if it is true again, means it has to from findAdminAccountByTenantAndUsername call
                     if(admin){
                         logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername found an admin with the same username : ', username);
-                        throw {
-                            code    : errCodes.C_400_003.code,
-                            message : util.format(errCodes.C_400_003.desc, username)
-                        };
+                        throw new InfluenceError(
+                            errCodes.C_400_001_003.code,
+                            util.format(errCodes.C_400_001_003.desc, email)
+                        );
                     }
 
                     //hash plain text password
@@ -113,7 +115,8 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
                 }).catch(function(err){
                     //one of the promise was rejected
                     logger.log('accountBusiness.createAdminAccount catch block got an err');
-                    logger.log(err);
+                    logger.log(err && err.stack?err.stack:err);
+
                     df.reject(err);
                 }).done(function(){
                     logger.log('accountBusiness.createAdminAccount done block was called');
@@ -124,7 +127,10 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
 
         getAppAccountByAppKey = function(appKey){
             if(!appKey){
-                throw new Error("No adminId found");
+                throw new InfluenceError(
+                    errCodes.C_400_001_001.code,
+                    util.format(errCodes.C_400_001_001.desc, email)
+                );
             }
 
             return accountDataHandler.findAppAccountByAppKey(appKey);
@@ -138,12 +144,14 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
             //validation
             //required fields
             if(!appName || !createdBy){
-                throw new Exception();
+                throw new InfluenceError();
             }
 
             //Generate AppKey and AppSecret
             var appKey      = _getUrlSafeBase64EncodedToken(),
                 appSecrect  = _getUrlSafeBase64EncodedToken();
+
+            //TODO: Ensure appKey/appSecrect uniqueness
 
             var
                 currentDate = new Date(),
