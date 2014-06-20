@@ -1,4 +1,4 @@
-module.exports = function(uuid, errCodes, accountDataHandler){
+module.exports = function(uuid, errCodes, accountDataHandler, logger){
 
     var
         getAdminAccountById = function(adminId){
@@ -99,11 +99,7 @@ module.exports = function(uuid, errCodes, accountDataHandler){
         },
 
         _getUrlSafeBase64EncodedToken = function(){
-            return
-                (new Buffer(uuid.v4() + (new Date()).getTime()).toString('base64')).
-                    replace(/\+/gi,'-').
-                    replace(/\//, '_').
-                    replace(/=/, ',');
+            return (new Buffer(uuid.v4() + ":" + uuid.v4()).toString('base64')).replace(/\+/gi,'-').replace(/\//gi, '_').replace(/\=/gi, ',');
         };
 
     return {

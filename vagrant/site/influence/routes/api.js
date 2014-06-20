@@ -18,7 +18,7 @@ module.exports = function(router, apiController){
         apiController.getAppAccount(req,res,next);
     });
     router.post('/account/app/:appKey', function(req, res, next) {
-        apiController.getAppAccount(req,res,next);
+        apiController.postAppAccount(req,res,next);
     });
 
 

@@ -120,7 +120,7 @@ module.exports = function(config, MongoDb, Q, logger){
 
                         collection.update(
                             {_id    : appDo._id},
-                            adminDo,
+                            appDo,
                             {
                                 upsert  : true
                             },

@@ -17,8 +17,8 @@ module.exports = function(Q, dbProvider){
             return dbProvider.findAppAccountByAppKey(appKey);
         },
 
-        upsertAppAccountById = function(adminAccountDo){
-            return dbProvider.upsertAppAccountById(adminAccountDo);
+        upsertAppAccountById = function(appDo){
+            return dbProvider.upsertAppAccountById(appDo);
         };
 
     return {
