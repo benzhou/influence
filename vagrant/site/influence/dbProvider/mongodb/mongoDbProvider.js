@@ -114,15 +114,13 @@ module.exports = function(config, MongoDb, Q, logger){
                 //success callback
                 function(db){
                     try{
-                        logger.log('mongoDbProvider.js _findOneBy - ' + collectionName +': got db object');
                         var collection = db.collection(collectionName);
-
-                        logger.log('mongoDbProvider.js _findOneBy - ' + collectionName +': got db collection');
+                        logger.log('mongoDbProvider.js _findOneBy - ' + collectionName +': querying');
 
                         collection.findOne(
                             match,
                             function(err, result){
-                                logger.log('mongoDbProvider.js  _findOneBy - ' + collectionName +': found!');
+                                logger.log('mongoDbProvider.js  _findOneBy - ' + collectionName +': resolved!');
                                 _rejectOrResolve(df, err, result);
                             }
                         );

@@ -29,6 +29,10 @@ module.exports = function(router, apiController){
     router.get('/auth/adminToken', function(req, res, next) {
         apiController.getAppAccount(req,res,next);
     });
+    router.get('/auth/admin/login/:tenantId/:username/:password', function(req, res, next) {
+        apiController.getAdminAccountLogin(req,res,next);
+    });
+
 
     return router;
 };

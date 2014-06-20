@@ -59,7 +59,10 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                 function(admin){
                     logger.log("Success when call accountBusiness.createAdminAccount in postAdminAccount");
                     logger.log(admin);
-                    res.json(admin);
+                    res.json({
+                        code : 200,
+                        message : "Admin account is created!"
+                    });
                 }
             ).catch(
                 function(err){
@@ -184,6 +187,7 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
         test : test,
         postAdminAccount    : postAdminAccount,
         getAdminAccount     : getAdminAccount,
+        getAdminAccountLogin: getAdminAccountLogin,
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount

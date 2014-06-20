@@ -15,6 +15,8 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                 );
             }
 
+            logger.log("adminAccountLogin, tenantId: %s, username %s, password %s", tenantId, username, password);
+
             Q.when(accountDataHandler.findAdminAccountByTenantAndUsername(tenantId, username)).then(
                 //
                 function(admin){
