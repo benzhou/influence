@@ -6,6 +6,7 @@ sudo apt-get update
 sudo apt-get install nginx -y
 sudo apt-get install mongodb-org -y
 sudo apt-get install nodejs -y
+sudo ln -s /usr/bin/nodejs /usr/bin/node
 sudo apt-get install npm -y
 sudo npm install -g express
 sudo npm install -g express-generator

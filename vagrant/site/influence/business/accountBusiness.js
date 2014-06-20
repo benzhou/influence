@@ -1,4 +1,4 @@
-module.exports = function(uuid, errCodes, accountDataHandler, logger){
+module.exports = function(Q, Pif, uuid, util, logger, errCodes, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
@@ -19,11 +19,22 @@ module.exports = function(uuid, errCodes, accountDataHandler, logger){
             displayName,
             createdBy
         ){
+            var df = Q.defer();
+
             //validation
             //required fields
-            if(!email || !passwordPlainText || !createdBy){
-                throw new Error("Required Fields are missing");
+            if(!tenantId || !email || !passwordPlainText || !createdBy){
+                df.reject({
+                    code : errCodes.C_400_001.code,
+                    message : "Missing parameters"
+                });
+                return df.promise;
             }
+
+            //TODO: validate Email format (length, invalid characters etc.)
+            //TODO: validate Username format (length, invalid characters etc.)
+            //TODO: validate the password complexity, length
+            //TODO: validate firstName, lastName, displayName length
 
             //defaulting values when necessary
             if(!username) {
@@ -32,31 +43,81 @@ module.exports = function(uuid, errCodes, accountDataHandler, logger){
 
             //TODO:validate createdBy AdminId has rights to create a new admin account for passed in tenant
 
-            //TODO: validate the password complexity
+            //Ensure per tenant Email/Username uniqueness
+            Q.when(accountDataHandler.findAdminAccountByTenantAndEmail(tenantId, email)).then(
+
+                function(admin){
+                    logger.log('accountBusiness.createAdminAccount findAdminAccountByEmail is resolved');
+                    logger.log(admin);
+
+                    if(admin){
+                        logger.log('accountBusiness.createAdminAccount findAdminAccountByEmail found an admin with the same email : ', email);
+                        throw {
+                            code    : errCodes.C_400_002.code,
+                            message : util.format(errCodes.C_400_002.desc, email)
+                        };
+                    }
+
+                    logger.log("Cannnot find admin by their email, email === username? %s", email === username);
+                    if(email !== username){
+                        logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername going to fire');
+                        return accountDataHandler.findAdminAccountByTenantAndUsername(tenantId, username);
+                    }
+
+                    //otherwise the orginal promise from findAdminAccountByTenantAndEmail will pass to the next then
+                }
+            ).then(
+                function(admin){
+                    logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername is resolved');
+                    logger.log(admin);
+
+                    //If admin had value, then it should be already rejected from previous code when we try to check the first promise from
+                    //findAdminAccountByEmail, if it is true again, means it has to from findAdminAccountByTenantAndUsername call
+                    if(admin){
+                        logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername found an admin with the same username : ', username);
+                        throw {
+                            code    : errCodes.C_400_003.code,
+                            message : util.format(errCodes.C_400_003.desc, username)
+                        };
+                    }
+
+                    //TODO: hash plain text password
+                    var passwordHash = passwordPlainText;
 
 
+                    var
+                        currentDate = new Date(),
+                        adminDo     = {
+                            tenantId            : tenantId,
+                            username            : username,
+                            email               : email,
+                            passwordHash        : passwordHash,
+                            firstName           : firstName,
+                            lastName            : lastName,
+                            displayName         : displayName,
+                            createdBy           : createdBy,
+                            createdOn           : currentDate,
+                            updatedBy           : createdBy,
+                            updatedOn           : currentDate
+                        };
 
-            //TODO: hash plain text password
-            var passwordHash = passwordPlainText;
+                    return accountDataHandler.upsertAdminAccount(adminDo);
+                }
+            ).then(function(admin){
+                    //accountDataHandler.upsertAdminAccountById is resolved!
+                    logger.log('accountBusiness.createAdminAccount accountDataHandler.upsertAdminAccount is resolved');
+                    logger.log(admin);
+                    df.resolve(admin);
+                }).catch(function(err){
+                    //one of the promise was rejected
+                    logger.log('accountBusiness.createAdminAccount catch block got an err');
+                    logger.log(err);
+                    df.reject(err);
+                }).done(function(){
+                    logger.log('accountBusiness.createAdminAccount done block was called');
+                });
 
-
-            var
-                currentDate = new Date(),
-                adminDo     = {
-                    tenantId            : tenantId,
-                    username            : username,
-                    email               : email,
-                    passwordHash        : passwordHash,
-                    firstName           : firstName,
-                    lastName            : lastName,
-                    displayName         : displayName,
-                    createdBy           : createdBy,
-                    createdOn           : currentDate,
-                    updatedBy           : createdBy,
-                    updatedOn           : currentDate
-                };
-
-            return accountDataHandler.upsertAdminAccountById(adminDo);
+            return df.promise;
         },
 
         getAppAccountByAppKey = function(appKey){

@@ -4,30 +4,49 @@ module.exports = function(dbProvider, accountDataObject){
         getAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
         },
-
-        upsertAdminAccountById = function(adminDo){
-            return dbProvider.upsertAdminAccountById(adminDo);
+        findAdminAccountByEmail = function(email){
+            return dbProvider.findAdminAccountByEmail(email);
+        },
+        findAdminAccountByTenantAndEmail = function(tenantId, email){
+            return dbProvider.findAdminAccountByTenantAndEmail(tenantId, email);
+        },
+        findAdminAccountByTenantAndUsername = function(tenantId, username){
+            return dbProvider.findAdminAccountByTenantAndUsername(tenantId, username);
+        },
+        upsertAdminAccount = function(adminDo){
+            return dbProvider.upsertAdminAccount(adminDo);
         },
 
         findAppAccountById = function(appId){
             return dbProvider.findAppAccountById(appId);
         },
-
         findAppAccountByAppKey = function(appKey){
             return dbProvider.findAppAccountByAppKey(appKey);
         },
+        upsertAppAccountById = function(adminAccountDo){
+            return dbProvider.upsertAppAccountById(adminAccountDo);
+        },
 
-        upsertAppAccountById = function(appDo){
-            return dbProvider.upsertAppAccountById(appDo);
+        findAdminToken = function(adminToken){
+            return dbProvider.findAdminToken(adminToken);
+        },
+        upsertAdminTokenByToken = function(adminTokenDo){
+            return dbProvider.upsertAdminTokenByToken(adminTokenDo);
         };
 
     return {
-        getAdminAccountById     : getAdminAccountById,
-        upsertAdminAccountById  : upsertAdminAccountById,
+        getAdminAccountById                 : getAdminAccountById,
+        findAdminAccountByEmail             : findAdminAccountByEmail,
+        findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
+        findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
+        upsertAdminAccount                  : upsertAdminAccount,
 
-        findAppAccountById      : findAppAccountById,
-        findAppAccountByAppKey  : findAppAccountByAppKey,
-        upsertAppAccountById    : upsertAppAccountById
+        findAppAccountById                  : findAppAccountById,
+        findAppAccountByAppKey              : findAppAccountByAppKey,
+        upsertAppAccountById                : upsertAppAccountById,
+
+        findAdminToken                      : findAdminToken,
+        upsertAdminTokenByToken             : upsertAdminTokenByToken
     };
 };
 

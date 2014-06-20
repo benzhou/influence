@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var mongoDb = require('mongodb');
 var Q = require("q");
 var uuid = require("node-uuid");
+var util = require("util");
 
 var exphbs  = require('express3-handlebars');
 
@@ -42,13 +43,15 @@ var routes              = {},
     errCodes            = require('./error/errorCodes')(),
     accountDataObject   = require('./dataHandler/authDataHandler')(dataObjects),
 
+    Pif                 = require('./lib/pif'),
+
     mongoDbProvider     = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, console),
     influenceDbProvider = require('./dbProvider/influenceDbProvider')(Q, mongoDbProvider),
 
     accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
 
-    accountBusiness     = require('./business/accountBusiness')(uuid, errCodes, accountDataHandler, console),
+    accountBusiness     = require('./business/accountBusiness')(Q, Pif, uuid, util, console, errCodes, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(authDataHandler),
 
     apiController       =  require('./controllers/apiController')(Q, console, authBusiness, accountBusiness);
