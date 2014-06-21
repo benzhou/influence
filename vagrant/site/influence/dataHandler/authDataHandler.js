@@ -1,11 +1,11 @@
 module.exports = function(dbProvider){
 
-    var getAccountInfo = function(acctId){
-        return {};
+    var createAdminAuthToken = function(token){
+        return dbProvider.upsertAdminAuthToken(token);
     };
 
     return {
-        getAccountInfo : getAccountInfo
+        createAdminAuthToken : createAdminAuthToken
     };
 };
 

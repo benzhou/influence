@@ -17,21 +17,16 @@ module.exports = function(Q, dbProvider){
             return dbProvider.upsertAdminAccount(adminAccountDo);
         },
 
-        findAppAccountById = function(appId){
-            return dbProvider.findAppAccountById(appId);
-        },
         findAppAccountByAppKey = function(appKey){
             return dbProvider.findAppAccountByAppKey(appKey);
         },
-        upsertAppAccountById = function(adminAccountDo){
-            return dbProvider.upsertAppAccountById(adminAccountDo);
+        upsertAppAccountByAppkey = function(adminAccountDo){
+            return dbProvider.upsertAppAccountByAppkey(adminAccountDo);
         },
 
-        findAdminToken = function(adminToken){
-            return dbProvider.findAdminToken(adminToken);
-        },
-        upsertAdminTokenByToken = function(adminTokenDo){
-            return dbProvider.upsertAdminTokenByToken(adminTokenDo);
+
+        upsertAdminAuthToken = function(token){
+            return dbProvider.upsertAdminAuthToken(token);
         };
 
     return {
@@ -41,12 +36,10 @@ module.exports = function(Q, dbProvider){
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,
 
-        findAppAccountById                  : findAppAccountById,
         findAppAccountByAppKey              : findAppAccountByAppKey,
-        upsertAppAccountById                : upsertAppAccountById,
+        upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
-        findAdminToken                      : findAdminToken,
-        upsertAdminTokenByToken             : upsertAdminTokenByToken
+        upsertAdminAuthToken                : upsertAdminAuthToken
     };
 };
 

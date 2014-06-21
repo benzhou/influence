@@ -1,7 +1,7 @@
 var InfluenceError = require('../error/influenceError');
 var crypto = require('crypto');
 
-module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, accountDataHandler){
+module.exports = function(Q, helpers, Pif, util, logger, errCodes, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
@@ -148,8 +148,8 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
             }
 
             //Generate AppKey and AppSecret
-            var appKey      = _getUrlSafeBase64EncodedToken(),
-                appSecrect  = _getUrlSafeBase64EncodedToken();
+            var appKey      = helpers.getUrlSafeBase64EncodedToken(),
+                appSecrect  = helpers.getUrlSafeBase64EncodedToken();
 
             //TODO: Ensure appKey/appSecrect uniqueness
 
@@ -167,10 +167,6 @@ module.exports = function(Q, helpers, Pif, uuid, util, logger, errCodes, account
                 };
 
             return accountDataHandler.upsertAppAccountById(appDo);
-        },
-
-        _getUrlSafeBase64EncodedToken = function(){
-            return (new Buffer(uuid.v4() + ":" + uuid.v4()).toString('base64')).replace(/\+/gi,'-').replace(/\//gi, '_').replace(/\=/gi, ',');
         };
 
     return {

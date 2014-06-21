@@ -6,7 +6,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoDb = require('mongodb');
 var Q = require("q");
-var uuid = require("node-uuid");
 var util = require("util");
 var crypto = require('crypto');
 
@@ -55,8 +54,8 @@ var routes              = {},
     accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
 
-    accountBusiness     = require('./business/accountBusiness')(Q, helpers, Pif, uuid, util, console, errCodes, accountDataHandler),
-    authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, errCodes, accountDataHandler),
+    accountBusiness     = require('./business/accountBusiness')(Q, helpers, Pif, util, console, errCodes, accountDataHandler),
+    authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, appConfig, errCodes, accountDataHandler),
 
     apiController       =  require('./controllers/apiController')(Q, console, errCodes, authBusiness, accountBusiness);
 

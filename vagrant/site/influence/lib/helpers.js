@@ -1,4 +1,5 @@
 var crypto = require('crypto');
+var uuid = require("node-uuid");
 
 module.exports = function(plain){
     var
@@ -17,11 +18,15 @@ module.exports = function(plain){
                     : cache[key = ({}).toString.call(obj)] // cached. date, regexp, error, object, array, math
                     || (cache[key] = key.slice(8, -1).toLowerCase()); // get XXXX from [object XXXX], and cache it
             };
-        }(this));
+        }(this)),
+
+        getUrlSafeBase64EncodedToken = function(){
+            return (new Buffer(uuid.v4() + ":" + uuid.v4()).toString('base64')).replace(/\+/gi,'-').replace(/\//gi, '_').replace(/\=/gi, ',');
+        };
 
     return {
         sha256Hash : sha256Hash,
-
+        getUrlSafeBase64EncodedToken   : getUrlSafeBase64EncodedToken,
         typeIs      : typeIs
     }
 }();

@@ -4,9 +4,9 @@ module.exports = function(config, MongoDb, Q, logger){
 
     var mongoClient = MongoDb.MongoClient,
         collections = {
-            AdminAccount    : "AdminAccount",
-            AppAccount      : "AppAccount",
-            AdminToken      : "AdminToken"
+            AdminAccount        : "AdminAccount",
+            AppAccount          : "AppAccount",
+            AdminAuthToken      : "AdminAuthToken"
         },
         db = null,
         connectionDefer = null,
@@ -83,22 +83,16 @@ module.exports = function(config, MongoDb, Q, logger){
         },
 
         //App Account CURD
-        findAppAccountById = function(appId){
-            return _findById(collections.AppAccount, appId);
-        },
         findAppAccountByAppKey = function(appKey){
             return _findOneBy(collections.AppAccount, {appKey : appKey});
         },
-        upsertAppAccountById = function(appDo){
-            return _upsertByMatch(collections.AppAccount, {_id:appDo._id}, appDo);
+        upsertAppAccountByAppkey = function(appDo){
+            return _upsertByMatch(collections.AppAccount, {appKey:appDo.appKey}, appDo);
         },
 
-        //Admin Token CURD
-        findAdminToken = function(adminToken){
-            return _findOneBy(collections.AdminToken, {token : adminToken});
-        },
-        upsertAdminTokenByToken = function(adminTokenDo){
-            return _upsertByMatch(collections.AdminToken, {token:adminTokenDo.tokenn}, adminTokenDo);
+        //Admin Auth Token CURD
+        upsertAdminAuthToken = function(token){
+            return _upsertByMatch(collections.AdminAuthToken, {token:token.token}, token);
         },
 
         //Private Helper methods
@@ -189,12 +183,10 @@ module.exports = function(config, MongoDb, Q, logger){
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,
 
-        findAppAccountById                  : findAppAccountById,
         findAppAccountByAppKey              : findAppAccountByAppKey,
-        upsertAppAccountById                : upsertAppAccountById,
+        upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
-        findAdminToken                      : findAdminToken,
-        upsertAdminTokenByToken             : upsertAdminTokenByToken
+        upsertAdminAuthToken                : upsertAdminAuthToken
     };
 };
 
