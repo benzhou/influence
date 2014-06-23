@@ -6,8 +6,12 @@ Influence Documentations
 
 1. Software to download before you start:
     - [Vagrant](http://www.vagrantup.com/downloads.html)
+      - We use Vagrant as our virtual envrionment tool for ease of collaboration. Details about vagrant setup is not in the scope of this document, please refer to [Vagrant Documentaion](http://docs.vagrantup.com/v2/) to see details.
+      - In the VagrantFile, we had several configurations worth mention here:
+        1. You virutal machine's port 80 is mapped to your work station's port 8888, you can change it if you want to.
+        2. We mapped the site_available folder of Nginx to the Vagrant/site-available folder, therefore, the detail Nginx configuration is used by Nginx from that location. This setup does created an issue at this moment: during the Vagrant up process, bootstrap.sh has be configured to install Nginx and it would fail due to a question asked during the installation process. You might want to reinstall Nginx once you can Vagrant ssh into the virtual box. See the bootstrap.sh file for the command if you are not familar with it.
     - [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-    - IDE ([Webstorm](http://www.jetbrains.com/webstorm/download/) if you don't have a preference)
+    - IDE ([Webstorm](http://www.jetbrains.com/webstorm/download/) if you don't have a preference, however, webstorm only offers a trial version, you can use sublime text 3 if you don't have a lisence or prefer that better anyway.)
         - markdown plugin
     - [Chrome Canary](http://www.google.com/intl/en/chrome/browser/canary.html) (Not required, you can use anyone that you like)
     - Git (Github tool) [See here](https://help.github.com/articles/set-up-git)
