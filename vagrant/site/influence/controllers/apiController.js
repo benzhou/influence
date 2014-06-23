@@ -84,7 +84,7 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
 
         getAdminAccountLogin = function(req,res,next){
 
-            Q.when(authBusiness.adminAccountLogin(req.params.tenantId,req.params.username,req.params.password)).then(
+            Q.when(authBusiness.adminAccountLogin(req.query.appKey, req.params.tenantId,req.params.username,req.params.password)).then(
                 function(admin){
                     if(!admin){
                         res.json({

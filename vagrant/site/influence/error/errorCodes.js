@@ -15,6 +15,7 @@ module.exports = function(){
         C_400_002_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400002001, desc : "Missing required parameters" },
         C_400_002_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400002002, desc : "Invalid username/password" },
         C_400_002_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400002003, desc : "Invalid username/password" },
+        C_400_002_004       : { type : CLIENT_ERROR, httpStatus: 400, code : 400002004, desc : "Unexpected error when create admin auth token" },
 
         //authBusiness.js createAdminLoginToken
         C_400_003_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400003001, desc : "Missing required parameters" },
