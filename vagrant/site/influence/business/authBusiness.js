@@ -159,12 +159,12 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
                     df.resolve(token);
                 }
             ).catch(function(err){
-                    logger.log("authBusiness.js createAdminAuthToken caught an error!");
+                    logger.log("authBusiness.js validateAdminAuthToken caught an error!");
                     logger.log(err);
 
                     df.reject(err);
                 }).done(function(){
-                    logger.log("authBusiness.js createAdminAuthToken done!");
+                    logger.log("authBusiness.js validateAdminAuthToken done!");
                 });
 
             return df.promise;
