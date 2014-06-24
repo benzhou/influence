@@ -96,7 +96,8 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
 
                     res.json({
                         code : 200,
-                        message : "Login Successful"
+                        message : "Login Successful",
+                        admin : admin
                     });
                 }
             ).catch(function(err){

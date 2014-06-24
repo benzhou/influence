@@ -79,7 +79,7 @@ module.exports = function(config, MongoDb, Q, logger){
             return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, username : username});
         },
         upsertAdminAccount = function(adminDo){
-            return _upsertByMatch(collections.AdminAccount, {tenantId:adminDo.tenantId,email:adminDo.email}, adminDo);
+            return _upsertByMatch(collections.AdminAccount, {createdOn:1}, {tenantId:adminDo.tenantId,email:adminDo.email}, adminDo);
         },
 
         //App Account CURD
@@ -87,12 +87,15 @@ module.exports = function(config, MongoDb, Q, logger){
             return _findOneBy(collections.AppAccount, {appKey : appKey});
         },
         upsertAppAccountByAppkey = function(appDo){
-            return _upsertByMatch(collections.AppAccount, {appKey:appDo.appKey}, appDo);
+            return _upsertByMatch(collections.AppAccount,{createdOn:1}, {appKey:appDo.appKey}, appDo);
         },
 
         //Admin Auth Token CURD
+        findAdminAuthTokenByToken = function(tokenStr){
+            return _findOneBy(collections.AdminAuthToken, {token : tokenStr});
+        },
         upsertAdminAuthToken = function(token){
-            return _upsertByMatch(collections.AdminAuthToken, {token:token.token}, token);
+            return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, token);
         },
 
         //Private Helper methods
@@ -132,7 +135,7 @@ module.exports = function(config, MongoDb, Q, logger){
             return df.promise;
         },
 
-        _upsertByMatch = function(collectionName, match, updateDo){
+        _upsertByMatch = function(collectionName, sort, match, updateDo){
             var df = Q.defer();
 
             Q.when(connect()).then(
@@ -140,12 +143,11 @@ module.exports = function(config, MongoDb, Q, logger){
                     try{
                         var collection = db.collection(collectionName);
 
-                        collection.update(
+                        collection.findAndModify(
                             match,
+                            sort,
                             updateDo,
-                            {
-                                upsert  : true
-                            },
+                            {new:true, upsert:true},
                             function(err, result){
                                 _rejectOrResolve(df, err, result);
                             }
@@ -186,6 +188,7 @@ module.exports = function(config, MongoDb, Q, logger){
         findAppAccountByAppKey              : findAppAccountByAppKey,
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
+        findAdminAuthTokenByToken           : findAdminAuthTokenByToken,
         upsertAdminAuthToken                : upsertAdminAuthToken
     };
 };

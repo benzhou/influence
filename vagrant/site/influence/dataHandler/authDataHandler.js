@@ -1,11 +1,17 @@
 module.exports = function(dbProvider){
 
-    var createAdminAuthToken = function(token){
-        return dbProvider.upsertAdminAuthToken(token);
-    };
+    var
+        createAdminAuthToken = function(token){
+            return dbProvider.upsertAdminAuthToken(token);
+        },
+
+        findAdminAuthTokenByToken = function(tokenStr){
+            return dbProvider.findAdminAuthTokenByToken(tokenStr);
+        };
 
     return {
-        createAdminAuthToken : createAdminAuthToken
+        createAdminAuthToken        : createAdminAuthToken,
+        findAdminAuthTokenByToken   : findAdminAuthTokenByToken
     };
 };
 

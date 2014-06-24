@@ -55,7 +55,7 @@ var routes              = {},
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
 
     accountBusiness     = require('./business/accountBusiness')(Q, helpers, Pif, util, console, errCodes, accountDataHandler),
-    authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, appConfig, errCodes, accountDataHandler),
+    authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler),
 
     apiController       =  require('./controllers/apiController')(Q, console, errCodes, authBusiness, accountBusiness);
 

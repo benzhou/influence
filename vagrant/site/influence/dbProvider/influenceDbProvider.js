@@ -24,7 +24,9 @@ module.exports = function(Q, dbProvider){
             return dbProvider.upsertAppAccountByAppkey(adminAccountDo);
         },
 
-
+        findAdminAuthTokenByToken = function(tokenStr){
+            return dbProvider.findAdminAuthTokenByToken(tokenStr);
+        },
         upsertAdminAuthToken = function(token){
             return dbProvider.upsertAdminAuthToken(token);
         };
@@ -39,6 +41,7 @@ module.exports = function(Q, dbProvider){
         findAppAccountByAppKey              : findAppAccountByAppKey,
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
+        findAdminAuthTokenByToken           : findAdminAuthTokenByToken,
         upsertAdminAuthToken                : upsertAdminAuthToken
     };
 };
