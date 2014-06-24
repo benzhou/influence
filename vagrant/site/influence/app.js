@@ -62,9 +62,12 @@ var routes              = {},
 //Setup routes
 routes.site = require('./routes/index')(express.Router());
 routes.api = require('./routes/api')(express.Router(), apiController);
+routes.admin = require('./routes/admin')(express.Router());
+
 
 app.use('/', routes.site);
 app.use('/api', routes.api);
+app.use('/admin', routes.admin);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
