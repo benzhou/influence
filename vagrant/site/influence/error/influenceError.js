@@ -3,24 +3,22 @@ var util = require("util");
 
 module.exports = function(){
 
-    var errCodeToHttpStatus = function(code){
+    var errCodeToErrorCodeObject = function(code){
         if(code<400000000 || code>599999999) return null;
 
         var cStr = code.toString(),
             prop = "C_" + cStr.slice(0,3) + "_" + cStr.slice(3,6) + "_" + cStr.slice(6);
 
-        if(!errCodes[prop]) return null;
+        if(!errCodes[prop]) return errCodes.S_500_000_001;
 
-        return errCodes[prop].httpStatus;
+        return errCodes[prop];
     };
 
     function InfluenceError (code, msg, httpStatus) {
         var isError = code instanceof Error,
-            msg = isError ? errCodes.S_500_000_001.desc : (msg || errCodes.S_500_000_001.desc),
             c = isError ? errCodes.S_500_000_001.code : (code || errCodes.S_500_000_001.code),
-            hs = isError ? errCodes.S_500_000_001.httpStatus : (httpStatus || errCodeToHttpStatus(c) || errCodes.S_500_000_001.httpStatus);
-        console.log("isError: %s", isError);
-        console.log("httpStatus: %s", hs);
+            msg = isError ? errCodes.S_500_000_001.desc : (msg || errCodeToErrorCodeObject(c).desc || errCodes.S_500_000_001.desc),
+            hs = isError ? errCodes.S_500_000_001.httpStatus : (httpStatus || errCodeToErrorCodeObject(c).httpStatus || errCodes.S_500_000_001.httpStatus);
 
         Error.call(this);
         Error.captureStackTrace(this, arguments.callee);
