@@ -11,5 +11,6 @@ sudo apt-get install npm -y
 sudo npm install -g express
 sudo npm install -g express-generator
 sudo npm install -g forever
+sudo npm install -g mocha
 cd /vagrant/site/influence
 npm install

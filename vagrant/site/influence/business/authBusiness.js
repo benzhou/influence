@@ -1,5 +1,6 @@
 var InfluenceError = require('../error/influenceError');
 
+
 module.exports = function(Q, helpers, util, logger, config, errCodes, accountDataHandler){
 
     var
@@ -58,9 +59,9 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
                         );
                     }
 
-                    var newAdminObject = admin;
+                    var newAdminObject = admin.token = token;
 
-                    df.resolve(admin);
+                    df.resolve(newAdminObject);
                 }).catch(function(err){
                     logger.log("authBusiness.js adminAccountLogin catch an error!");
                     logger.log(err);

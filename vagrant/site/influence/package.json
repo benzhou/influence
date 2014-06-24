@@ -16,6 +16,9 @@
     "mongodb" : ">=1.4.6",
     "q": " >=1.0.1",
     "node-uuid" : ">=1.4.1",
-    "underscore" : ">=1.6.0"
+    "underscore" : ">=1.6.0",
+    "sinon": ">=1.10.2",
+    "chai": ">=1.9.1",
+    "chai-as-promised": ">=4.1.1"
   }
 }

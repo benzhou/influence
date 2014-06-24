@@ -1,5 +1,6 @@
 var crypto = require('crypto');
 var uuid = require("node-uuid");
+var _ = require("underscore");
 
 module.exports = function(plain){
     var
@@ -22,12 +23,18 @@ module.exports = function(plain){
 
         getUrlSafeBase64EncodedToken = function(){
             return (new Buffer(uuid.v4() + ":" + uuid.v4()).toString('base64')).replace(/\+/gi,'-').replace(/\//gi, '_').replace(/\=/gi, ',');
+        },
+
+        mixin = function(){
+            var args = [].slice(arguments);
+            return _.extend.apply(this, args);
         };
 
     return {
         sha256Hash : sha256Hash,
         getUrlSafeBase64EncodedToken   : getUrlSafeBase64EncodedToken,
-        typeIs      : typeIs
+        typeIs      : typeIs,
+        mixin       : mixin
     }
 }();
 
