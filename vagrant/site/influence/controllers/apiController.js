@@ -16,7 +16,19 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                 function(admin){
                     logger.log("Success when call accountBusiness.getAdminAccountById in getAdminAccount");
                     logger.log(admin);
-                    res.json(admin);
+
+                    res.json({
+                        code    : errCodes.SU_200.code,
+                        message : errCodes.SU_200.message,
+                        data    : {
+                            id          : admin._id,
+                            username    : admin.username,
+                            email       : admin.email,
+                            firstname   : admin.firstname,
+                            lastname    : admin.lastname,
+                            displayName : admin.displayName
+                        }
+                    });
                 },
 
                 function(err){
@@ -59,9 +71,18 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                 function(admin){
                     logger.log("Success when call accountBusiness.createAdminAccount in postAdminAccount");
                     logger.log(admin);
+
                     res.json({
-                        code : 200,
-                        message : "Admin account is created!"
+                        code    : errCodes.SU_200.code,
+                        message : errCodes.SU_200.message,
+                        data    : {
+                            id          : admin._id,
+                            username    : admin.username,
+                            email       : admin.email,
+                            firstname   : admin.firstname,
+                            lastname    : admin.lastname,
+                            displayName : admin.displayName
+                        }
                     });
                 }
             ).catch(

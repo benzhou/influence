@@ -1,10 +1,12 @@
 module.exports = function(){
-    var SYSTEM_ERROR = "SYSTEM_ERROR",
-        CLIENT_ERROR = "CLIENT_ERROR";
+    var SYSTEM_ERROR    = "SYSTEM_ERROR",
+        CLIENT_ERROR    = "CLIENT_ERROR",
+        SUCCESS         = "SUCCESS";
 
     //http://www.w3.org/Protocols/HTTP/HTRESP.html
 
     return {
+        SU_200              : { type : SUCCESS,      httpStatus: 200,  code : 200000000, desc : "Success" },
         S_500_000_001       : { type : SYSTEM_ERROR, httpStatus: 500,  code : 500000001, desc : "System error" },
 
         //accountBusiness.js createAdminAccount
@@ -39,7 +41,8 @@ module.exports = function(){
         C_400_007_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400007001, desc : "Missing required parameters" },
 
         //adminAuthenticationMiddleware.js adminTokenAuthentication
-        C_401_001_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001001, desc : "Unauthorized" }
+        C_401_001_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001001, desc : "Unauthorized" },
+        C_401_001_002       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001002, desc : "Unauthorized" }
     };
 }();
 

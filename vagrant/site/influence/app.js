@@ -59,7 +59,7 @@ var routes              = {},
 
     apiController       =  require('./controllers/apiController')(Q, console, errCodes, authBusiness, accountBusiness),
 
-    adminAuthenticationMiddleware = require('./middleware/adminAuthenticationMiddleware');
+    adminAuthenticationMiddleware = require('./middleware/adminAuthenticationMiddleware')(console, authBusiness);
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());
