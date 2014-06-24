@@ -6,6 +6,7 @@ module.exports = function(){
 
     return {
         S_500_000_001       : { type : SYSTEM_ERROR, httpStatus: 500,  code : 500000001, desc : "System error" },
+
         //accountBusiness.js createAdminAccount
         C_400_001_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400001001, desc : "Missing required parameters" },
         C_400_001_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400001002, desc : "Admin with same email address: %s already exists!" },
@@ -25,7 +26,20 @@ module.exports = function(){
 
         //authBusiness.js validateAdminAuthToken
         C_400_004_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400004001, desc : "Invalid token." },
-        C_400_004_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400004002, desc : "Invalid token." }
+        C_400_004_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400004002, desc : "Invalid token." },
+
+        //tenantsBusiness.js getTenantById
+        C_400_005_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400005001, desc : "Missing required parameters" },
+        C_400_005_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400005002, desc : "Invalid TenantId" },
+
+        //tenantsBusiness.js createTenant
+        C_400_006_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400006001, desc : "Missing required parameters" },
+
+        //accountBusiness.js getAdminAccountById
+        C_400_007_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400007001, desc : "Missing required parameters" },
+
+        //adminAuthenticationMiddleware.js adminTokenAuthentication
+        C_401_001_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001001, desc : "Unauthorized" }
     };
 }();
 

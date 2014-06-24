@@ -29,7 +29,16 @@ module.exports = function(Q, dbProvider){
         },
         upsertAdminAuthToken = function(token){
             return dbProvider.upsertAdminAuthToken(token);
+        },
+
+        findTenantById = function(tenantId){
+            return dbProvider.findTenantById(tenantId);
+        },
+        upsertTenant = function(tenant){
+            return dbProvider.upsertTenant(tenant);
         };
+
+
 
     return {
         findAdminAccountById                : findAdminAccountById,
@@ -42,7 +51,10 @@ module.exports = function(Q, dbProvider){
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
         findAdminAuthTokenByToken           : findAdminAuthTokenByToken,
-        upsertAdminAuthToken                : upsertAdminAuthToken
+        upsertAdminAuthToken                : upsertAdminAuthToken,
+
+        findTenantById                      : findTenantById,
+        upsertTenant                        : upsertTenant
     };
 };
 

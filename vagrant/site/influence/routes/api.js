@@ -1,4 +1,4 @@
-module.exports = function(router, apiController){
+module.exports = function(router, adminAuthenticationMiddleware, apiController){
 
     router.get('/test', function(req, res, next) {
         apiController.test(req,res,next);
@@ -6,9 +6,13 @@ module.exports = function(router, apiController){
 
     //Account
     //Admin
-    router.get('/account/admin/:adminId', function(req, res, next) {
-        apiController.getAdminAccount(req,res,next);
-    });
+    router.get(
+        '/account/admin/:adminId',
+        adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next) {
+            apiController.getAdminAccount(req,res,next);
+        }
+    );
     router.post('/account/admin/:adminId', function(req, res, next) {
         apiController.postAdminAccount(req,res,next);
     });

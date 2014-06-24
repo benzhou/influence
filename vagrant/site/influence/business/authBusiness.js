@@ -10,10 +10,13 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
             //validation
             //required fields
             if(!appKey || !tenantId || !username || !password){
-                throw new InfluenceError(
-                    errCodes.C_400_002_001.code,
-                    "Missing parameters"
-                );
+                df.reject(
+                    new InfluenceError(
+                        errCodes.C_400_002_001.code,
+                        "Missing parameters"
+                    ));
+
+                return df.promise;
             }
 
             logger.log("adminAccountLogin, tenantId: %s, username %s, password %s", tenantId, username, password);
@@ -89,10 +92,13 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
             //validation
             //required fields
             if(!appKey || !adminId){
-                throw new InfluenceError(
-                    errCodes.C_400_003_001.code,
-                    "Missing parameters"
-                );
+                df.reject(
+                    new InfluenceError(
+                        errCodes.C_400_003_001.code,
+                        "Missing parameters"
+                    ));
+
+                return df.promise;
             }
 
             logger.log("createAdminAuthToken, appKey: %s, adminId %s", appKey, adminId);
@@ -136,10 +142,13 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
             var df = Q.defer();
 
             if(!token){
-                throw new InfluenceError(
-                    errCodes.C_400_004_001.code,
-                    "Invalid token"
-                );
+                df.reject(
+                    new InfluenceError(
+                        errCodes.C_400_004_001.code,
+                        "Missing parameters"
+                    ));
+
+                return df.promise;
             }
 
             Q.when(authDataHandler.findAdminAuthTokenByToken(token)).then(

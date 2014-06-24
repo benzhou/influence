@@ -7,6 +7,9 @@ var chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 
 var
+    expect = chai.expect,
+    should = chai.should(),
+
     Q = require("q"),
     util = require("util"),
     helpers = require('../lib/helpers'),
@@ -15,20 +18,71 @@ var
     errCodes            = require('../error/errorCodes');
 
 describe('AuthBusiness', function(){
-    describe('#adminAccountLogin()', function(){
+    describe('#adminAccountLogin()', function(done){
         it('Admin login pass no password, should be rejected', function(){
-
-            var accountDataHandler = {},
+            var
+                accountDataHandler = {
+                    findAdminAccountByTenantAndUsername: function(){},
+                    createAdminLoginToken : function () {}
+                },
                 findAdminAccountByTenantAndUsernameStub = sinon.stub(accountDataHandler, "findAdminAccountByTenantAndUsername"),
-                createAdminLoginTokenStub = sinon.stub(accountDataHandler, "createAdminLoginToken");
+                createAdminLoginTokenStub = sinon.stub(accountDataHandler, "createAdminLoginToken"),
+                df1 = Q.defer(),
+                df2 = Q.defer();
 
-            findAdminAccountByTenantAndUsernameStub.withArgs(1, 'fakeUsername').return();
+            //df1.resolve({});
 
-            var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig, errCodes, accountDataHandler);
+            findAdminAccountByTenantAndUsernameStub.withArgs(1, 'fakeUsername').returns(true);
+            createAdminLoginTokenStub.returns({
+                token : 'test'
+            });
+
+            var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler);
             var promise = authBusiness.adminAccountLogin('fakeAppKey', 1, 'fakeUsername');
 
-            return chai.expect(promise).should.be.rejected;
-            //promise.catch(function(err){assert.equal(err.code, errCodes.C_400_002_001.code);}).done();
+            promise.should.eventually.be.rejected;
+        }),
+
+        it('Admin login pass case: ', function(done){
+            var
+                accountDataHandler = {
+                    findAdminAccountByTenantAndUsername: function(){}
+                },
+                authDataHandler = {
+                    createAdminAuthToken : function () {}
+                },
+                findAdminAccountByTenantAndUsernameStub = sinon.stub(accountDataHandler, "findAdminAccountByTenantAndUsername"),
+                createAdminAuthTokenStub = sinon.stub(authDataHandler, "createAdminAuthToken"),
+                df1 = Q.defer(),
+                df2 = Q.defer(),
+                appKey = "fakeAppKey",
+                tenantId = 1,
+                username = "ben",
+                password = "1234",
+                salt = "1234",
+                hash = helpers.sha256Hash(password + '.' + salt);
+
+            df1.resolve({
+                _id:"12345",
+                "username" : "ben",
+                "passwordHash" : hash,
+                "passwordSalt" : salt
+            });
+
+            df2.resolve({
+                token : 'test'
+            });
+
+            findAdminAccountByTenantAndUsernameStub.returns(df1.promise);
+            createAdminAuthTokenStub.returns(df2.promise);
+
+            var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler);
+            var promise = authBusiness.adminAccountLogin(appKey, tenantId, username, password);
+
+            Q.all([
+                promise.should.eventually.have.property('token')
+            ]).should.notify(done);
+
         });
     });
 })

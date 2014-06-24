@@ -6,7 +6,7 @@ module.exports = function(Q, helpers, Pif, util, logger, errCodes, accountDataHa
     var
         getAdminAccountById = function(adminId){
             if(!adminId){
-                throw new InfluenceError("No adminId found");
+                throw new InfluenceError(errCodes.C_400_007_001.code);
             }
 
             return accountDataHandler.getAdminAccountById(adminId);
@@ -27,10 +27,9 @@ module.exports = function(Q, helpers, Pif, util, logger, errCodes, accountDataHa
             //validation
             //required fields
             if(!tenantId || !email || !passwordPlainText || !createdBy){
-                throw new InfluenceError(
-                    errCodes.C_400_001_001.code,
-                    "Missing parameters"
-                );
+                df.reject(new InfluenceError(errCodes.C_400_001_001.code));
+
+                return df.promise;
             }
 
             //TODO: validate Email format (length, invalid characters etc.)

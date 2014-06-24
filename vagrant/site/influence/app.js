@@ -57,11 +57,13 @@ var routes              = {},
     accountBusiness     = require('./business/accountBusiness')(Q, helpers, Pif, util, console, errCodes, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler),
 
-    apiController       =  require('./controllers/apiController')(Q, console, errCodes, authBusiness, accountBusiness);
+    apiController       =  require('./controllers/apiController')(Q, console, errCodes, authBusiness, accountBusiness),
+
+    adminAuthenticationMiddleware = require('./middleware/adminAuthenticationMiddleware');
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());
-routes.api = require('./routes/api')(express.Router(), apiController);
+routes.api = require('./routes/api')(express.Router(), adminAuthenticationMiddleware, apiController);
 routes.admin = require('./routes/admin')(express.Router());
 
 

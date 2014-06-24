@@ -6,7 +6,8 @@ module.exports = function(config, MongoDb, Q, logger){
         collections = {
             AdminAccount        : "AdminAccount",
             AppAccount          : "AppAccount",
-            AdminAuthToken      : "AdminAuthToken"
+            AdminAuthToken      : "AdminAuthToken",
+            Tenants             : "Tenants"
         },
         db = null,
         connectionDefer = null,
@@ -96,6 +97,14 @@ module.exports = function(config, MongoDb, Q, logger){
         },
         upsertAdminAuthToken = function(token){
             return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, token);
+        },
+
+        //Tenants CURD
+        findTenantById = function(tenantId){
+            return  _findOneBy(collections.Tenants, {_id : tenantId});
+        },
+        upsertTenant = function(tenant){
+            return _upsertByMatch(collections.Tenants, {createdOn:1}, {_id:tenant._id}, tenant);
         },
 
         //Private Helper methods
@@ -189,7 +198,10 @@ module.exports = function(config, MongoDb, Q, logger){
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
         findAdminAuthTokenByToken           : findAdminAuthTokenByToken,
-        upsertAdminAuthToken                : upsertAdminAuthToken
+        upsertAdminAuthToken                : upsertAdminAuthToken,
+
+        findTenantById                      : findTenantById,
+        upsertTenant                        : upsertTenant
     };
 };
 

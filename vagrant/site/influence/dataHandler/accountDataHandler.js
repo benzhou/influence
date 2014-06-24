@@ -1,4 +1,4 @@
-module.exports = function(dbProvider, accountDataObject){
+module.exports = function(dbProvider){
 
     var
         getAdminAccountById = function(adminId){
@@ -22,6 +22,13 @@ module.exports = function(dbProvider, accountDataObject){
         },
         upsertAppAccountByAppkey = function(adminAccountDo){
             return dbProvider.upsertAppAccountByAppkey(adminAccountDo);
+        },
+
+        findTenantById = function(tenantId){
+            return dbProvider.findTenantById(tenantId);
+        },
+        upsertTenant = function(tenant){
+            return dbProvider.upsertTenant(tenant);
         };
 
     return {
@@ -32,7 +39,10 @@ module.exports = function(dbProvider, accountDataObject){
         upsertAdminAccount                  : upsertAdminAccount,
 
         findAppAccountByAppKey              : findAppAccountByAppKey,
-        upsertAppAccountByAppkey            : upsertAppAccountByAppkey
+        upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
+
+        findTenantById                      : findTenantById,
+        upsertTenant                        : upsertTenant
     };
 };
 
