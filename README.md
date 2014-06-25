@@ -31,9 +31,146 @@ Influence Documentations
 - Topics
 ---
 1. Flow Control with promises and Q library. 
+    In the influence application, we use Q library for defer and promises. What is a promise or how actually it works is not talked here in this 
+    documentation, if you are not familiar with it, please read more on the [Q's documentation site](http://documentup.com/kriskowal/q/)
+    
+    Because the nature of asynchronous, a lot of times, we need to wait a callback to continue the execute code blocks. A good example is
+    When admin tryies to login, we will:
+     first, lookup the database for an admin document. (asynchronous)
+     Second, calculate the passwordHash, if doesn't match the from-the-db admin's passwordHash, reject the request. (synchronous)
+     Third, If all passes, create admin authentication token. (asynchronous)
+     Finally, return the response.
+     
+    When this process happen, we have a put a callback in each asynchronous call(The first and third step). it creates a lot of nested,
+     hard to read code. With promise and Q, we can do it in a cleaner manner.
+        
+        adminAccountLogin = function(appKey, tenantId, username, password){
+                    var df = Q.defer();
+        
+                    //validation
+                    //required fields
+                    if(!appKey || !tenantId || !username || !password){
+                        df.reject(
+                            new InfluenceError(
+                                errCodes.C_400_002_001.code,
+                                "Missing parameters"
+                            ));
+        
+                        return df.promise;
+                    }
+        
+                    logger.log("adminAccountLogin, tenantId: %s, username %s, password %s", tenantId, username, password);
+                    tenantId = parseInt(tenantId);
+        
+        
+                    //TODO: Validates AppKey is authorized for this method
+        
+                    Q.when(accountDataHandler.findAdminAccountByTenantAndUsername(tenantId, username)).then(
+                        //
+                        function(admin){
+                            logger.log("authBusiness.js adminAccountLogin: findAdminAccountByTenantAndUsername promise resolved");
+                            logger.log("here is the admin object");
+                            logger.log(admin);
+        
+                            if(!admin){
+                                //if admin is false value, means we didn't find the admin by the tenantId and username
+                                throw new InfluenceError(
+                                    errCodes.C_400_002_002.code,
+                                    "Invalid Username/Password"
+                                );
+                            }
+        
+                            //Validate retrieved admin has passwordHash and passwordSalt
+                            var calculatedHash = helpers.sha256Hash(password + '.' + admin.passwordSalt);
+                            logger.log("admin's saved password hash is %s", admin.passwordHash);
+                            logger.log("calculated hash is %s", calculatedHash);
+        
+                            if(admin.passwordHash !== calculatedHash){
+                                throw new InfluenceError(
+                                    errCodes.C_400_002_003.code,
+                                    "Invalid Username/Password"
+                                );
+                            }
+        
+                            createAdminAuthToken(appKey, admin._id).then(
+                                function(token){
+                                    logger.log("authBusiness.js adminAccountLogin createAdminAuthToken promise resolved!");
+        
+                                    if(!token || !token.token){
+                                        throw new InfluenceError(
+                                            errCodes.C_400_002_004.code,
+                                            "Unexpected error when retrieve admin auth token."
+                                        );
+                                    }
+        
+                                    admin.token = token;
+        
+                                    df.resolve(admin);
+                                }
+                            ).catch(function(err){
+                                    throw new InfluenceError(
+                                        errCodes.C_400_002_005.code,
+                                        "Unable to create admin auth token."
+                                    );
+                                }).done();
+                        }
+                    ).catch(function(err){
+                            logger.log("authBusiness.js adminAccountLogin catch an error!");
+                            logger.log(err);
+        
+                            df.reject(err);
+                        }).done(function(){
+                            logger.log("authBusiness.js adminAccountLogin done!");
+                    });
+        
+                    return df.promise;
+                }
+     
 2. Error Handling
+    Influence created a custom error object call InfluenceError. It is simply extended the nodejs Error object with several properties.
+    It is used throughout the application, either being used as typical "throw" syntax or rejected with a promise object. 
+        
+        var df = Q.defer();
+        
+        //validation
+        //required fields
+        if(!appKey || !tenantId || !username || !password){
+            df.reject(
+                new InfluenceError(
+                    errCodes.C_400_002_001.code,
+                    "Missing parameters"
+                ));
+    
+            return df.promise;
+        }
+    as you can see in the above code example, the new InfluenceError object is passing in when rejecting a promise. 
+    You can *also* use the InfluenceError to wrap an Error object, which creates a system error. See the example below:
+        
+        function(err){
+            logger.log("Failed when call accountBusiness.createAppAccount in postAppAccount");
+            logger.log(err);
+            var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+            res.json(
+                resObj.httpStatus,
+                {
+                    code : resObj.code,
+                    message : resObj.message
+                }
+            );
+        }
+    
+   
 3. Unit Test frameworks
     * [Mocha](http://visionmedia.github.io/mocha/) Test running
     * [Sinon.js](http://sinonjs.org/docs) Stub/Spy/Mock library
     * [Chai.js](http://chaijs.com/api/) Assertion syntax
-    * [Chai-as-promised](https://github.com/domenic/chai-as-promised/) Chai addon for promises
+    * [Chai-as-promised](https://github.com/domenic/chai-as-promised/) Chai add-on for promises
+    
+4. Layers in the applications and their responsibilities:
+    - Application
+    - Routes
+    - Middleware
+    - Controller
+    - Business Logic
+    - Data Access
+        
