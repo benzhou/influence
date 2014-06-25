@@ -42,6 +42,7 @@ Influence Documentations
 - Topics
 ---
 - Flow Control with promises and Q library. 
+
     In the influence application, we use Q library for defer and promises. What is a promise or how actually it works is not talked here in this 
     documentation, if you are not familiar with it, please read more on the [Q's documentation site](http://documentup.com/kriskowal/q/)
     
@@ -139,7 +140,9 @@ Influence Documentations
                 }
 
 
+
 - Error Handling
+
     Influence created a custom error object call InfluenceError. It is simply extended the nodejs Error object with several properties.
     It is used throughout the application, either being used as typical "throw" syntax or rejected with a promise object. 
         
