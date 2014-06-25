@@ -54,7 +54,9 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
             //TODO request validation
 
             var reqAdmin = req.body,
-                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN].adminId;
+                authToken = req[constants.reqParams.PROP_AUTHTOKEN];
+
+            var currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
             Q.when(
                 accountBusiness
@@ -63,9 +65,9 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                         reqAdmin.username,
                         reqAdmin.email,
                         reqAdmin.password,
-                        reqAdmin.firstName,
-                        reqAdmin.lastName,
-                        reqAdmin.displayName,
+                        reqAdmin.firstname,
+                        reqAdmin.lastname,
+                        reqAdmin.displayname,
                         currentAdminId
             )).then(
 
@@ -110,14 +112,6 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
 
             Q.when(authBusiness.adminAccountLogin(req.query.appKey, req.params.tenantId,req.params.username,req.params.password)).then(
                 function(admin){
-                    if(!admin){
-                        res.json({
-                            code : errorCodes.S_500_000_001,
-                            message: "System Error!"
-                        });
-                        return;
-                    }
-
                     res.json({
                         code : errorCodes.SU_200.code,
                         data : {
@@ -166,8 +160,8 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                             }
                         }
                     });
-                },
-
+                }
+            ).catch(
                 function(err){
                     logger.log("apiController.js getAppAccount: Failed when call accountBusiness.getAppAccountByAppKey in getAppAccount");
                     logger.log(err);
@@ -190,7 +184,7 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
             //TODO request validation
 
             var reqApp = req.body,
-                currentAdminId = req[constants.reqParams.PROP_AUTHTOKEN];
+                currentAdminId = req[constants.reqParams.PROP_AUTHTOKEN].adminId;
 
             Q.when(
                 accountBusiness
@@ -215,8 +209,8 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                             }
                         }
                     });
-                },
-
+                }
+            ).catch(
                 function(err){
                     logger.log("Failed when call accountBusiness.createAppAccount in postAppAccount");
                     logger.log(err);
@@ -229,7 +223,7 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                         }
                     );
                 }
-            );
+            ).done();
         };
 
     return {

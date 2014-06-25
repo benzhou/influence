@@ -13,17 +13,29 @@ module.exports = function(router, adminAuthenticationMiddleware, apiController){
             apiController.getAdminAccount(req,res,next);
         }
     );
-    router.post('/account/admin/:adminId', function(req, res, next) {
+    router.post(
+        '/account/admin',
+        adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next) {
         apiController.postAdminAccount(req,res,next);
-    });
+        }
+    );
 
     //App
-    router.get('/account/app/:appKey', function(req, res, next) {
-        apiController.getAppAccount(req,res,next);
-    });
-    router.post('/account/app/:appKey', function(req, res, next) {
-        apiController.postAppAccount(req,res,next);
-    });
+    router.get(
+        '/account/app/:appKey',
+        adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next) {
+            apiController.getAppAccount(req,res,next);
+        }
+    );
+    router.post(
+        '/account/app',
+        //adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next) {
+            apiController.postAppAccount(req,res,next);
+        }
+    );
 
 
     //Auth

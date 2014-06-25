@@ -5,11 +5,36 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
 
     var
         getAdminAccountById = function(adminId){
+            var df = Q.defer();
+
+            //validation
+            //required fields
             if(!adminId){
-                throw new InfluenceError(errCodes.C_400_007_001.code);
+                df.reject(
+                    new InfluenceError(errCodes.C_400_007_001.code)
+                );
+
+                return df.promise;
             }
 
-            return accountDataHandler.getAdminAccountById(adminId);
+            Q.when(accountDataHandler.getAdminAccountById(adminId)).then(
+                function(admin){
+                    if(!admin){
+                        throw new InfluenceError(errCodes.C_400_007_002.code);
+                    }
+
+                    df.resolve(admin);
+                }
+            ).catch(
+                function(err){
+                    logger.log('accountBusiness.getAdminAccountById catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done();
+
+            return df.promise;
         },
 
         createAdminAccount = function(
@@ -112,7 +137,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                     logger.log(admin);
                     df.resolve(admin);
                 }).catch(function(err){
-                    //one of the promise was rejected
+                    //one of the promises was rejected
                     logger.log('accountBusiness.createAdminAccount catch block got an err');
                     logger.log(err && err.stack?err.stack:err);
 
@@ -125,14 +150,37 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
         },
 
         getAppAccountByAppKey = function(appKey){
+            var df = Q.defer();
+
+            //validation
+            //required fields
             if(!appKey){
-                throw new InfluenceError(
-                    errCodes.C_400_001_001.code,
-                    util.format(errCodes.C_400_001_001.desc, email)
+                df.reject(
+                    new InfluenceError(errCodes.C_400_008_001.code)
                 );
+
+                return df.promise;
             }
 
-            return accountDataHandler.findAppAccountByAppKey(appKey);
+            Q.when(accountDataHandler.findAppAccountByAppKey(appKey)).then(
+                function(app){
+                    if(!app){
+                        //if admin is false value, means we didn't find the admin by the tenantId and username
+                        throw new InfluenceError(errCodes.C_400_008_002.code);
+                    }
+
+                    df.resolve(app);
+                }
+            ).catch(
+                function(err){
+                    logger.log('accountBusiness.getAppAccountByAppKey catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done();
+
+            return df.promise;
         },
 
         createAppAccount = function(
@@ -140,10 +188,13 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             description,
             createdBy
         ){
+            var df = Q.defer();
+
             //validation
             //required fields
-            if(!appName || !createdBy){
-                throw new InfluenceError();
+            if(!name || !createdBy){
+                df.reject(new InfluenceError(errCodes.C_400_009_001.code));
+                return df.promise;
             }
 
             //Generate AppKey and AppSecret
@@ -165,7 +216,22 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                     updatedOn           : currentDate
                 };
 
-            return accountDataHandler.upsertAppAccountById(appDo);
+            Q.when(accountDataHandler.upsertAppAccountById(appDo)).then(
+                function(app){
+                    if(!app){
+                        throw new InfluenceError(errCodes.C_400_009_002.code);
+                    }
+
+                    df.resolve(app);
+                }
+            ).catch(
+                function(err){
+                    logger.log('accountBusiness.createAppAccount catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done();
         };
 
     return {

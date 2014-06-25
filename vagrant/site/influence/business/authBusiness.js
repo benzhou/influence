@@ -7,6 +7,8 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
         adminAccountLogin = function(appKey, tenantId, username, password){
             var df = Q.defer();
 
+            logger.log("adminAccountLogin, appKey: %s tenantId: %s, username %s, password %s", appKey, tenantId, username, password);
+
             //validation
             //required fields
             if(!appKey || !tenantId || !username || !password){

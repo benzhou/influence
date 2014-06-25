@@ -39,6 +39,15 @@ module.exports = function(){
 
         //accountBusiness.js getAdminAccountById
         C_400_007_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400007001, desc : "Missing required parameters" },
+        C_400_007_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400007002, desc : "Invalid adminId." },
+
+        //accountBusiness.js getAppAccountById
+        C_400_008_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400008001, desc : "Missing required parameters" },
+        C_400_008_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400008002, desc : "Invalid appKey" },
+
+        //accountBusiness.js createAppAccount
+        C_400_009_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009001, desc : "Missing required parameters" },
+        C_400_009_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009002, desc : "Not able to create an app." },
 
         //adminAuthenticationMiddleware.js adminTokenAuthentication
         C_401_001_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001001, desc : "Unauthorized" },
