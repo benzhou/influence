@@ -36,10 +36,11 @@ Influence Documentations
     
     Because the nature of asynchronous, a lot of times, we need to wait a callback to continue the execute code blocks. A good example is
     When admin tryies to login, we will:
-     first, lookup the database for an admin document. (asynchronous)
-     Second, calculate the passwordHash, if doesn't match the from-the-db admin's passwordHash, reject the request. (synchronous)
-     Third, If all passes, create admin authentication token. (asynchronous)
-     Finally, return the response.
+    
+    - First, lookup the database for an admin document. (asynchronous)
+    - Second, calculate the passwordHash, if doesn't match the from-the-db admin's passwordHash, reject the request. (synchronous)
+    - Third, If all passes, create admin authentication token. (asynchronous)
+    - Finally, return the response.
      
     When this process happen, we have a put a callback in each asynchronous call(The first and third step). it creates a lot of nested,
      hard to read code. With promise and Q, we can do it in a cleaner manner.
