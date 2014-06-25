@@ -1,8 +1,9 @@
 var Q = require("q"),
     util = require("util"),
+    errCodes = require('../error/errorCodes'),
     InfluenceError = require('../error/influenceError');
 
-module.exports = function(helpers, logger, errCodes, tenantsDataHandler) {
+module.exports = function(helpers, logger, tenantsDataHandler) {
 
     var
         getTenantById = function(tenantId){
@@ -65,22 +66,22 @@ module.exports = function(helpers, logger, errCodes, tenantsDataHandler) {
                     updatedOn   : new Date()
                 };
 
-            Q.when(authDataHandler.createAdminAuthToken(token)).then(
+            Q.when(tenantsDataHandler.createAdminAuthToken(tenant)).then(
                 //
-                function(token){
-                    logger.log("authBusiness.js createAdminAuthToken: createAdminAuthToken promise resolved");
-                    logger.log("here is the token object");
-                    logger.log(token);
+                function(tenant){
+                    logger.log("tenantsBusiness.js createTenant: createAdminAuthToken promise resolved");
+                    logger.log("here is the tenant object");
+                    logger.log(tenant);
 
-                    df.resolve(token);
+                    df.resolve(tenant);
                 }
             ).catch(function(err){
-                    logger.log("authBusiness.js createAdminAuthToken caught an error!");
+                    logger.log("tenantsBusiness.js createTenant: caught an error!");
                     logger.log(err);
 
                     df.reject(err);
                 }).done(function(){
-                    logger.log("authBusiness.js createAdminAuthToken done!");
+                    logger.log("tenantsBusiness.js createTenant: done!");
                 });
 
 
@@ -88,6 +89,7 @@ module.exports = function(helpers, logger, errCodes, tenantsDataHandler) {
         };
 
     return {
-        getTenantById       : getTenantById
+        getTenantById       : getTenantById,
+        createTenant        : createTenant
     };
 }

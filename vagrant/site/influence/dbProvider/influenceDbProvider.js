@@ -1,6 +1,10 @@
 module.exports = function(Q, dbProvider){
 
     var
+        upsertApiCallLog = function(apiCallLog){
+            return dbProvider.upsertApiCallLog(apiCallLog);
+        },
+
         findAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
         },
@@ -41,6 +45,8 @@ module.exports = function(Q, dbProvider){
 
 
     return {
+        upsertApiCallLog                    : upsertApiCallLog,
+
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,

@@ -5,7 +5,11 @@ var InfluenceError  = require('../error/influenceError'),
 module.exports = function(Q, logger, authBusiness, accountBusiness){
 
     var test = function(req,res,next){
-            res.json({result:true});
+            logger.log("================");
+            logger.log("apiController.js test action called!");
+            logger.log("================");
+
+            res.json(400, {result:true});
         },
 
         getAdminAccount = function(req,res,next){
@@ -33,8 +37,12 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                             }
                         }
                     });
-                },
 
+                    next({
+                        success : true
+                    });
+                }
+            ).catch(
                 function(err){
                     logger.log("Failed when call accountBusiness.getAdminAccountById in getAdminAccount");
                     logger.log(err);
@@ -46,8 +54,13 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                             message : resObj.message
                         }
                     );
+
+                    next({
+                        success : false,
+                        err     : err
+                    });
                 }
-            );
+            ).done();
         },
 
         postAdminAccount = function(req,res,next){

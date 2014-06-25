@@ -52,23 +52,40 @@ var routes              = {},
 
     accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
+    tenantsDataHandler  = require('./dataHandler/tenantsDataHandler')(influenceDbProvider),
+    apiLogDataHandler   = require('./dataHandler/apiLogDataHandler')(influenceDbProvider),
 
+    tenantsBusiness     = require('./business/tenantsBusiness')(helpers, logger, tenantsDataHandler),
     accountBusiness     = require('./business/accountBusiness')(Q, helpers, util, console, errCodes, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler),
+    apiLogBusiness      = require('./business/apiLogBusiness')(logger, apiLogDataHandler),
 
     apiController       =  require('./controllers/apiController')(Q, console, authBusiness, accountBusiness),
 
-    adminAuthenticationMiddleware = require('./middleware/adminAuthenticationMiddleware')(console, authBusiness);
+    adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(console, authBusiness),
+    apiLogMiddleware                = require('./middleware/apiLogMiddleware')(console, apiLogBusiness);
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());
-routes.api = require('./routes/api')(express.Router(), adminAuthenticationMiddleware, apiController);
+routes.api = require('./routes/api')(express.Router(), console, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
 routes.admin = require('./routes/admin')(express.Router());
 
 
 app.use('/', routes.site);
-app.use('/api', routes.api);
 app.use('/admin', routes.admin);
+
+app.use('/api', routes.api);
+
+//catch any 404 routes for api only
+app.use('/api', function(req, res, next){
+    res.json(
+        errCodes.C_404_001_001.httpStatus,
+        {
+            code : errCodes.C_404_001_001.code,
+            message : errCodes.C_404_001_001.desc
+        }
+    );
+})
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
