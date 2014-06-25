@@ -30,7 +30,7 @@ Influence Documentations
     
 - Topics
 ---
-1. Flow Control with promises and Q library. 
+- Flow Control with promises and Q library. 
     In the influence application, we use Q library for defer and promises. What is a promise or how actually it works is not talked here in this 
     documentation, if you are not familiar with it, please read more on the [Q's documentation site](http://documentup.com/kriskowal/q/)
     
@@ -126,8 +126,9 @@ Influence Documentations
         
                     return df.promise;
                 }
-     
-2. Error Handling
+
+
+- Error Handling
     Influence created a custom error object call InfluenceError. It is simply extended the nodejs Error object with several properties.
     It is used throughout the application, either being used as typical "throw" syntax or rejected with a promise object. 
         
@@ -161,13 +162,13 @@ Influence Documentations
         }
     
    
-3. Unit Test frameworks
+- Unit Test frameworks
     * [Mocha](http://visionmedia.github.io/mocha/) Test running
     * [Sinon.js](http://sinonjs.org/docs) Stub/Spy/Mock library
     * [Chai.js](http://chaijs.com/api/) Assertion syntax
     * [Chai-as-promised](https://github.com/domenic/chai-as-promised/) Chai add-on for promises
     
-4. Layers in the applications and their responsibilities:
+- Layers in the applications and their responsibilities:
     - Application
     - Routes
     - Middleware
