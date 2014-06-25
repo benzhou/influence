@@ -30,11 +30,10 @@ Influence Documentations
     
 - Topics
 ---
-
-    - Flow Control with promises and Q library. 
-    - Error Handling
-    - Unit Test frameworks
-        - [Mocha](http://visionmedia.github.io/mocha/) Test running
-        - [Sinon.js](http://sinonjs.org/docs) Stub/Spy/Mock library
-        - [Chai.js](http://chaijs.com/api/) Assertion syntax
-        - [Chai-as-promised](https://github.com/domenic/chai-as-promised/) Chai addon for promises
+1. Flow Control with promises and Q library. 
+2. Error Handling
+3. Unit Test frameworks
+    * [Mocha](http://visionmedia.github.io/mocha/) Test running
+    * [Sinon.js](http://sinonjs.org/docs) Stub/Spy/Mock library
+    * [Chai.js](http://chaijs.com/api/) Assertion syntax
+    * [Chai-as-promised](https://github.com/domenic/chai-as-promised/) Chai addon for promises
