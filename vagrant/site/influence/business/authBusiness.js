@@ -107,13 +107,13 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
                 expiredOn = new Date(),
                 epoch = expiredOn.setSeconds(expiredOn.getSeconds() + config.auth.tokenExpirationAddOn),
                 token = {
-                token       : helpers.getUrlSafeBase64EncodedToken(),
-                adminId    : adminId,
-                appKey      : appKey,
-                isActive    : true,
-                expiredOn   : expiredOn,//new Date(expiredOn*1000),
-                createdOn   : new Date(),
-                updatedOn   : new Date()
+                    token       : helpers.getUrlSafeBase64EncodedToken(),
+                    adminId     : adminId,
+                    appKey      : appKey,
+                    isActive    : true,
+                    expiredOn   : expiredOn,//new Date(expiredOn*1000),
+                    createdOn   : new Date(),
+                    updatedOn   : new Date()
             };
 
             Q.when(authDataHandler.createAdminAuthToken(token)).then(

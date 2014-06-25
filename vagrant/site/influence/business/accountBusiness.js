@@ -1,7 +1,7 @@
 var InfluenceError = require('../error/influenceError');
 var crypto = require('crypto');
 
-module.exports = function(Q, helpers, Pif, util, logger, errCodes, accountDataHandler){
+module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
@@ -136,8 +136,8 @@ module.exports = function(Q, helpers, Pif, util, logger, errCodes, accountDataHa
         },
 
         createAppAccount = function(
-            appName,
-            appDesc,
+            name,
+            description,
             createdBy
         ){
             //validation
@@ -155,10 +155,10 @@ module.exports = function(Q, helpers, Pif, util, logger, errCodes, accountDataHa
             var
                 currentDate = new Date(),
                 appDo       = {
-                    appKey              : appKey,
-                    appSecrect          : appSecrect,
-                    appName             : appName,
-                    appDescription      : appDesc,
+                    key                 : appKey,
+                    secret              : appSecrect,
+                    name                : name,
+                    description         : description,
                     createdBy           : createdBy,
                     createdOn           : currentDate,
                     updatedBy           : createdBy,

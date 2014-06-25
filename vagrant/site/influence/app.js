@@ -45,8 +45,7 @@ var routes              = {},
 
     accountDataObject   = require('./dataHandler/authDataHandler')(dataObjects),
 
-    Pif                 = require('./lib/pif'),
-    helpers                 = require('./lib/helpers'),
+    helpers             = require('./lib/helpers'),
 
     mongoDbProvider     = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, console),
     influenceDbProvider = require('./dbProvider/influenceDbProvider')(Q, mongoDbProvider),
@@ -54,10 +53,10 @@ var routes              = {},
     accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
 
-    accountBusiness     = require('./business/accountBusiness')(Q, helpers, Pif, util, console, errCodes, accountDataHandler),
+    accountBusiness     = require('./business/accountBusiness')(Q, helpers, util, console, errCodes, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler),
 
-    apiController       =  require('./controllers/apiController')(Q, console, errCodes, authBusiness, accountBusiness),
+    apiController       =  require('./controllers/apiController')(Q, console, authBusiness, accountBusiness),
 
     adminAuthenticationMiddleware = require('./middleware/adminAuthenticationMiddleware')(console, authBusiness);
 

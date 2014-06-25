@@ -26,11 +26,7 @@ describe('AuthBusiness', function(){
                     createAdminLoginToken : function () {}
                 },
                 findAdminAccountByTenantAndUsernameStub = sinon.stub(accountDataHandler, "findAdminAccountByTenantAndUsername"),
-                createAdminLoginTokenStub = sinon.stub(accountDataHandler, "createAdminLoginToken"),
-                df1 = Q.defer(),
-                df2 = Q.defer();
-
-            //df1.resolve({});
+                createAdminLoginTokenStub = sinon.stub(accountDataHandler, "createAdminLoginToken");
 
             findAdminAccountByTenantAndUsernameStub.withArgs(1, 'fakeUsername').returns(true);
             createAdminLoginTokenStub.returns({
@@ -40,7 +36,20 @@ describe('AuthBusiness', function(){
             var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler);
             var promise = authBusiness.adminAccountLogin('fakeAppKey', 1, 'fakeUsername');
 
-            promise.should.eventually.be.rejected;
+            return promise.should.eventually.be.rejected;
+        }),
+
+        it('Admin login do not pass required parameters, should be rejected', function(){
+            var
+                accountDataHandler = {
+                    findAdminAccountByTenantAndUsername: function(){},
+                    createAdminLoginToken : function () {}
+                };
+
+            var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler);
+            var promise = authBusiness.adminAccountLogin();
+
+            return promise.should.eventually.be.rejected;
         }),
 
         it('Admin login pass case: ', function(done){

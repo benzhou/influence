@@ -1,6 +1,8 @@
-var InfluenceError = require('../error/influenceError');
+var InfluenceError  = require('../error/influenceError'),
+    errorCodes      = require('../error/errorCodes'),
+    constants       = require('../constants/constants');
 
-module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
+module.exports = function(Q, logger, authBusiness, accountBusiness){
 
     var test = function(req,res,next){
             res.json({result:true});
@@ -9,7 +11,7 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
         getAdminAccount = function(req,res,next){
             //TODO request validation
 
-            var adminId = req.params.adminId;
+            var adminId = req.params.adminId || req[constants.reqParams.PROP_AUTHTOKEN].adminId;
 
             Q.when(accountBusiness.getAdminAccountById(adminId)).then(
 
@@ -18,15 +20,17 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                     logger.log(admin);
 
                     res.json({
-                        code    : errCodes.SU_200.code,
-                        message : errCodes.SU_200.message,
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
                         data    : {
-                            id          : admin._id,
-                            username    : admin.username,
-                            email       : admin.email,
-                            firstname   : admin.firstname,
-                            lastname    : admin.lastname,
-                            displayName : admin.displayName
+                            admin : {
+                                id          : admin._id,
+                                username    : admin.username,
+                                email       : admin.email,
+                                firstname   : admin.firstname,
+                                lastname    : admin.lastname,
+                                displayName : admin.displayName
+                            }
                         }
                     });
                 },
@@ -49,11 +53,8 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
         postAdminAccount = function(req,res,next){
             //TODO request validation
 
-            var reqAdmin = req.body;
-
-            //authentication/Authorization (Use middleware?)
-
-
+            var reqAdmin = req.body,
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN].adminId;
 
             Q.when(
                 accountBusiness
@@ -65,7 +66,7 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                         reqAdmin.firstName,
                         reqAdmin.lastName,
                         reqAdmin.displayName,
-                        1 //TODO Needs to retrieve from authenticated admin token
+                        currentAdminId
             )).then(
 
                 function(admin){
@@ -73,15 +74,17 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                     logger.log(admin);
 
                     res.json({
-                        code    : errCodes.SU_200.code,
-                        message : errCodes.SU_200.message,
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
                         data    : {
-                            id          : admin._id,
-                            username    : admin.username,
-                            email       : admin.email,
-                            firstname   : admin.firstname,
-                            lastname    : admin.lastname,
-                            displayName : admin.displayName
+                            admin : {
+                                id          : admin._id,
+                                username    : admin.username,
+                                email       : admin.email,
+                                firstname   : admin.firstname,
+                                lastname    : admin.lastname,
+                                displayName : admin.displayName
+                            }
                         }
                     });
                 }
@@ -109,16 +112,21 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
                 function(admin){
                     if(!admin){
                         res.json({
-                            code : errCodes.S_500_000_001,
+                            code : errorCodes.S_500_000_001,
                             message: "System Error!"
                         });
                         return;
                     }
 
                     res.json({
-                        code : 200,
-                        message : "Login Successful",
-                        admin : admin
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            token : {
+                                token       : admin.token.token,
+                                expiredOn   : admin.token.expiredOn
+                            }
+
+                        }
                     });
                 }
             ).catch(function(err){
@@ -140,19 +148,30 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
         getAppAccount = function(req,res,next){
             //TODO request validation
 
-            var appKey = req.params.appKey;
+            var appKey = req.params.appKey || req[constants.reqParams.PROP_AUTHTOKEN].appKey;
 
             Q.when(accountBusiness.getAppAccountByAppKey(appKey)).then(
 
                 function(app){
                     logger.log("apiController.js getAppAccount: Success when call accountBusiness.getAppAccountByAppKey in getAppAccount");
                     logger.log(app);
-                    res.json(app);
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            app : {
+                                appKey      : app.appKey,
+                                name        : app.name,
+                                description : app.description
+                            }
+                        }
+                    });
                 },
 
                 function(err){
                     logger.log("apiController.js getAppAccount: Failed when call accountBusiness.getAppAccountByAppKey in getAppAccount");
                     logger.log(err);
+
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -170,24 +189,32 @@ module.exports = function(Q, logger, errCodes, authBusiness, accountBusiness){
         postAppAccount = function(req,res,next){
             //TODO request validation
 
-            var reqApp = req.body;
-
-            //authentication/Authorization (Use middleware?)
-
-
+            var reqApp = req.body,
+                currentAdminId = req[constants.reqParams.PROP_AUTHTOKEN];
 
             Q.when(
                 accountBusiness
                     .createAppAccount(
-                    reqApp.appName,
-                    reqApp.appDescripion,
-                    1 //TODO Needs to retrieve from authenticated admin token
+                    reqApp.name,
+                    reqApp.description,
+                    currentAdminId //TODO Needs to retrieve from authenticated admin token
                 )).then(
 
                 function(app){
                     logger.log("Success when call accountBusiness.createAppAccount in postAppAccount");
                     logger.log(app);
-                    res.json(app);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            app : {
+                                appKey      : app.appKey,
+                                name        : app.name,
+                                description : app.description
+                            }
+                        }
+                    });
                 },
 
                 function(err){

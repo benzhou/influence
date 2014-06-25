@@ -1,9 +1,10 @@
-var InfluenceError = require('../error/influenceError'),
-    errorCodes = require('../error/errorCodes');
+var InfluenceError  = require('../error/influenceError'),
+    errorCodes      = require('../error/errorCodes'),
+    constants       = require('../constants/constants');
 
 module.exports = function(logger, authBusiness){
 
-    var req_prop_const = "authToken",
+    var
         adminTokenAuth = function(req, res, next){
         var
             token = req.query.token;
@@ -27,7 +28,7 @@ module.exports = function(logger, authBusiness){
                     throw new InfluenceError(errorCodes.C_401_001_002.code);
                 }
 
-                req[req_prop_const] = tokenObj;
+                req[constants.reqParams.PROP_AUTHTOKEN] = tokenObj;
                 next();
             }
         ).catch(
