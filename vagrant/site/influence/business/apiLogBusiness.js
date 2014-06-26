@@ -1,5 +1,5 @@
 var
-    Q = require("q"),
+    Q               = require("q"),
     constants       = require('../constants/constants'),
     errorCodes      = require('../error/errorCodes'),
     InfluenceError  = require('../error/influenceError');
@@ -14,21 +14,24 @@ module.exports = function(logger, apiLogDataHandler){
                 params  : req.params,
                 query   : req.query,
                 body    : req.body
-            };
+            },
+            resStatusCode = res.statusCode;
 
         var apiCallLog = {
             token       : tokenStr,
+            path        : reqLogObj.path,
+            statusCode  : resStatusCode,
             req         : reqLogObj,
             createdOn   : new Date()
         };
 
-        Q.when(apiLogDataHandler.upsertApiCallLog(apiCallLog)).then(
+        Q.when(apiLogDataHandler.insertApiCallLog(apiCallLog)).then(
             function(log){
                 if(!log) {
                     throw new InfluenceError(errorCodes.S_500_001_001.code);
                 }
 
-                df.resolve(df);
+                df.resolve(log);
             }
         ).catch(
             function(err){
@@ -37,7 +40,7 @@ module.exports = function(logger, apiLogDataHandler){
                 logger.log(err);
                 logger.log("======================");
 
-                df.reject(df);
+                df.reject(err);
             }
         ).done();
 

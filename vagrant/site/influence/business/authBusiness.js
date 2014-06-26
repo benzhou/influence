@@ -1,7 +1,9 @@
-var InfluenceError = require('../error/influenceError');
+var  Q = require("q"),
+    InfluenceError = require('../error/influenceError'),
+    errorCodes      = require('../error/errorCodes');
 
 
-module.exports = function(Q, helpers, util, logger, config, errCodes, accountDataHandler, authDataHandler){
+module.exports = function(helpers, util, logger, config, accountDataHandler, authDataHandler){
 
     var
         adminAccountLogin = function(appKey, tenantId, username, password){
@@ -14,7 +16,7 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
             if(!appKey || !tenantId || !username || !password){
                 df.reject(
                     new InfluenceError(
-                        errCodes.C_400_002_001.code,
+                        errorCodes.C_400_002_001.code,
                         "Missing parameters"
                     ));
 
@@ -22,8 +24,6 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
             }
 
             logger.log("adminAccountLogin, tenantId: %s, username %s, password %s", tenantId, username, password);
-            tenantId = parseInt(tenantId);
-
 
             //TODO: Validates AppKey is authorized for this method
 
@@ -37,7 +37,7 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
                     if(!admin){
                         //if admin is false value, means we didn't find the admin by the tenantId and username
                         throw new InfluenceError(
-                            errCodes.C_400_002_002.code,
+                            errorCodes.C_400_002_002.code,
                             "Invalid Username/Password"
                         );
                     }
@@ -49,7 +49,7 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
 
                     if(admin.passwordHash !== calculatedHash){
                         throw new InfluenceError(
-                            errCodes.C_400_002_003.code,
+                            errorCodes.C_400_002_003.code,
                             "Invalid Username/Password"
                         );
                     }
@@ -60,7 +60,7 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
 
                             if(!token || !token.token){
                                 throw new InfluenceError(
-                                    errCodes.C_400_002_004.code,
+                                    errorCodes.C_400_002_004.code,
                                     "Unexpected error when retrieve admin auth token."
                                 );
                             }
@@ -71,7 +71,7 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
                         }
                     ).catch(function(err){
                             throw new InfluenceError(
-                                errCodes.C_400_002_005.code,
+                                errorCodes.C_400_002_005.code,
                                 "Unable to create admin auth token."
                             );
                         }).done();
@@ -96,7 +96,7 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
             if(!appKey || !adminId){
                 df.reject(
                     new InfluenceError(
-                        errCodes.C_400_003_001.code,
+                        errorCodes.C_400_003_001.code,
                         "Missing parameters"
                     ));
 
@@ -146,7 +146,7 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
             if(!token){
                 df.reject(
                     new InfluenceError(
-                        errCodes.C_400_004_001.code,
+                        errorCodes.C_400_004_001.code,
                         "Missing parameters"
                     ));
 
@@ -160,10 +160,15 @@ module.exports = function(Q, helpers, util, logger, config, errCodes, accountDat
                     logger.log("here is the token object");
                     logger.log(token);
 
-                    if(!token || !token.active || token.expiredOn < (new Date())){
+                    var currentDate = new Date();
+
+                    if(!token || !token.isActive || token.expiredOn < currentDate){
                         throw new InfluenceError(
-                            errCodes.C_400_004_002.code,
-                            "Invalid token"
+                            !token ?
+                                errorCodes.C_400_004_002.code :
+                                !token.isActive ?
+                                    errorCodes.C_400_004_003.code :
+                                    errorCodes.C_400_004_004.code
                         );
                     }
 

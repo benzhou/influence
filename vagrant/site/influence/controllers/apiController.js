@@ -1,8 +1,10 @@
-var InfluenceError  = require('../error/influenceError'),
+var
+    Q               = require('q'),
+    InfluenceError  = require('../error/influenceError'),
     errorCodes      = require('../error/errorCodes'),
     constants       = require('../constants/constants');
 
-module.exports = function(Q, logger, authBusiness, accountBusiness){
+module.exports = function(logger, authBusiness, accountBusiness){
 
     var test = function(req,res,next){
             logger.log("================");
@@ -10,6 +12,7 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
             logger.log("================");
 
             res.json(400, {result:true});
+            next();
         },
 
         getAdminAccount = function(req,res,next){
@@ -37,10 +40,6 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                             }
                         }
                     });
-
-                    next({
-                        success : true
-                    });
                 }
             ).catch(
                 function(err){
@@ -54,13 +53,12 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                             message : resObj.message
                         }
                     );
-
-                    next({
-                        success : false,
-                        err     : err
-                    });
                 }
-            ).done();
+            ).done(
+                function(){
+                    next();
+                }
+            );
         },
 
         postAdminAccount = function(req,res,next){
@@ -117,8 +115,12 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                             message : resObj.message
                         }
                     );
-
-                }).done(function(){logger.log("apiController.js postAdminAccount: done");});
+                }).done(
+                    function(){
+                        logger.log("apiController.js postAdminAccount: done");
+                        next();
+                    }
+            );
         },
 
         getAdminAccountLogin = function(req,res,next){
@@ -149,6 +151,7 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                     );
                 }).done(function(){
                     logger.log("apiController.js getAdminAccountLogin: done!");
+                    next();
                 });
         },
 
@@ -190,7 +193,9 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                 }
             ).done(function(){
                     logger.log("apiController.js getAppAccount: done!");
-                });
+                    next();
+                }
+            );
         },
 
         postAppAccount = function(req,res,next){
@@ -236,7 +241,12 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
                         }
                     );
                 }
-            ).done();
+            ).done(
+                function(){
+                    logger.log("apiController.js postAppAccount Done!");
+                    next();
+                }
+            );
         };
 
     return {
@@ -247,8 +257,6 @@ module.exports = function(Q, logger, authBusiness, accountBusiness){
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount
-
-
     };
 };
 

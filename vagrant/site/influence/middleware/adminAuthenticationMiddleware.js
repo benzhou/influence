@@ -1,4 +1,6 @@
-var InfluenceError  = require('../error/influenceError'),
+var
+    Q               = require('q'),
+    InfluenceError  = require('../error/influenceError'),
     errorCodes      = require('../error/errorCodes'),
     constants       = require('../constants/constants');
 

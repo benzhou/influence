@@ -1,12 +1,12 @@
 module.exports = function(dbProvider){
 
     var
-        upsertApiCallLog = function(apiCallLog){
-            return dbProvider.upsertApiCallLog(apiCallLog);
+        insertApiCallLog = function(apiCallLog){
+            return dbProvider.insertApiCallLog(apiCallLog);
         };
 
     return {
-        upsertApiCallLog            : upsertApiCallLog
+        insertApiCallLog            : insertApiCallLog
     };
 };
 

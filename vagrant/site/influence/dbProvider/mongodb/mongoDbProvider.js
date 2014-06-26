@@ -1,6 +1,8 @@
 "use strict";
 
-module.exports = function(config, MongoDb, Q, logger){
+var Q = require("q");
+
+module.exports = function(config, MongoDb, logger){
 
     var mongoClient = MongoDb.MongoClient,
         collections = {
@@ -68,7 +70,7 @@ module.exports = function(config, MongoDb, Q, logger){
         },
 
         //API Call Log CURD
-        upsertApiCallLog = function(apiCallLog){
+        insertApiCallLog = function(apiCallLog){
             return _insertNew(collections.APICallLog, apiCallLog);
         },
 
@@ -80,10 +82,10 @@ module.exports = function(config, MongoDb, Q, logger){
             return  _findOneBy(collections.AdminAccount, {email : email});
         },
         findAdminAccountByTenantAndEmail = function(tenantId, email){
-            return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, email : email});
+            return  _findOneBy(collections.AdminAccount, {tenantId: new MongoDb.ObjectID(tenantId), email : email});
         },
         findAdminAccountByTenantAndUsername = function(tenantId, username){
-            return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, username : username});
+            return  _findOneBy(collections.AdminAccount, {tenantId: new MongoDb.ObjectID(tenantId), username : username});
         },
         upsertAdminAccount = function(adminDo){
             return _upsertByMatch(collections.AdminAccount, {createdOn:1}, {tenantId:adminDo.tenantId,email:adminDo.email}, adminDo);
@@ -128,6 +130,10 @@ module.exports = function(config, MongoDb, Q, logger){
                     try{
                         var collection = db.collection(collectionName);
                         logger.log('mongoDbProvider.js _findOneBy - ' + collectionName +': querying');
+
+                        if(match.hasOwnProperty("_id")){
+                            match._id = new MongoDb.ObjectID(match._id);
+                        }
 
                         collection.findOne(
                             match,
@@ -224,7 +230,7 @@ module.exports = function(config, MongoDb, Q, logger){
         connect                             : connect,
         close                               : close,
 
-        upsertApiCallLog                    : upsertApiCallLog,
+        insertApiCallLog                    : insertApiCallLog,
 
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,

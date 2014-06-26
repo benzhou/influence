@@ -1,3 +1,6 @@
+var
+    InfluenceError = require('../error/influenceError');
+
 module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogMiddleware, apiController){
 
     router.get(
@@ -31,7 +34,20 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         '/account/admin/:adminId?',
         adminAuthenticationMiddleware.adminTokenAuth,
         function(req, res, next) {
-            apiController.getAdminAccount(req,res,next);
+            try{
+                apiController.getAdminAccount(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
         },
         apiLogMiddleware.apiLogger
     );
@@ -39,7 +55,20 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         '/account/admin',
         adminAuthenticationMiddleware.adminTokenAuth,
         function(req, res, next) {
-            apiController.postAdminAccount(req,res,next);
+            try{
+                apiController.postAdminAccount(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
         },
         apiLogMiddleware.apiLogger
     );
@@ -49,7 +78,20 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         '/account/app/:appKey',
         adminAuthenticationMiddleware.adminTokenAuth,
         function(req, res, next) {
-            apiController.getAppAccount(req,res,next);
+            try{
+                apiController.getAppAccount(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
         },
         apiLogMiddleware.apiLogger
     );
@@ -57,7 +99,20 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         '/account/app',
         adminAuthenticationMiddleware.adminTokenAuth,
         function(req, res, next) {
-            apiController.postAppAccount(req,res,next);
+            try{
+                apiController.postAppAccount(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
         },
         apiLogMiddleware.apiLogger
     );
@@ -67,21 +122,60 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     router.get(
         '/auth/appToken',
         function(req, res, next) {
-            apiController.getAppAccount(req,res,next);
+            try{
+                apiController.getAppAccount(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
         },
         apiLogMiddleware.apiLogger
     );
     router.get(
         '/auth/adminToken',
         function(req, res, next) {
-            apiController.getAppAccount(req,res,next);
+            try{
+                apiController.getAppAccount(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
         },
         apiLogMiddleware.apiLogger
     );
     router.get(
         '/auth/admin/login/:tenantId/:username/:password',
         function(req, res, next) {
-            apiController.getAdminAccountLogin(req,res,next);
+            try{
+                apiController.getAdminAccountLogin(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
         },
         apiLogMiddleware.apiLogger
     );

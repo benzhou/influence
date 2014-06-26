@@ -43,31 +43,32 @@ var routes              = {},
     dataObjects         = {},
     errCodes            = require('./error/errorCodes'),
 
+    influenceLogger     = require('./lib/logger')(),
     accountDataObject   = require('./dataHandler/authDataHandler')(dataObjects),
 
     helpers             = require('./lib/helpers'),
 
-    mongoDbProvider     = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, console),
-    influenceDbProvider = require('./dbProvider/influenceDbProvider')(Q, mongoDbProvider),
+    mongoDbProvider     = require('./dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, influenceLogger),
+    influenceDbProvider = require('./dbProvider/influenceDbProvider')(mongoDbProvider),
 
     accountDataHandler  = require('./dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
     tenantsDataHandler  = require('./dataHandler/tenantsDataHandler')(influenceDbProvider),
     apiLogDataHandler   = require('./dataHandler/apiLogDataHandler')(influenceDbProvider),
 
-    tenantsBusiness     = require('./business/tenantsBusiness')(helpers, logger, tenantsDataHandler),
-    accountBusiness     = require('./business/accountBusiness')(Q, helpers, util, console, errCodes, accountDataHandler),
-    authBusiness        = require('./business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler),
-    apiLogBusiness      = require('./business/apiLogBusiness')(logger, apiLogDataHandler),
+    tenantsBusiness     = require('./business/tenantsBusiness')(helpers, influenceLogger, tenantsDataHandler),
+    accountBusiness     = require('./business/accountBusiness')(helpers, util, influenceLogger, accountDataHandler),
+    authBusiness        = require('./business/authBusiness')(helpers, util, influenceLogger, appConfig.app, accountDataHandler, authDataHandler),
+    apiLogBusiness      = require('./business/apiLogBusiness')(influenceLogger, apiLogDataHandler),
 
-    apiController       =  require('./controllers/apiController')(Q, console, authBusiness, accountBusiness),
+    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness),
 
-    adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(console, authBusiness),
-    apiLogMiddleware                = require('./middleware/apiLogMiddleware')(console, apiLogBusiness);
+    adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(influenceLogger, authBusiness),
+    apiLogMiddleware                = require('./middleware/apiLogMiddleware')(influenceLogger, apiLogBusiness);
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());
-routes.api = require('./routes/api')(express.Router(), console, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
+routes.api = require('./routes/api')(express.Router(), influenceLogger, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
 routes.admin = require('./routes/admin')(express.Router());
 
 
@@ -103,7 +104,8 @@ if (app.get('env') === 'development') {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
-            error: err
+            error: err,
+            stack: err.stack
         });
     });
 }

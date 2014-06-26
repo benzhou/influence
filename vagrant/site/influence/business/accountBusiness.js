@@ -1,7 +1,10 @@
-var InfluenceError = require('../error/influenceError');
-var crypto = require('crypto');
+var
+    Q = require("q"),
+    InfluenceError = require('../error/influenceError'),
+    errorCodes      = require('../error/errorCodes'),
+    crypto = require('crypto');
 
-module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler){
+module.exports = function(helpers, util, logger, accountDataHandler){
 
     var
         getAdminAccountById = function(adminId){
@@ -11,7 +14,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             //required fields
             if(!adminId){
                 df.reject(
-                    new InfluenceError(errCodes.C_400_007_001.code)
+                    new InfluenceError(errorCodes.C_400_007_001.code)
                 );
 
                 return df.promise;
@@ -20,7 +23,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             Q.when(accountDataHandler.getAdminAccountById(adminId)).then(
                 function(admin){
                     if(!admin){
-                        throw new InfluenceError(errCodes.C_400_007_002.code);
+                        throw new InfluenceError(errorCodes.C_400_007_002.code);
                     }
 
                     df.resolve(admin);
@@ -53,7 +56,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             //validation
             //required fields
             if(!tenantId || !email || !passwordPlainText || !createdBy){
-                df.reject(new InfluenceError(errCodes.C_400_001_001.code));
+                df.reject(new InfluenceError(errorCodes.C_400_001_001.code));
 
                 return df.promise;
             }
@@ -80,8 +83,8 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                     if(admin){
                         logger.log('accountBusiness.createAdminAccount findAdminAccountByEmail found an admin with the same email : ', email);
                         throw new InfluenceError(
-                            errCodes.C_400_001_002.code,
-                            util.format(errCodes.C_400_001_002.desc, email)
+                            errorCodes.C_400_001_002.code,
+                            util.format(errorCodes.C_400_001_002.desc, email)
                         );
                     }
 
@@ -103,8 +106,8 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                     if(admin){
                         logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername found an admin with the same username : ', username);
                         throw new InfluenceError(
-                            errCodes.C_400_001_003.code,
-                            util.format(errCodes.C_400_001_003.desc, email)
+                            errorCodes.C_400_001_003.code,
+                            util.format(errorCodes.C_400_001_003.desc, email)
                         );
                     }
 
@@ -157,7 +160,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             //required fields
             if(!appKey){
                 df.reject(
-                    new InfluenceError(errCodes.C_400_008_001.code)
+                    new InfluenceError(errorCodes.C_400_008_001.code)
                 );
 
                 return df.promise;
@@ -167,7 +170,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                 function(app){
                     if(!app){
                         //if admin is false value, means we didn't find the admin by the tenantId and username
-                        throw new InfluenceError(errCodes.C_400_008_002.code);
+                        throw new InfluenceError(errorCodes.C_400_008_002.code);
                     }
 
                     df.resolve(app);
@@ -194,7 +197,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             //validation
             //required fields
             if(!name || !createdBy){
-                df.reject(new InfluenceError(errCodes.C_400_009_001.code));
+                df.reject(new InfluenceError(errorCodes.C_400_009_001.code));
                 return df.promise;
             }
 
@@ -220,7 +223,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
             Q.when(accountDataHandler.upsertAppAccountByAppkey(appDo)).then(
                 function(app){
                     if(!app){
-                        throw new InfluenceError(errCodes.C_400_009_002.code);
+                        throw new InfluenceError(errorCodes.C_400_009_002.code);
                     }
 
                     df.resolve(app);

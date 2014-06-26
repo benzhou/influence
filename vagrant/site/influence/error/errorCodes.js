@@ -38,6 +38,8 @@ module.exports = function(){
         //authBusiness.js validateAdminAuthToken
         C_400_004_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400004001, desc : "Invalid token." },
         C_400_004_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400004002, desc : "Invalid token." },
+        C_400_004_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400004003, desc : "Inactive token." },
+        C_400_004_004       : { type : CLIENT_ERROR, httpStatus: 400, code : 400004004, desc : "Expired token." },
 
         //tenantsBusiness.js getTenantById
         C_400_005_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400005001, desc : "Missing required parameters" },
