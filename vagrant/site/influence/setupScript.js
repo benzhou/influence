@@ -24,8 +24,13 @@ var appConfig           = require('./config'),
     tenantDo        = {
         name        : "First Ever"
     },
+    appDo           = {
+        name        : "firstApp",
+        description : "first ever app",
+        createdBy   : 1
+    },
     adminDo         = {
-        tenantId    : 1,
+        tenantId    : 1, //Place holder
         username    : "ben",
         email       : "ben@test.com",
         password    : "test",
@@ -53,29 +58,40 @@ Q.when(tenantsBusiness.createTenant(tenantDo.name)).then(
 
         logger.log("Creating admin record...");
 
-        var promise = accountBusiness
-                        .createAdminAccount(
-                            adminDo.tenantId,
-                            adminDo.username,
-                            adminDo.email,
-                            adminDo.password,
-                            adminDo.firstname,
-                            adminDo.lastname,
-                            adminDo.displayname,
-                            adminDo.createdBy
-                        );
+        return accountBusiness
+                .createAdminAccount(
+                    adminDo.tenantId,
+                    adminDo.username,
+                    adminDo.email,
+                    adminDo.password,
+                    adminDo.firstname,
+                    adminDo.lastname,
+                    adminDo.displayname,
+                    adminDo.createdBy
+                );
+    }
+).then(
+    function(admin){
+        if(!admin){
+            throw new Error("Not able to create admin.");
+        }
 
-        promise.then(
-            function(admin){
-                if(!admin){
-                    throw new Error("Not able to create admin.");
-                }
+        logger.log("Creating admin record... Done!");
 
-                logger.log("Creating admin record... Done!");
-            }
+        logger.log("Creating app record...");
+
+        return accountBusiness.createAppAccount(
+            appDo.name,
+            appDo.description,
+            appDo.createdBy
         );
-
-        return promise;
+    }
+).then(
+    function(app){
+        if(!app){
+            throw new Error("Not able to create app.");
+        }
+        logger.log("Creating app record... Done!");
     }
 ).catch(
     function(err){
@@ -90,7 +106,7 @@ Q.when(tenantsBusiness.createTenant(tenantDo.name)).then(
         logger.log("=======================================");
         logger.log("Initializating process completed, Exiting...");
         logger.log("=======================================");
-
+        process.exit(1);
     }
 );
 

@@ -49,6 +49,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
         ){
             var df = Q.defer();
 
+            logger.log("accountBusiness.js createAdminAccount, tenantId:%s, email:%s, passwordPlainText:%s, createdBy %s", tenantId, email, passwordPlainText, createdBy);
             //validation
             //required fields
             if(!tenantId || !email || !passwordPlainText || !createdBy){
@@ -216,7 +217,7 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                     updatedOn           : currentDate
                 };
 
-            Q.when(accountDataHandler.upsertAppAccountById(appDo)).then(
+            Q.when(accountDataHandler.upsertAppAccountByAppkey(appDo)).then(
                 function(app){
                     if(!app){
                         throw new InfluenceError(errCodes.C_400_009_002.code);
@@ -232,6 +233,8 @@ module.exports = function(Q, helpers, util, logger, errCodes, accountDataHandler
                     df.reject(err);
                 }
             ).done();
+
+            return df.promise;
         };
 
     return {

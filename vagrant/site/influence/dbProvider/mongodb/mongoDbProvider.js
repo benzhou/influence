@@ -69,7 +69,7 @@ module.exports = function(config, MongoDb, Q, logger){
 
         //API Call Log CURD
         upsertApiCallLog = function(apiCallLog){
-            return _upsertByMatch(collections.APICallLog, {createdOn:1}, {_id:apiCallLog._id}, apiCallLog);
+            return _insertNew(collections.APICallLog, apiCallLog);
         },
 
         //Admin Account CURD
@@ -110,7 +110,7 @@ module.exports = function(config, MongoDb, Q, logger){
             return  _findOneBy(collections.Tenants, {_id : tenantId});
         },
         upsertTenant = function(tenant){
-            return _upsertByMatch(collections.Tenants, {createdOn:1}, {_id:tenant._id}, tenant);
+            return _insertNew(collections.Tenants, tenant);
         },
 
         //Private Helper methods
@@ -143,6 +143,36 @@ module.exports = function(config, MongoDb, Q, logger){
                 //fail callback
                 function(){
                     logger.log('mongoDbProvider.js  _findOneBy - ' + collectionName +': failed to obtain the db');
+                    _rejectOrResolve(df, { message : "Failed to connect DB"});
+                }
+            );
+
+            return df.promise;
+        },
+
+        _insertNew = function(collectionName, document){
+            var df = Q.defer();
+
+            Q.when(connect()).then(
+                function(db){
+                    try{
+                        var collection = db.collection(collectionName);
+
+                        collection.insert(
+                            document,
+                            //{forceServerObjectId : true},
+                            function(err, result){
+                                _rejectOrResolve(df, err, result && result[0]);
+                            }
+                        );
+                    }catch(e){
+                        _rejectOrResolve(df, e);
+                    }
+
+                },
+                //fail callback
+                function(){
+                    logger.log('mongoDbProvider.js _upsertByMatch -' + collectionName + ': failed to obtain the db');
                     _rejectOrResolve(df, { message : "Failed to connect DB"});
                 }
             );
