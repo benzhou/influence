@@ -7,7 +7,8 @@ module.exports = function(config, MongoDb, Q, logger){
             AdminAccount        : "AdminAccount",
             AppAccount          : "AppAccount",
             AdminAuthToken      : "AdminAuthToken",
-            Tenants             : "Tenants"
+            Tenants             : "Tenants",
+            APICallLog          : "APICallLog"
         },
         db = null,
         connectionDefer = null,
@@ -64,6 +65,11 @@ module.exports = function(config, MongoDb, Q, logger){
 
             connectionDefer = null;
             return df.promise;
+        },
+
+        //API Call Log CURD
+        upsertApiCallLog = function(apiCallLog){
+            return _upsertByMatch(collections.APICallLog, {createdOn:1}, {_id:apiCallLog._id}, apiCallLog);
         },
 
         //Admin Account CURD
@@ -187,6 +193,8 @@ module.exports = function(config, MongoDb, Q, logger){
     return {
         connect                             : connect,
         close                               : close,
+
+        upsertApiCallLog                    : upsertApiCallLog,
 
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,

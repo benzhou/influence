@@ -9,6 +9,15 @@ module.exports = function(){
         SU_200              : { type : SUCCESS,      httpStatus: 200,  code : 200000000, desc : "Success" },
         S_500_000_001       : { type : SYSTEM_ERROR, httpStatus: 500,  code : 500000001, desc : "System error" },
 
+        //apiLogBusiness.js log
+        S_500_001_001       : { type : SYSTEM_ERROR, httpStatus: 500, code : 500001001, desc : "Not able to write apiCallLog." },
+
+        //adminAuthenticationMiddleware.js adminTokenAuthentication
+        C_401_001_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001001, desc : "Unauthorized" },
+        C_401_001_002       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001002, desc : "Unauthorized" },
+
+        C_404_001_001       : { type : CLIENT_ERROR, httpStatus: 404, code : 404001001, desc : "End Point not found" },
+
         //accountBusiness.js createAdminAccount
         C_400_001_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400001001, desc : "Missing required parameters" },
         C_400_001_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400001002, desc : "Admin with same email address: %s already exists!" },
@@ -47,11 +56,9 @@ module.exports = function(){
 
         //accountBusiness.js createAppAccount
         C_400_009_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009001, desc : "Missing required parameters" },
-        C_400_009_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009002, desc : "Not able to create an app." },
+        C_400_009_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009002, desc : "Not able to create an app." }
 
-        //adminAuthenticationMiddleware.js adminTokenAuthentication
-        C_401_001_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001001, desc : "Unauthorized" },
-        C_401_001_002       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001002, desc : "Unauthorized" }
+
     };
 }();
 
