@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="influenceAdminApp">
 <head>
     <meta charset="utf-8" />
     <title>Influence - Admin portal</title>
@@ -11,49 +11,39 @@
     <link rel="stylesheet" href="/admin/styles/style.css">
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
-    <script type="application/javascript" src="/admin/scripts/controller/adminController.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
+
+    <script type="application/javascript" src="/admin/scripts/controllers/adminController.js"></script>
+    <script type="application/javascript" src="/admin/scripts/app.js"></script>
+
 </head>
-<body ng-controller="influenceAdminController">
-<div class="site-wrapper">
-    <div class="site-wrapper-inner">
-        <div class="cover-container">
-            <div class="masthead clearfix">
-                <div class="inner">
-                    <h3 class="masthead-brand">Influence - Admin portal</h3>
-                    <ul class="nav masthead-nav">
-                        <li class="active"><a href="#">Login</a></li>
-                        <li><a href="#">Affiliates</a></li>
-                        <li><a href="#">Contact Support</a></li>
-                    </ul>
+<body ng-controller="influenceAdminCtrl">
+    <div class="site-wrapper">
+        <div class="site-wrapper-inner">
+            <div class="cover-container">
+                <div class="masthead clearfix">
+                    <div class="inner">
+                        <h3 class="masthead-brand">Influence - Admin portal</h3>
+                        <ul class="nav masthead-nav">
+                            <li class="active"><a href="#/">Home</a></li>
+                            <li><a href="#/login">Login</a></li>
+                            <li><a href="#/contactus">Contact Support</a></li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <div class="inner cover">
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-10">
-                            <label>
-                                What's in your mind?
-                            </label>
-                            <textarea class="form-control input-lg" rows="6"></textarea>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-sm-offset-2 col-sm-10">
-                            <a href="#" class="btn btn-lg btn-default btn-block">Send In</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
+                <div class="inner cover" ng-view>
 
-            <div class="mastfoot">
-                <div class="inner">
-                    <p>CopyRight by <a href="http://getbootstrap.com">Influence LLC.</a>, 2014</p>
+                </div>
+
+                <div class="mastfoot">
+                    <div class="inner">
+                        <p>CopyRight by <a href="http://getbootstrap.com">Influence LLC.</a>, 2014</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 </body>
 </html>
