@@ -13,10 +13,10 @@
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
     <script type="application/javascript">
-        angular.module('influenceAdminApp.config', []).provider('$influenceAdminAppConfig', function(){
+        angular.module('influenceAdminApp.config', []).provider('influenceAdminAppConfig', function(){
             var options = {};
 
-            this.$get = [, function(){
+            this.$get = function(){
                 function influenceAdminAppConfig(opt){
                     this.options = angular.extend({}, opt);
                 }
@@ -26,7 +26,7 @@
                         key : '{{config.app.token}}'
                     }
                 });
-            }];
+            };
         });
     </script>
     <script type="application/javascript" src="/admin/scripts/directives/navi.js"></script>

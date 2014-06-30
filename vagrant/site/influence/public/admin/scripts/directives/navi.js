@@ -8,11 +8,11 @@ angular.module('influenceAdminNavi', ['influenceAdminApp.config'])
 
     }])
     */
-    .directive('naviDirective', function(){
+    .directive('naviDirective', ['influenceAdminAppConfig', function(influenceAdminAppConfig){
         return {
             scope : {},
             restrict: 'E',
-            controller : function($scope, $location, $log, $influenceAdminAppConfig){
+            controller : function($scope, $location, $log, influenceAdminAppConfig){
                 var items = $scope.items = [
                     {
                         name : "Home",
@@ -43,4 +43,4 @@ angular.module('influenceAdminNavi', ['influenceAdminApp.config'])
             },
             templateUrl : '/admin/scripts/views/partials/navi.html'
         }
-    });
+    }]);

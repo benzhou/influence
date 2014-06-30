@@ -4,7 +4,7 @@
 
 angular.module('influenceAdminApp', [
     'ngRoute',
-    'influenceAdminApp.config',
+    //'influenceAdminApp.config',
     'influenceAdminNavi',
     'influenceAdminControllers'
 ]).config(['$routeProvider',

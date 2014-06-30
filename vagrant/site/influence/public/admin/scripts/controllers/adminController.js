@@ -2,7 +2,7 @@
     "use strict";
 
     var influenceAdminControllers =
-        angular.module('influenceAdminControllers', ['influenceAdminApp.config']);
+        angular.module('influenceAdminControllers', []);
 
     influenceAdminControllers.controller('influenceAdminCtrl', function ($scope, $location, $log) {
         $scope.login = function(){
