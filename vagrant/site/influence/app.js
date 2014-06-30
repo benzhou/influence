@@ -64,12 +64,15 @@ var routes              = {},
     apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness),
 
     adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(influenceLogger, authBusiness),
-    apiLogMiddleware                = require('./middleware/apiLogMiddleware')(influenceLogger, apiLogBusiness);
+    apiLogMiddleware                = require('./middleware/apiLogMiddleware')(influenceLogger, apiLogBusiness),
+
+    //Admins
+    adminController       =  require('./controllers/admin/adminController')(influenceLogger, appConfig.admin);
 
 //Setup routes
 routes.site = require('./routes/index')(express.Router());
 routes.api = require('./routes/api')(express.Router(), influenceLogger, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
-routes.admin = require('./routes/admin')(express.Router());
+routes.admin = require('./routes/admin')(express.Router(), influenceLogger, adminController);
 
 
 app.use('/', routes.site);

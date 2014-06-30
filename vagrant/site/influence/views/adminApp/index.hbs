@@ -12,9 +12,27 @@
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
+    <script type="application/javascript">
+        angular.module('influenceAdminApp.config', []).provider('$influenceAdminAppConfig', function(){
+            var options = {};
 
+            this.$get = [, function(){
+                function influenceAdminAppConfig(opt){
+                    this.options = angular.extend({}, opt);
+                }
+
+                return new influenceAdminAppConfig({
+                    api : {
+                        key : '{{config.app.token}}'
+                    }
+                });
+            }];
+        });
+    </script>
+    <script type="application/javascript" src="/admin/scripts/directives/navi.js"></script>
     <script type="application/javascript" src="/admin/scripts/controllers/adminController.js"></script>
     <script type="application/javascript" src="/admin/scripts/app.js"></script>
+
 
 </head>
 <body ng-controller="influenceAdminCtrl">
@@ -24,21 +42,15 @@
                 <div class="masthead clearfix">
                     <div class="inner">
                         <h3 class="masthead-brand">Influence - Admin portal</h3>
-                        <ul class="nav masthead-nav">
-                            <li class="active"><a href="#/">Home</a></li>
-                            <li><a href="#/login">Login</a></li>
-                            <li><a href="#/contactus">Contact Support</a></li>
-                        </ul>
+                        <navi-directive></navi-directive>
                     </div>
                 </div>
 
-                <div class="inner cover" ng-view>
-
-                </div>
+                <div class="inner cover" ng-view></div>
 
                 <div class="mastfoot">
                     <div class="inner">
-                        <p>CopyRight by <a href="http://getbootstrap.com">Influence LLC.</a>, 2014</p>
+                        <p>CopyRight by <a href="http://influence-llc.com">Influence LLC.</a>, 2014</p>
                     </div>
                 </div>
             </div>

@@ -2,12 +2,12 @@
 
 /* App Module */
 
-var influenceAdminApp = angular.module('influenceAdminApp', [
+angular.module('influenceAdminApp', [
     'ngRoute',
+    'influenceAdminApp.config',
+    'influenceAdminNavi',
     'influenceAdminControllers'
-]);
-
-influenceAdminApp.config(['$routeProvider',
+]).config(['$routeProvider',
     function($routeProvider) {
         $routeProvider.
             when('/', {
