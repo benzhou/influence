@@ -1,9 +1,14 @@
-angular.module('influenceAdminApp.navigation', [])
+(function () {
+    "use strict";
+
+    angular.module('influenceAdminApp.navigation', [
+        'influenceAdminApp.constants'
+    ])
     .directive('naviDirective', function(){
         return {
             scope : {},
             restrict: 'E',
-            controller : function($scope, $location, $log){
+            controller : function($scope, $location, $log, influenceAdminAppConstants){
                 var items = $scope.items = [
                     {
                         name : "Home",
@@ -22,6 +27,16 @@ angular.module('influenceAdminApp.navigation', [])
                     }
                 ];
 
+                $log.log('naviDirective Controller called');
+                $log.log(influenceAdminAppConstants);
+
+                $scope.$on(influenceAdminAppConstants.EVENTS.LOCATION_CHANGED, function(e, loc){
+                    $log.log('influenceAdminAppConstants event fired, listened in naviDirective controller');
+                    //$log.log(arguments);
+                    angular.forEach(items, function(itm) {
+                        itm.active = (itm.href === loc);
+                    });
+                });
 
                 $scope.naviClick = function(item){
                     angular.forEach(items, function(itm) {
@@ -35,3 +50,4 @@ angular.module('influenceAdminApp.navigation', [])
             templateUrl : '/admin/scripts/views/partials/navi.html'
         }
     });
+}());
