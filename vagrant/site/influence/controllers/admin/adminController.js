@@ -6,7 +6,8 @@ module.exports = function(logger, config){
                 showTitle: true,
                 config: {
                     app : {
-                        key : config.app.key
+                        key : config.app.key,
+                        tenantId : config.app.tenantId
                     }
                 },
                 helpers: {

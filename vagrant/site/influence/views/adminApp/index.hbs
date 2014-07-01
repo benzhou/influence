@@ -11,36 +11,35 @@
     <link rel="stylesheet" href="/admin/styles/style.css">
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-resource.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
 
+    <script type="application/javascript" src="/admin/scripts/common/configGen.js"></script>
     <script type="application/javascript" src="/admin/scripts/common/constants.js"></script>
 
-    <script type="application/javascript">
-        angular.module('influenceAdminApp.config', []).provider('influenceAdminAppConfig', function(){
-            var options = {};
+    <script type="application/javascript" src="/admin/scripts/services/influenceAdminAppApiServices.js"></script>
 
-            this.$get = function(){
-                function influenceAdminAppConfig(opt){
-                    this.options = angular.extend({}, opt);
-                }
-
-                return new influenceAdminAppConfig({
-                    api : {
-                        url : "http://127.0.0.1:8888/api",
-                        methods : {
-                            login : "auth/adminLogin"
-                        },
-                        key : '{{config.app.key}}',
-                        tenantId    : '{{config.app.tenantId}}'
-                    }
-                });
-            };
-        });
-    </script>
     <script type="application/javascript" src="/admin/scripts/directives/navi.js"></script>
     <script type="application/javascript" src="/admin/scripts/controllers/adminController.js"></script>
     <script type="application/javascript" src="/admin/scripts/app.js"></script>
 
+    <script type="application/javascript">
+        configGen(
+                'influenceAdminApp.config',
+                'influenceAdminAppConfig',
+                {
+                    DEBUG: false,
+                    API : {
+                        URL : "http://127.0.0.1:8888/api",
+                        METHODS : {
+                            ADMIN_LOGIN : "/auth/admin/login"
+                        },
+                        KEY : '{{config.app.key}}',
+                        TENANT_ID    : '{{config.app.tenantId}}'
+                    }
+                }
+        );
+    </script>
 
 </head>
 <body>
