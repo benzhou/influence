@@ -23,7 +23,12 @@
 
                 return new influenceAdminAppConfig({
                     api : {
-                        key : '{{config.app.token}}'
+                        url : "http://127.0.0.1:8888/api",
+                        methods : {
+                            login : "auth/adminLogin"
+                        },
+                        key : '{{config.app.key}}',
+                        tenantId    : '{{config.app.tenantId}}'
                     }
                 });
             };
@@ -35,7 +40,7 @@
 
 
 </head>
-<body ng-controller="influenceAdminCtrl">
+<body>
     <div class="site-wrapper">
         <div class="site-wrapper-inner">
             <div class="cover-container">

@@ -2,24 +2,21 @@
     "use strict";
 
     var influenceAdminControllers =
-        angular.module('influenceAdminControllers', []);
+        angular.module('influenceAdminApp.controllers', []);
 
     influenceAdminControllers.controller('influenceAdminCtrl', function ($scope, $location, $log) {
+        $log.log("influenceAdminCtrl called!");
+
         $scope.login = function(){
             $location.path('/login');
         };
 
-        //$scope.login();
+
     });
 
-    influenceAdminControllers.controller('influenceAdminNaviCtrl', function ($scope, $location) {
-        $scope.activeNavi = function(currentNavi){
-            if($location.path() === currentNavi){
-                return "class='active'";
-            }else{
-                return "";
-            }
-        }
+    influenceAdminControllers.controller('influenceAdminLoginCtrl', function ($scope, $location, $log) {
+        //$scope.
+        $log.log("influenceAdminLoginCtrl called!");
     });
 }());
 

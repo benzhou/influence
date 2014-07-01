@@ -5,8 +5,8 @@
 angular.module('influenceAdminApp', [
     'ngRoute',
     //'influenceAdminApp.config',
-    'influenceAdminNavi',
-    'influenceAdminControllers'
+    'influenceAdminApp.navigation',
+    'influenceAdminApp.controllers'
 ]).config(['$routeProvider',
     function($routeProvider) {
         $routeProvider.
@@ -16,7 +16,7 @@ angular.module('influenceAdminApp', [
             }).
             when('/login', {
                 templateUrl: '/admin/scripts/views/partials/login.html',
-                controller: 'influenceAdminCtrl'
+                controller: 'influenceAdminLoginCtrl'
             }).
             when('/contactus', {
                 templateUrl: '/admin/scripts/views/partials/contactus.html',

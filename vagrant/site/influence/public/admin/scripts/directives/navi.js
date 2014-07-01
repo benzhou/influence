@@ -1,23 +1,14 @@
-angular.module('influenceAdminNavi', ['influenceAdminApp.config'])
-    /*
-    .controller('naviCtrl', ['$scope', function($scope, $location){
-        $scope.activeNavi = function(currentRoute){
-            console.log("Hello activeNavi");
-            console.log($location.path());
-        };
-
-    }])
-    */
-    .directive('naviDirective', ['influenceAdminAppConfig', function(influenceAdminAppConfig){
+angular.module('influenceAdminApp.navigation', [])
+    .directive('naviDirective', function(){
         return {
             scope : {},
             restrict: 'E',
-            controller : function($scope, $location, $log, influenceAdminAppConfig){
+            controller : function($scope, $location, $log){
                 var items = $scope.items = [
                     {
                         name : "Home",
                         href : "/",
-                        active : true
+                        active : false
                     },
                     {
                         name : "Login",
@@ -31,7 +22,7 @@ angular.module('influenceAdminNavi', ['influenceAdminApp.config'])
                     }
                 ];
 
-                $log.log('naviDirective controller called: ');
+
                 $scope.naviClick = function(item){
                     angular.forEach(items, function(itm) {
                         itm.active = false;
@@ -43,4 +34,4 @@ angular.module('influenceAdminNavi', ['influenceAdminApp.config'])
             },
             templateUrl : '/admin/scripts/views/partials/navi.html'
         }
-    }]);
+    });

@@ -13,7 +13,9 @@ module.exports = function(){
         admin : {
             app : {
                 key      : "YTFmNGE3ZWMtMjI4Zi00YzA3LTkyYTgtMWUwNjc5Y2YyNDNlOjk0ZmU2NGQ3LTAxMjUtNDg3My1iMTk4LWQ1NzMxZmY3NDdhNw,,",
-                secrect  : "MmY4MjY5YTEtNTg3NS00MTZlLWIzZjItOTljMjlmZTQ4NDdhOmNjODdhZDhjLWMwM2ItNGU1Ni04ZDYwLWRkMDkxZWRjMGQ4Ng,,"
+                secrect  : "MmY4MjY5YTEtNTg3NS00MTZlLWIzZjItOTljMjlmZTQ4NDdhOmNjODdhZDhjLWMwM2ItNGU1Ni04ZDYwLWRkMDkxZWRjMGQ4Ng,,",
+
+                tenantId : ""
             }
         }
     };
