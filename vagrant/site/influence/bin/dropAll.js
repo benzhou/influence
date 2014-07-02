@@ -8,6 +8,7 @@ print('Start to drop all:');
 db.AdminAccount.drop();
 db.Tenants.drop();
 db.AppAccount.drop();
+db.AdminAuthToken.drop();
 
 print('Current collections are:');
 collections = db.getCollectionNames();

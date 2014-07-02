@@ -18,6 +18,10 @@
                     templateUrl: '/admin/scripts/views/partials/login.html',
                     controller: 'influenceAdminLoginCtrl'
                 }).
+                when('/welcome', {
+                    templateUrl: '/admin/scripts/views/partials/welcome.html',
+                    controller: 'influenceAdminWelcomeCtrl'
+                }).
                 when('/contactus', {
                     templateUrl: '/admin/scripts/views/partials/contactus.html',
                     controller: 'influenceAdminCtrl'

@@ -10,16 +10,16 @@ var appConfig           = require('./../config'),
 
     helpers             = require('./../lib/helpers'),
 
-    mongoDbProvider     = require('./../dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, Q, console),
-    influenceDbProvider = require('./../dbProvider/influenceDbProvider')(Q, mongoDbProvider),
+    mongoDbProvider     = require('./../dbProvider/mongodb/mongoDbProvider')(appConfig.db, mongoDb, console),
+    influenceDbProvider = require('./../dbProvider/influenceDbProvider')(mongoDbProvider),
 
     accountDataHandler  = require('./../dataHandler/accountDataHandler')(influenceDbProvider),
     authDataHandler     = require('./../dataHandler/authDataHandler')(influenceDbProvider),
     tenantsDataHandler  = require('./../dataHandler/tenantsDataHandler')(influenceDbProvider),
 
     tenantsBusiness     = require('./../business/tenantsBusiness')(helpers, logger, tenantsDataHandler);
-    accountBusiness     = require('./../business/accountBusiness')(Q, helpers, util, console, errCodes, accountDataHandler),
-    authBusiness        = require('./../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler),
+    accountBusiness     = require('./../business/accountBusiness')(helpers, util, console,  accountDataHandler),
+    authBusiness        = require('./../business/authBusiness')(helpers, util, console, appConfig.app, accountDataHandler, authDataHandler),
 
     tenantDo        = {
         name        : "First Ever"

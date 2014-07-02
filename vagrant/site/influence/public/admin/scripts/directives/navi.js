@@ -9,23 +9,47 @@
             scope : {},
             restrict: 'E',
             controller : function($scope, $location, $log, influenceAdminAppConstants){
-                var items = $scope.items = [
-                    {
-                        name : "Home",
-                        href : "/",
-                        active : false
-                    },
-                    {
-                        name : "Login",
-                        href : "/login",
-                        active : false
-                    },
-                    {
-                        name : "Contact Us",
-                        href : "/contactus",
-                        active : false
-                    }
-                ];
+                var loggedOutItems = [
+                        {
+                            name : "Home",
+                            href : "/",
+                            active : false
+                        },
+                        {
+                            name : "Login",
+                            href : "/login",
+                            active : false
+                        },
+                        {
+                            name : "Contact Us",
+                            href : "/contactus",
+                            active : false
+                        }
+                    ],
+                    logedInItems = [
+                        {
+                            name : "Home",
+                            href : "/welcome",
+                            active : false
+                        },
+                        {
+                            name : "Logout",
+                            href : "/logout",
+                            active : false
+                        },
+                        {
+                            name : "Contact Us",
+                            href : "/contactus",
+                            active : false
+                        }
+                    ]
+                ;
+
+//                var items = $scope.items = loggedOutItems;
+//
+//                angular.forEach(items, function(itm) {
+//                    itm.active = (itm.href === $location.path());
+//                });
 
                 $log.log('naviDirective Controller called');
                 $log.log(influenceAdminAppConstants);
@@ -38,13 +62,24 @@
                     });
                 });
 
-                $scope.naviClick = function(item){
+                $scope.$on(influenceAdminAppConstants.EVENTS.ADMIN_AUTHENTICATED, function(){
+                    $log.log('naviDirective influenceAdminAppConstants.EVENTS.ADMIN_AUTHENTICATED handled!');
+                    $scope.items = items = logedInItems;
+
                     angular.forEach(items, function(itm) {
-                        itm.active = false;
+                        itm.active = (itm.href === $location.path());
                     });
-                    item.active = true;
-                    $location.path(item.href);
-                }
+                });
+
+                $scope.$on(influenceAdminAppConstants.EVENTS.ADMIN_LOGGED_OUT, function(){
+                    $log.log('naviDirective influenceAdminAppConstants.EVENTS.ADMIN_LOGGED_OUT handled!');
+                    $scope.items = items = loggedOutItems;
+
+                    angular.forEach(items, function(itm) {
+                        itm.active = (itm.href === $location.path());
+                    });
+                });
+
 
             },
             templateUrl : '/admin/scripts/views/partials/navi.html'
