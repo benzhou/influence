@@ -2,7 +2,10 @@
     angular.module('influenceAdminApp.apiServices', [
         'ngResource',
         'influenceAdminApp.config'
-    ]).factory('authService', ['$resource', 'influenceAdminAppConfig',
+    ]).factory('authService', [
+            '$resource',
+            'influenceAdminAppConfig'
+        ,
         function($resource, influenceAdminAppConfig){
             var apiConfig = influenceAdminAppConfig.API;
             return $resource(
@@ -11,6 +14,17 @@
                 {
                     adminLogin : { method: "GET", params:{appKey:influenceAdminAppConfig.API.KEY}}
                 }
+            );
+        }
+    ]).factory('adminService', [
+        '$resource',
+        'influenceAdminAppConfig'
+        ,
+        function($resource, influenceAdminAppConfig){
+            var apiConfig = influenceAdminAppConfig.API;
+            return $resource(
+                [apiConfig.URL, "/auth/admin"].join(''), //endpoint
+                {}
             );
         }
     ]);

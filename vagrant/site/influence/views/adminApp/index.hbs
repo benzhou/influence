@@ -10,10 +10,25 @@
 
     <link rel="stylesheet" href="/admin/styles/style.css">
 
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="/admin/scripts/assets/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="/admin/scripts/assets/ie-emulation-modes-warning.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/admin/scripts/assets/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-resource.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-cookies.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-resource.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-cookies.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
+
+    <script src="/admin/scripts/assets/angular-bootstrap-ui/0.11.0/angular-bootstrap-ui.min.js"></script>
 
     <script type="application/javascript" src="/admin/scripts/common/configGen.js"></script>
     <script type="application/javascript" src="/admin/scripts/common/constants.js"></script>
@@ -22,6 +37,7 @@
 
     <script type="application/javascript" src="/admin/scripts/services/influenceAdminAppApiServices.js"></script>
 
+    <script type="application/javascript" src="/admin/scripts/directives/menu.js"></script>
     <script type="application/javascript" src="/admin/scripts/directives/navi.js"></script>
     <script type="application/javascript" src="/admin/scripts/controllers/adminController.js"></script>
     <script type="application/javascript" src="/admin/scripts/app.js"></script>
@@ -45,27 +61,11 @@
     </script>
 
 </head>
-<body>
-    <div class="site-wrapper">
-        <div class="site-wrapper-inner">
-            <div class="cover-container">
-                <div class="masthead clearfix">
-                    <div class="inner">
-                        <h3 class="masthead-brand">Influence - Admin portal</h3>
-                        <navi-directive></navi-directive>
-                    </div>
-                </div>
+<body ng-controller="influenceAdminAppCtrl as app">
+    <loadingModalDirective show="app.showLoadingModal"></loadingModalDirective>
+    <navi-directive></navi-directive>
 
-                <div class="inner cover" ng-view></div>
-
-                <div class="mastfoot">
-                    <div class="inner">
-                        <p>CopyRight by <a href="http://influence-llc.com">Influence LLC.</a>, 2014</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="container-fluid" ng-view></div>
 
 </body>
 </html>

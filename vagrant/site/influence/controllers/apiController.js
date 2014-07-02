@@ -34,8 +34,8 @@ module.exports = function(logger, authBusiness, accountBusiness){
                                 id          : admin._id,
                                 username    : admin.username,
                                 email       : admin.email,
-                                firstname   : admin.firstname,
-                                lastname    : admin.lastname,
+                                firstName   : admin.firstName,
+                                lastName    : admin.lastName,
                                 displayName : admin.displayName
                             }
                         }
@@ -132,7 +132,15 @@ module.exports = function(logger, authBusiness, accountBusiness){
                         data : {
                             token : {
                                 token       : admin.token.token,
-                                expiredOn   : admin.token.expiredOn
+                                expiredOn   : admin.token.expiredOn,
+                                admin       : {
+                                    displayName : admin.displayName,
+                                    firstName   : admin.firstName,
+                                    lastName    : admin.lastName,
+                                    tenantId    : admin.tenantId,
+                                    username    : admin.username,
+                                    email       : admin.email
+                                }
                             }
 
                         }

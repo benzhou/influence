@@ -2,82 +2,71 @@
     "use strict";
 
     angular.module('influenceAdminApp.navigation', [
-        'influenceAdminApp.constants'
+        'influenceAdminApp.constants',
+        'influenceAdminApp.session'
     ])
     .directive('naviDirective', function(){
+
         return {
             scope : {},
             restrict: 'E',
-            controller : function($scope, $location, $log, influenceAdminAppConstants){
-                var loggedOutItems = [
-                        {
-                            name : "Home",
-                            href : "/",
-                            active : false
-                        },
-                        {
-                            name : "Login",
-                            href : "/login",
-                            active : false
-                        },
-                        {
-                            name : "Contact Us",
-                            href : "/contactus",
-                            active : false
-                        }
-                    ],
-                    logedInItems = [
-                        {
-                            name : "Home",
-                            href : "/welcome",
-                            active : false
-                        },
-                        {
-                            name : "Logout",
-                            href : "/logout",
-                            active : false
-                        },
-                        {
-                            name : "Contact Us",
-                            href : "/contactus",
-                            active : false
-                        }
-                    ]
-                ;
-
-//                var items = $scope.items = loggedOutItems;
-//
-//                angular.forEach(items, function(itm) {
-//                    itm.active = (itm.href === $location.path());
-//                });
-
+            controller : function($scope, $rootScope, $location, $log, influenceAdminAppConstants, influenceAdminAppSession){
                 $log.log('naviDirective Controller called');
-                $log.log(influenceAdminAppConstants);
 
-                $scope.$on(influenceAdminAppConstants.EVENTS.LOCATION_CHANGED, function(e, loc){
-                    $log.log('influenceAdminAppConstants event fired, listened in naviDirective controller');
-                    //$log.log(arguments);
-                    angular.forEach(items, function(itm) {
-                        itm.active = (itm.href === loc);
+                var
+                    items,
+                    LoggedOutItems = [
+                        { name : "Home", href : "/", active : false},
+                        { name : "Login",href : "/login",active : false},
+                        { name : "Contact Us", href : "/contactus", active : false}
+                    ],
+                    loggedInItems = [
+                        { name : "Home", href : "/welcome", active : false},
+                        { name : "Logout", href : "/logout", active : false},
+                        { name : "Contact Us", href : "/contactus", active : false}
+                    ],
+                    refreshNavi = function(loc){
+                        var isAuthenticated = influenceAdminAppSession.isAuthenticated();
+
+                        if(isAuthenticated){
+                            var admin = influenceAdminAppSession.token.admin;
+                            $scope.admin = {
+                                name : admin.displayName || admin.firstName || admin.username
+                            };
+                        }else{
+                            $scope.admin = null;
+                        }
+
+                        $scope.items = items = isAuthenticated ? loggedInItems : LoggedOutItems;
+
+
+                        angular.forEach(items, function(itm) {
+                            itm.active = (itm.href === (loc ||$location.path()));
+                        });
+                    };
+
+                refreshNavi();
+
+                var
+                    locChangedUnSub = $rootScope.$on(influenceAdminAppConstants.EVENTS.LOCATION_CHANGED, function(e, loc){
+                        $log.log('influenceAdminAppConstants event fired, listened in naviDirective controller');
+
+                        refreshNavi();
+                    }),
+                    authenticatedUnSub = $rootScope.$on(influenceAdminAppConstants.EVENTS.ADMIN_AUTHENTICATED, function(){
+                        $log.log('naviDirective influenceAdminAppConstants.EVENTS.ADMIN_AUTHENTICATED handled!');
+
+                        refreshNavi();
+                    }),
+                    loggedOutUnSub = $rootScope.$on(influenceAdminAppConstants.EVENTS.ADMIN_LOGGED_OUT, function(){
+                        $log.log('naviDirective influenceAdminAppConstants.EVENTS.ADMIN_LOGGED_OUT handled!');
+                        refreshNavi();
                     });
-                });
 
-                $scope.$on(influenceAdminAppConstants.EVENTS.ADMIN_AUTHENTICATED, function(){
-                    $log.log('naviDirective influenceAdminAppConstants.EVENTS.ADMIN_AUTHENTICATED handled!');
-                    $scope.items = items = logedInItems;
-
-                    angular.forEach(items, function(itm) {
-                        itm.active = (itm.href === $location.path());
-                    });
-                });
-
-                $scope.$on(influenceAdminAppConstants.EVENTS.ADMIN_LOGGED_OUT, function(){
-                    $log.log('naviDirective influenceAdminAppConstants.EVENTS.ADMIN_LOGGED_OUT handled!');
-                    $scope.items = items = loggedOutItems;
-
-                    angular.forEach(items, function(itm) {
-                        itm.active = (itm.href === $location.path());
-                    });
+                $scope.$on(influenceAdminAppConstants.EVENTS.DESTROY, function(){
+                    locChangedUnSub();
+                    authenticatedUnSub();
+                    loggedOutUnSub();
                 });
 
 
