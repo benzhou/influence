@@ -8,8 +8,11 @@
         'influenceAdminApp.session',
         'influenceAdminApp.apiServices'
     ])
-        .controller('influenceAdminAppCtrl', function($scope, $rootScope, $log){
-            $log.log("influenceAdminAppCtrl called!");
+        .controller('influenceAdminAppCtrl', function($scope, $rootScope, $log, influenceAdminAppConstants){
+            $log.log("!!!!!!!!influenceAdminAppCtrl called!");
+
+
+
 
         })
         .controller('influenceAdminIndexCtrl', function ($scope, $rootScope, $location, $log, influenceAdminAppConstants, influenceAdminAppSession) {
@@ -42,6 +45,8 @@
             }
 
             $scope.adminLogin = function(username, password, rememberMe){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+
                 authService.adminLogin({
                     tenantId:influenceAdminAppConfig.API.TENANT_ID,
                     username:$scope.credential.username,
@@ -56,9 +61,14 @@
 
                         $rootScope.$emit(influenceAdminAppConstants.EVENTS.ADMIN_AUTHENTICATED);
                     }
-                ).catch(function(err){
+                ).catch(
+                    function(err){
                         $log.log('influenceAdminLoginCtrl adminLogin rejected!');
                         $log.log(err);
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
                     }
                 );
             };
@@ -73,11 +83,30 @@
                 return;
             }
         })
-        .controller('influenceAdminLogoutCtrl', function($scope, $rootScope, $location, $log, influenceAdminAppConstants, influenceAdminAppSession){
+        .controller('influenceAdminLogoutCtrl', function(
+            $scope, $rootScope, $location, $log,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            authService){
             $log.log("influenceAdminLogoutCtrl called!");
+            $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
 
-            influenceAdminAppSession.destroy();
-            $location.path('/');
+            authService.adminLogout({token: influenceAdminAppSession.token.token}).$promise.then(
+                function(result){
+                    $log.log(result);
+                    influenceAdminAppSession.destroy();
+                    $location.path('/');
+                }
+            ).catch(
+                function(err){
+                    $log.log('influenceAdminLogoutCtrl adminLogin rejected!');
+                    $log.log(err);
+                }
+            ).finally(
+                function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                }
+            );
+
         })
         .controller('influenceAdminContactusCtrl', function($scope, $log){
             $log.log("influenceAdminContactusCtrl called!");

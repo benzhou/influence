@@ -141,9 +141,10 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     );
     router.get(
         '/auth/adminToken',
+        adminAuthenticationMiddleware.adminTokenAuth,
         function(req, res, next) {
             try{
-                apiController.getAppAccount(req,res,next);
+                apiController.getAdminAuthToken(req,res,next);
             }catch(e){
                 logger.log(e);
                 var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
@@ -159,6 +160,49 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         },
         apiLogMiddleware.apiLogger
     );
+    router.get(
+        '/auth/adminToken/invalidate',
+        adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next) {
+            try{
+                apiController.deleteAdminAuthToken(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
+        },
+        apiLogMiddleware.apiLogger
+    );
+    router.delete(
+        '/auth/adminToken',
+        adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next) {
+            try{
+                apiController.deleteAdminAuthToken(req,res,next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
+        },
+        apiLogMiddleware.apiLogger
+    );
+
     router.get(
         '/auth/admin/login/:tenantId/:username/:password',
         function(req, res, next) {

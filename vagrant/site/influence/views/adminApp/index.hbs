@@ -37,6 +37,7 @@
 
     <script type="application/javascript" src="/admin/scripts/services/influenceAdminAppApiServices.js"></script>
 
+    <script type="application/javascript" src="/admin/scripts/directives/loadingModal.js"></script>
     <script type="application/javascript" src="/admin/scripts/directives/menu.js"></script>
     <script type="application/javascript" src="/admin/scripts/directives/navi.js"></script>
     <script type="application/javascript" src="/admin/scripts/controllers/adminController.js"></script>
@@ -62,7 +63,7 @@
 
 </head>
 <body ng-controller="influenceAdminAppCtrl as app">
-    <loadingModalDirective show="app.showLoadingModal"></loadingModalDirective>
+    <loading-modal-directive></loading-modal-directive>
     <navi-directive></navi-directive>
 
     <div class="container-fluid" ng-view></div>

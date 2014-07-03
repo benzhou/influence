@@ -163,6 +163,77 @@ module.exports = function(logger, authBusiness, accountBusiness){
                 });
         },
 
+        deleteAdminAuthToken = function(req,res,next){
+
+            Q.when(authBusiness.invalidateAdminAuthToken(req[constants.reqParams.PROP_AUTHTOKEN].token)).then(
+                function(token){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            token : {
+                                token       : token.token
+                            }
+
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js deleteAdminAuthToken: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js deleteAdminAuthToken: done!");
+                    next();
+                });
+        },
+
+        getAdminAuthToken = function(req,res,next){
+
+            Q.when(authBusiness.findAdminAuthToken(req[constants.reqParams.PROP_AUTHTOKEN])).then(
+                function(admin){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            token : {
+                                token       : admin.token.token,
+                                expiredOn   : admin.token.expiredOn,
+                                admin       : {
+                                    displayName : admin.displayName,
+                                    firstName   : admin.firstName,
+                                    lastName    : admin.lastName,
+                                    tenantId    : admin.tenantId,
+                                    username    : admin.username,
+                                    email       : admin.email
+                                }
+                            }
+
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js getAdminAuthToken: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js getAdminAuthToken: done!");
+                    next();
+                });
+        },
+
         getAppAccount = function(req,res,next){
             //TODO request validation
 
@@ -262,6 +333,8 @@ module.exports = function(logger, authBusiness, accountBusiness){
         postAdminAccount    : postAdminAccount,
         getAdminAccount     : getAdminAccount,
         getAdminAccountLogin: getAdminAccountLogin,
+
+        deleteAdminAuthToken: deleteAdminAuthToken,
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount

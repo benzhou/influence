@@ -12,7 +12,9 @@
                 [apiConfig.URL, "/auth/admin/login/:tenantId/:username/:password"].join(''), //endpoint
                 {},
                 {
-                    adminLogin : { method: "GET", params:{appKey:influenceAdminAppConfig.API.KEY}}
+                    adminLogin      : { method: "GET", params:{appKey:influenceAdminAppConfig.API.KEY}},
+                    adminLogout     : { method: "GET", url : [apiConfig.URL, "/auth/adminToken/invalidate"].join('')},
+                    adminAuthToken  : { method: "GET", url : [apiConfig.URL, "/auth/adminToken"].join('')}
                 }
             );
         }

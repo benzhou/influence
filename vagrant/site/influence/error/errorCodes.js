@@ -58,7 +58,15 @@ module.exports = function(){
 
         //accountBusiness.js createAppAccount
         C_400_009_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009001, desc : "Missing required parameters" },
-        C_400_009_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009002, desc : "Not able to create an app." }
+        C_400_009_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400009002, desc : "Not able to create an app." },
+
+        //authBusiness.js invalidateAdminAuthToken
+        C_400_010_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400010001, desc : "Missing required parameters" },
+        C_400_010_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400010002, desc : "Failed to invalidate token." },
+
+        //authBusiness.js findAdminAuthToken
+        C_400_011_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400011001, desc : "Missing required parameters" },
+        C_400_011_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400011002, desc : "xxx" }
 
 
     };

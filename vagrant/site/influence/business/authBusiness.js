@@ -140,10 +140,52 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
             return df.promise;
         },
 
-        validateAdminAuthToken = function(token){
+        findAdminAuthToken = function(tokenObj){
             var df = Q.defer();
 
-            if(!token){
+            if(!tokenObj || !tokenObj.token || !tokenObj.adminId){
+                df.reject(
+                    new InfluenceError(
+                        errorCodes.C_400_011_001.code,
+                        "Missing parameters"
+                    ));
+
+                return df.promise;
+            }
+
+            Q.when(accountDataHandler.getAdminAccountById(tokenObj.adminId)).then(
+                //
+                function(admin){
+                    logger.log("authBusiness.js findAdminAuthToken: getAdminAccountById promise resolved");
+                    logger.log("here is the token object");
+                    logger.log(admin);
+
+                    var currentDate = new Date();
+
+                    if(!admin){
+                        throw new InfluenceError(errorCodes.C_400_011_002.code);
+                    }
+
+                    admin.token = tokenObj;
+
+                    df.resolve(admin);
+                }
+            ).catch(function(err){
+                    logger.log("authBusiness.js findAdminAuthToken caught an error!");
+                    logger.log(err);
+
+                    df.reject(err);
+                }).done(function(){
+                    logger.log("authBusiness.js findAdminAuthToken done!");
+                });
+
+            return df.promise;
+        },
+
+        validateAdminAuthToken = function(tokenStr){
+            var df = Q.defer();
+
+            if(!tokenStr){
                 df.reject(
                     new InfluenceError(
                         errorCodes.C_400_004_001.code,
@@ -153,7 +195,7 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
                 return df.promise;
             }
 
-            Q.when(authDataHandler.findAdminAuthTokenByToken(token)).then(
+            Q.when(authDataHandler.findAdminAuthTokenByToken(tokenStr)).then(
                 //
                 function(token){
                     logger.log("authBusiness.js validateAdminAuthToken: findAdminAuthTokenByToken promise resolved");
@@ -184,12 +226,54 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
                 });
 
             return df.promise;
+        },
+
+        invalidateAdminAuthToken = function(tokenStr){
+            var df = Q.defer();
+
+            if(!tokenStr){
+                df.reject(
+                    new InfluenceError(
+                        errorCodes.C_400_010_001.code,
+                        "Missing parameters"
+                    ));
+
+                return df.promise;
+            }
+
+            Q.when(authDataHandler.invalidateAdminAuthToken(tokenStr)).then(
+
+                function(token){
+                    logger.log("authBusiness.js invalidateAdminAuthToken: invalidateAdminAuthToken promise resolved");
+                    logger.log("here is the token object");
+                    logger.log(token);
+
+                    if(!token || token.isActive){
+                        throw new InfluenceError(
+                            errorCodes.C_400_010_002.code
+                        );
+                    }
+
+                    df.resolve(token);
+                }
+            ).catch(function(err){
+                    logger.log("authBusiness.js invalidateAdminAuthToken caught an error!");
+                    logger.log(err);
+
+                    df.reject(err);
+                }).done(function(){
+                    logger.log("authBusiness.js invalidateAdminAuthToken done!");
+                });
+
+            return df.promise;
         };
 
     return {
         adminAccountLogin       : adminAccountLogin,
         createAdminAuthToken    : createAdminAuthToken,
-        validateAdminAuthToken  : validateAdminAuthToken
+        findAdminAuthToken      : findAdminAuthToken,
+        validateAdminAuthToken  : validateAdminAuthToken,
+        invalidateAdminAuthToken: invalidateAdminAuthToken
     };
 };
 

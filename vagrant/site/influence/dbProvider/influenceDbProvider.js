@@ -31,8 +31,8 @@ module.exports = function(dbProvider){
         findAdminAuthTokenByToken = function(tokenStr){
             return dbProvider.findAdminAuthTokenByToken(tokenStr);
         },
-        upsertAdminAuthToken = function(token){
-            return dbProvider.upsertAdminAuthToken(token);
+        upsertAdminAuthToken = function(token, updateObject){
+            return dbProvider.upsertAdminAuthToken(token, updateObject);
         },
 
         findTenantById = function(tenantId){

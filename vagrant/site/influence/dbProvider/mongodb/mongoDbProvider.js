@@ -103,8 +103,8 @@ module.exports = function(config, MongoDb, logger){
         findAdminAuthTokenByToken = function(tokenStr){
             return _findOneBy(collections.AdminAuthToken, {token : tokenStr});
         },
-        upsertAdminAuthToken = function(token){
-            return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, token);
+        upsertAdminAuthToken = function(token, updateObj){
+            return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, updateObj || token);
         },
 
         //Tenants CURD

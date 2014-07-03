@@ -5,6 +5,7 @@
         'ngRoute',
         'influenceAdminApp.constants',
         //'influenceAdminApp.config',
+        'influenceAdminApp.loadingModal',
         'influenceAdminApp.navigation',
         'influenceAdminApp.menu',
         'influenceAdminApp.controllers'
