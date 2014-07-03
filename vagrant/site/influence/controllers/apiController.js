@@ -334,6 +334,7 @@ module.exports = function(logger, authBusiness, accountBusiness){
         getAdminAccount     : getAdminAccount,
         getAdminAccountLogin: getAdminAccountLogin,
 
+        getAdminAuthToken   : getAdminAuthToken,
         deleteAdminAuthToken: deleteAdminAuthToken,
 
         getAppAccount       : getAppAccount,
