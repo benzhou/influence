@@ -29,6 +29,17 @@
                 {}
             );
         }
+    ]).factory('tenantsService', [
+        '$resource',
+        'influenceAdminAppConfig'
+        ,
+        function($resource, influenceAdminAppConfig){
+            var apiConfig = influenceAdminAppConfig.API;
+            return $resource(
+                [apiConfig.URL, "/tenants/:numberOfPage/:pageNumber"].join(''), //endpoint
+                {}
+            );
+        }
     ]);
 
 })();

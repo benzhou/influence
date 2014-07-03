@@ -107,12 +107,26 @@ module.exports = function(config, MongoDb, logger){
             return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, updateObj || token);
         },
 
-        //Tenants CURD
+        //Tenants
         findTenantById = function(tenantId){
             return  _findOneBy(collections.Tenants, {_id : tenantId});
         },
         upsertTenant = function(tenant){
             return _insertNew(collections.Tenants, tenant);
+        },
+        loadTenants = function(numberOfPage, pageNumber){
+            numberOfPage = numberOfPage || 10;
+            pageNumber = pageNumber || 1;
+
+            var
+                skip = pageNumber - 1,
+                limits = numberOfPage,
+                opts = {
+                    skip : skip,
+                    limits : limits
+                };
+
+            return  _find(collections.Tenants, {}, opts);
         },
 
         //Private Helper methods
@@ -149,6 +163,44 @@ module.exports = function(config, MongoDb, logger){
                 //fail callback
                 function(){
                     logger.log('mongoDbProvider.js  _findOneBy - ' + collectionName +': failed to obtain the db');
+                    _rejectOrResolve(df, { message : "Failed to connect DB"});
+                }
+            );
+
+            return df.promise;
+        },
+
+        _find = function(collectionName, match, options){
+            var df = Q.defer();
+
+
+            Q.when(connect()).then(
+                //success callback
+                function(db){
+                    try{
+                        var collection = db.collection(collectionName);
+                        logger.log('mongoDbProvider.js _find - ' + collectionName +': querying');
+
+                        if(match.hasOwnProperty("_id")){
+                            match._id = new MongoDb.ObjectID(match._id);
+                        }
+
+                        collection.find(
+                            match,
+                            options
+                        ).toArray(
+                            function(err, docs){
+                                logger.log('mongoDbProvider.js  _find - ' + collectionName +': resolved!');
+                                _rejectOrResolve(df, err, docs);
+                            }
+                        );
+                    }catch(e){
+                        _rejectOrResolve(df, e);
+                    }
+                },
+                //fail callback
+                function(){
+                    logger.log('mongoDbProvider.js  _find - ' + collectionName +': failed to obtain the db');
                     _rejectOrResolve(df, { message : "Failed to connect DB"});
                 }
             );
@@ -245,6 +297,7 @@ module.exports = function(config, MongoDb, logger){
         upsertAdminAuthToken                : upsertAdminAuthToken,
 
         findTenantById                      : findTenantById,
+        loadTenants                         : loadTenants,
         upsertTenant                        : upsertTenant
     };
 };

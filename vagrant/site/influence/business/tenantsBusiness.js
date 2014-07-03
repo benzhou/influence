@@ -40,6 +40,47 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             return df.promise;
         },
 
+        getTenants = function(numberOfPage, pageNumber){
+            var df = Q.defer();
+
+            //Cleaning and set defaults
+            numberOfPage = numberOfPage || 10;
+            pageNumber   = pageNumber || 1;
+
+            numberOfPage = parseInt(numberOfPage);
+            pageNumber = parseInt(pageNumber);
+
+            if(isNaN(numberOfPage)){
+                numberOfPage = 10;
+            }
+
+            if(isNaN(pageNumber)){
+                pageNumber = 1;
+            }
+
+            Q.when(tenantsDataHandler.loadTenants(numberOfPage, pageNumber)).then(
+                //
+                function(tenants){
+                    logger.log("tenantsBusiness.js getTenants: loadTenants promise resolved");
+                    logger.log("here is the tenants object");
+                    logger.log(tenants);
+
+                    df.resolve(tenants);
+                }
+            ).catch(function(err){
+                    logger.log("tenantsBusiness.js getTenants caught an error!");
+                    logger.log(err);
+
+                    df.reject(err);
+                }).done(function(){
+                    logger.log("tenantsBusiness.js getTenants done!");
+                });
+
+
+            return df.promise;
+        },
+
+
         createTenant = function(name){
             var df = Q.defer();
 
@@ -90,6 +131,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
 
     return {
         getTenantById       : getTenantById,
+        getTenants          : getTenants,
         createTenant        : createTenant
     };
 }

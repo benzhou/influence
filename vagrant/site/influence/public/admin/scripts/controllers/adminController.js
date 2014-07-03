@@ -74,7 +74,9 @@
             };
 
         })
-        .controller('influenceAdminHomeCtrl', function($scope, $rootScope, $location, $log, influenceAdminAppConstants, influenceAdminAppSession){
+        .controller('influenceAdminHomeCtrl', function(
+            $scope, $rootScope, $location, $log,
+            influenceAdminAppConstants, influenceAdminAppSession){
             $log.log("influenceAdminHomeCtrl called!");
 
             //If user not authenticated, then go to home/index view directly
@@ -100,12 +102,58 @@
                 function(err){
                     $log.log('influenceAdminLogoutCtrl adminLogin rejected!');
                     $log.log(err);
+
+                    $location.path('/error');
                 }
             ).finally(
                 function(){
                     $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
                 }
             );
+
+        })
+        .controller('influenceAdminTenantsCtrl', function(
+            $scope, $rootScope, $location, $log,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            tenantsService){
+            $log.log("influenceAdminTenantsCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var loadTenants = function(numberOfPage, pageNumber){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                tenantsService.get({numberOfPage:numberOfPage,pageNumber:pageNumber }).$promise.then(
+                    function(docs){
+                        $log.log('influenceAdminTenantsCtrl');
+                        $scope.tenants = docs;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminTenantsCtrl adminLogin rejected!');
+                        $log.log(err);
+
+                        $location.path('/error');
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            };
+
+            $scope.numberOfPage = 10;
+            $scope.pageNumber = 1;
+
+            $scope.nextPage = function(){
+                loadTenants($scope.numberOfPage, $scope.pageNumber);
+            };
+
+            //initial load
+            loadTenants($scope.numberOfPage, $scope.pageNumber);
 
         })
         .controller('influenceAdminContactusCtrl', function($scope, $log){

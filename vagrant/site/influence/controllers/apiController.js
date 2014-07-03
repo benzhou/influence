@@ -4,7 +4,7 @@ var
     errorCodes      = require('../error/errorCodes'),
     constants       = require('../constants/constants');
 
-module.exports = function(logger, authBusiness, accountBusiness){
+module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness){
 
     var test = function(req,res,next){
             logger.log("================");
@@ -234,6 +234,36 @@ module.exports = function(logger, authBusiness, accountBusiness){
                 });
         },
 
+        //Tenants
+        getTenants = function(req,res,next){
+
+            Q.when(tenantsBusiness.getTenants(req.params.numberOfPage, req.params.pageNumber)).then(
+                function(tenants){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            tenants : tenants
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js getTenants: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js getTenants: done!");
+                    next();
+                });
+        },
+
+
         getAppAccount = function(req,res,next){
             //TODO request validation
 
@@ -336,6 +366,8 @@ module.exports = function(logger, authBusiness, accountBusiness){
 
         getAdminAuthToken   : getAdminAuthToken,
         deleteAdminAuthToken: deleteAdminAuthToken,
+
+        getTenants          : getTenants,
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount

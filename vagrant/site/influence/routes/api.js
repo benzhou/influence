@@ -224,6 +224,29 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         apiLogMiddleware.apiLogger
     );
 
+    //Tenants
+    router.get(
+        '/tenants/:numberOfPage/:pageNumber',
+        adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next){
+            try{
+                apiController.getTenants(req,res, next);
+            }catch(e){
+                logger.log(e);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
+        },
+        apiLogMiddleware.apiLogger
+    );
+
 
     return router;
 };
