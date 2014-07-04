@@ -14,7 +14,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                 return df.promise;
             }
 
-            Q.when(tenantsDataHandler.findTenantById(tenant)).then(
+            Q.when(tenantsDataHandler.findTenantById(tenantId)).then(
                 //
                 function(tenant){
                     logger.log("tenantsBusiness.js getTenantById: findTenantById promise resolved");

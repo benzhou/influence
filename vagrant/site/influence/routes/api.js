@@ -246,6 +246,28 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         },
         apiLogMiddleware.apiLogger
     );
+    router.get(
+        '/tenant',
+        adminAuthenticationMiddleware.adminTokenAuth,
+        function(req, res, next){
+            try{
+                apiController.getTenant(req,res, next);
+            }catch(e){
+                logger.log(e);
+                logger.log(e.stack);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
+        },
+        apiLogMiddleware.apiLogger
+    );
 
 
     return router;

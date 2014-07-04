@@ -3,25 +3,26 @@
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <h1 class="page-header">Tenants</h1>
+        <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <button type="button" class="btn btn-primary" ng-click="createTenant()">Create New</button>
+            </div>
+        </div>
 
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                        <th>Header</th>
+                        <th>Tenant ID</th>
+                        <th>Name</th>
+                        <th>Active</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>1,001</td>
-                        <td>Lorem</td>
-                        <td>ipsum</td>
-                        <td>dolor</td>
-                        <td>sit</td>
+                    <tr ng-repeat="tenant in tenants" ng-click="editTenant(tenant)">
+                        <td>{{tenant._id}}</td>
+                        <td>{{tenant.name}}</td>
+                        <td><input type="checkbox" ng-checked="tenant.isActive" /></td>
                     </tr>
                 </tbody>
             </table>

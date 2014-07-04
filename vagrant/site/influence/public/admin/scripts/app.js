@@ -36,9 +36,13 @@
                     templateUrl: '/admin/scripts/views/partials/posts.html',
                     controller: 'influenceAdminHomeCtrl'
                 }).
-                when('/home/tenants', {
+                when('/home/config/tenants', {
                     templateUrl: '/admin/scripts/views/partials/tenants.html',
-                    controller: 'influenceAdminHomeCtrl'
+                    controller: 'influenceAdminTenantsCtrl'
+                }).
+                when('/home/config/tenant', {
+                    templateUrl: '/admin/scripts/views/partials/tenant.html',
+                    controller: 'influenceAdminTenantCtrl'
                 }).
                 when('/contactus', {
                     templateUrl: '/admin/scripts/views/partials/contactus.html',

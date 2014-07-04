@@ -262,6 +262,33 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     next();
                 });
         },
+        getTenant = function(req,res,next){
+
+            Q.when(tenantsBusiness.getTenantById(req.query.tenantId)).then(
+                function(tenant){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            tenant : tenant
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js getTenantById: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js getTenantById: done!");
+                    next();
+                });
+        },
 
 
         getAppAccount = function(req,res,next){
@@ -368,6 +395,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         deleteAdminAuthToken: deleteAdminAuthToken,
 
         getTenants          : getTenants,
+        getTenant           : getTenant,
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount

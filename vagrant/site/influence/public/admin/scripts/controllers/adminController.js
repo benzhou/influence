@@ -65,6 +65,8 @@
                     function(err){
                         $log.log('influenceAdminLoginCtrl adminLogin rejected!');
                         $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
                     }
                 ).finally(
                     function(){
@@ -103,7 +105,7 @@
                     $log.log('influenceAdminLogoutCtrl adminLogin rejected!');
                     $log.log(err);
 
-                    $location.path('/error');
+                    $location.path('/error').search({code:err.data.code, msg:err.data.message});
                 }
             ).finally(
                 function(){
@@ -111,6 +113,62 @@
                 }
             );
 
+        })
+        .controller('influenceAdminTenantCtrl', function(
+            $scope, $rootScope, $location, $log,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            tenantsService){
+            $log.log("influenceAdminTenantCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var tenantid = $location.search().tenantId;
+            if(!tenantid){
+
+                $scope.tenant = {
+
+                };
+
+
+            }else{
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                tenantsService.get({tenantId:tenantid,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminTenantCtrl get fulfilled!');
+                        $log.log(result.data.tenant);
+                        $scope.tenant = result.data.tenant;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminTenantCtrl get rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            }
+
+
+            $scope.createUpdateTenant = function(){
+                $log.log('influenceAdminTenantCtrl createUpdateTenant.');
+
+                if(!$scope.tenant || !$scope.tenant._id){
+                    //create new tenant
+                    $log.log('influenceAdminTenantCtrl create new Tenant.');
+
+                }else{
+                    //update existing tenant
+                    $log.log('influenceAdminTenantCtrl Update existing Tenant.');
+                }
+            }
         })
         .controller('influenceAdminTenantsCtrl', function(
             $scope, $rootScope, $location, $log,
@@ -126,17 +184,17 @@
 
             var loadTenants = function(numberOfPage, pageNumber){
                 $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                tenantsService.get({numberOfPage:numberOfPage,pageNumber:pageNumber }).$promise.then(
+                tenantsService.query({numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminTenantsCtrl');
-                        $scope.tenants = docs;
+                        $scope.tenants = docs.data.tenants;
                     }
                 ).catch(
                     function(err){
-                        $log.log('influenceAdminTenantsCtrl adminLogin rejected!');
+                        $log.log('influenceAdminTenantsCtrl query rejected!');
                         $log.log(err);
 
-                        $location.path('/error');
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
                     }
                 ).finally(
                     function(){
@@ -150,6 +208,18 @@
 
             $scope.nextPage = function(){
                 loadTenants($scope.numberOfPage, $scope.pageNumber);
+            };
+
+            $scope.editTenant = function(tenant){
+                $log.log("Editing tenant:");
+                $log.log(tenant);
+
+                $location.path('/home/config/tenant').search({tenantId:tenant._id});
+            };
+
+            $scope.createTenant = function(){
+                $log.log("Creating tenant:");
+                $location.path('/home/config/tenant')
             };
 
             //initial load

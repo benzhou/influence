@@ -33,7 +33,7 @@ describe('AuthBusiness', function(){
                 token : 'test'
             });
 
-            var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler);
+            var authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountDataHandler);
             var promise = authBusiness.adminAccountLogin('fakeAppKey', 1, 'fakeUsername');
 
             return promise.should.eventually.be.rejected;
@@ -46,7 +46,7 @@ describe('AuthBusiness', function(){
                     createAdminLoginToken : function () {}
                 };
 
-            var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler);
+            var authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountDataHandler);
             var promise = authBusiness.adminAccountLogin();
 
             return promise.should.eventually.be.rejected;
@@ -85,7 +85,7 @@ describe('AuthBusiness', function(){
             findAdminAccountByTenantAndUsernameStub.returns(df1.promise);
             createAdminAuthTokenStub.returns(df2.promise);
 
-            var authBusiness = require('../business/authBusiness')(Q, helpers, util, console, appConfig.app, errCodes, accountDataHandler, authDataHandler);
+            var authBusiness = require('../business/authBusiness')( helpers, util, console, appConfig.app, accountDataHandler, authDataHandler);
             var promise = authBusiness.adminAccountLogin(appKey, tenantId, username, password);
 
             Q.all([

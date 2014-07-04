@@ -21,9 +21,9 @@
                         {
                             name : "config",
                             menues : [
-                                {name:"Admins", active:true, href:"/config/admins"},
-                                {name:"Apps", active:false, href:"/config/apps"},
-                                {name:"Tenants", active:false, href:"/config/tenants"}
+                                {name:"Admins", active:true, href:"/home/config/admins"},
+                                {name:"Apps", active:false, href:"/home/config/apps"},
+                                {name:"Tenants", active:false, href:"/home/config/tenants"}
                             ]
                         }
                     ],

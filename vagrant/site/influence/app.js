@@ -61,7 +61,7 @@ var routes              = {},
     authBusiness        = require('./business/authBusiness')(helpers, util, influenceLogger, appConfig.app, accountDataHandler, authDataHandler),
     apiLogBusiness      = require('./business/apiLogBusiness')(influenceLogger, apiLogDataHandler),
 
-    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness),
+    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness),
 
     adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(influenceLogger, authBusiness),
     apiLogMiddleware                = require('./middleware/apiLogMiddleware')(influenceLogger, apiLogBusiness),
