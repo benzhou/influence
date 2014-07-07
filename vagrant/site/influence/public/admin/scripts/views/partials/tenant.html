@@ -12,14 +12,14 @@
                     </div>
                     <div class="form-group">
                         <label for="tenantName">Tenant Name</label>
-                        <input type="text" class="form-control" id="tenantName" placeholder="tenantName" value="{{tenant.name}}">
+                        <input type="text" class="form-control" id="tenantName" placeholder="tenantName" ng-model="tenant.name">
                     </div>
                     <div lass="checkbox" ng-if='tenant && tenant._id'>
                         <label for="tenantIsActive">
-                            Active: <input type="checkbox" class="form-control" id="tenantIsActive" ng-checked="{{tenant.isActive}}">
+                            Active: <input type="checkbox" class="form-control" id="tenantIsActive" ng-model="tenant.isActive">
                         </label>
                     </div>
-                    <button type="submit" class="btn btn-default" ng-click="createUpdateTenant">Submit</button>
+                    <a type="submit" class="btn btn-default" ng-click="createUpdateTenant()">Submit</a>
                 </form>
             </div>
         </div>

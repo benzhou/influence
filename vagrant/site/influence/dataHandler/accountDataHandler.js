@@ -1,6 +1,7 @@
 module.exports = function(dbProvider){
 
     var
+        //Admin Account
         getAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
         },
@@ -16,19 +17,16 @@ module.exports = function(dbProvider){
         upsertAdminAccount = function(adminDo){
             return dbProvider.upsertAdminAccount(adminDo);
         },
+        updateAdminAccount = function(adminId, updateDo){
+            return dbProvider.updateAdminAccount(adminid, updateDo);
+        },
 
+        //App Account
         findAppAccountByAppKey = function(appKey){
             return dbProvider.findAppAccountByAppKey(appKey);
         },
         upsertAppAccountByAppkey = function(adminAccountDo){
             return dbProvider.upsertAppAccountByAppkey(adminAccountDo);
-        },
-
-        findTenantById = function(tenantId){
-            return dbProvider.findTenantById(tenantId);
-        },
-        upsertTenant = function(tenant){
-            return dbProvider.upsertTenant(tenant);
         };
 
     return {
@@ -37,12 +35,10 @@ module.exports = function(dbProvider){
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,
+        updateAdminAccount                  : updateAdminAccount,
 
         findAppAccountByAppKey              : findAppAccountByAppKey,
-        upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
-
-        findTenantById                      : findTenantById,
-        upsertTenant                        : upsertTenant
+        upsertAppAccountByAppkey            : upsertAppAccountByAppkey
     };
 };
 

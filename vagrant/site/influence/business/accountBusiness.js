@@ -7,6 +7,7 @@ var
 module.exports = function(helpers, util, logger, accountDataHandler){
 
     var
+        //Admin Accounts
         getAdminAccountById = function(adminId){
             var df = Q.defer();
 
@@ -153,6 +154,115 @@ module.exports = function(helpers, util, logger, accountDataHandler){
             return df.promise;
         },
 
+        updateAdminAccount = function(
+            adminId,
+            username,
+            email,
+            firstName,
+            lastName,
+            displayName,
+            updatedBy
+            ){
+            var df = Q.defer();
+
+            logger.log("accountBusiness.js updateAdminAccount, adminId:%s", adminId);
+            //validation
+            //required fields
+            if(!adminId || !updatedBy){
+                df.reject(new InfluenceError(errorCodes.C_400_013_001.code));
+
+                return df.promise;
+            }
+
+            //TODO: validate Email format (length, invalid characters etc.)
+            //TODO: validate Username format (length, invalid characters etc.)
+            //TODO: validate firstName, lastName, displayName length
+
+
+            //TODO:validate createdBy AdminId has rights to create a new admin account for passed in tenant
+
+
+            Q.when(getAdminAccountById(adminId)).then(
+                function(admin){
+                    logger.log('accountBusiness.updateAdminAccount getAdminAccountById fulfilled');
+                    logger.log('===> to be updated Admin Document: ');
+                    logger.log(admin);
+
+                    if(!admin){
+                        throw new InfluenceError(errorCodes.C_400_013_002.code);
+                    }
+
+                    //Check if email or username is changed
+                    if(admin.email !== email){
+                        return accountDataHandler.findAdminAccountByTenantAndEmail(admin.tenantId, email);
+                    }else{
+                        if(email !== username && admin.username != username){
+                            return accountDataHandler.findAdminAccountByTenantAndUsername(admin.tenantId, username);
+                        }
+                    }
+                }
+            ).then(
+                function(adminMatch){
+                    logger.log('===> Matched Admin Document: ');
+                    logger.log(adminMatch);
+
+                    if(adminMatch && adminMatch._id === adminId){
+                        //If admin exists, means findAdminAccountByTenantAndEmail or findAdminAccountByTenantAndUsername
+                        //found an existing admin in the tenant with the same email or username
+                        throw new InfluenceError(errorCodes.C_400_013_003.code);
+                    }
+
+                    //now start to update the admin
+                    var updateAdminDo = {
+                        updatedBy           : updatedBy,
+                        updatedOn           : new Date()
+                    };
+
+                    if(username){
+                        updateAdminDo.username = username;
+                    }
+                    if(email){
+                        updateAdminDo.email = email;
+                    }
+                    if(firstName){
+                        updateAdminDo.firstName = firstName;
+                    }
+                    if(lastName){
+                        updateAdminDo.lastName = lastName;
+                    }
+                    if(displayName){
+                        updateAdminDo.displayName = displayName;
+                    }
+
+                    return accountDataHandler.updateAdminAccount(adminId, updateAdminDo);
+                }
+            ).then(
+                function(newAdmin){
+                    //accountDataHandler.updateAdminAccount is resolved!
+                    logger.log('accountBusiness.updateAdminAccount accountDataHandler.updateAdminAccount is fulfilled');
+                    logger.log(newAdmin);
+
+                    df.resolve(newAdmin);
+                }
+            ).catch(
+                function(err){
+                    //one of the promises was rejected
+                    logger.log('accountBusiness.updateAdminAccount catch block got an err');
+                    logger.log(err && err.stack?err.stack:err);
+
+                    df.reject(err);
+                }
+            ).done(
+
+                function(){
+                    logger.log('accountBusiness.updateAdminAccount done block was called');
+                }
+            );
+
+            return df.promise;
+        },
+
+        //App Account
         getAppAccountByAppKey = function(appKey){
             var df = Q.defer();
 
@@ -243,6 +353,7 @@ module.exports = function(helpers, util, logger, accountDataHandler){
     return {
         createAdminAccount      : createAdminAccount,
         getAdminAccountById     : getAdminAccountById,
+        updateAdminAccount      : updateAdminAccount,
 
         getAppAccountByAppKey   : getAppAccountByAppKey,
         createAppAccount        : createAppAccount

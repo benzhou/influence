@@ -105,7 +105,12 @@
                     $log.log('influenceAdminLogoutCtrl adminLogin rejected!');
                     $log.log(err);
 
-                    $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    if(err.data.code === 400004004){
+                        influenceAdminAppSession.destroy();
+                        $location.path('/');
+                    }else{
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
                 }
             ).finally(
                 function(){
@@ -115,7 +120,7 @@
 
         })
         .controller('influenceAdminTenantCtrl', function(
-            $scope, $rootScope, $location, $log,
+            $scope, $rootScope, $location, $log, $routeParams,
             influenceAdminAppConstants, influenceAdminAppSession,
             tenantsService){
             $log.log("influenceAdminTenantCtrl called!");
@@ -126,15 +131,20 @@
                 return;
             }
 
-            var tenantid = $location.search().tenantId;
-            if(!tenantid){
+            var tenantid = $routeParams.tenantId;
+            $log.log('influenceAdminTenantCtrl $routeParams');
+            $log.log($routeParams);
 
+            //Code for when load the tenant view
+            if(!tenantid){
+                //When no passed-in tenantId, assume this is an create
                 $scope.tenant = {
 
                 };
 
 
             }else{
+                //When has passed in tenantId, assume this is an update
                 $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
                 tenantsService.get({tenantId:tenantid,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(result){
@@ -156,18 +166,46 @@
                 );
             }
 
-
+            //Handler when user update or create tenant
             $scope.createUpdateTenant = function(){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
                 $log.log('influenceAdminTenantCtrl createUpdateTenant.');
 
-                if(!$scope.tenant || !$scope.tenant._id){
-                    //create new tenant
-                    $log.log('influenceAdminTenantCtrl create new Tenant.');
+                var params = {
+                        token: influenceAdminAppSession.token.token
+                    },
+                    postData = {
+                        name : $scope.tenant.name
+                    };
 
-                }else{
-                    //update existing tenant
-                    $log.log('influenceAdminTenantCtrl Update existing Tenant.');
+                if($scope.tenant && $scope.tenant._id){
+                    params.tenantId = $scope.tenant._id;
+                    postData.isActive = $scope.tenant.isActive;
                 }
+
+                tenantsService.save(
+                    //params
+                    params,
+                    //Post data
+                    postData
+                ).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminTenantCtrl post fulfilled!');
+                        $log.log(result.data.tenant);
+                        $scope.tenant = result.data.tenant;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminTenantCtrl post rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
             }
         })
         .controller('influenceAdminTenantsCtrl', function(
@@ -214,7 +252,7 @@
                 $log.log("Editing tenant:");
                 $log.log(tenant);
 
-                $location.path('/home/config/tenant').search({tenantId:tenant._id});
+                $location.path(['/home/config/tenant/', tenant._id].join(''));
             };
 
             $scope.createTenant = function(){

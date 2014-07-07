@@ -3,6 +3,34 @@ var
 
 module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogMiddleware, apiController){
 
+    var _hookUpRoutes = function(router, verb, route, ctrlAction){
+        var
+            self = this;
+
+        router[verb](
+            route,
+            adminAuthenticationMiddleware.adminTokenAuth,
+            function(req, res, next){
+                try{
+                    ctrlAction.apply(self, [req, res, next]);
+                }catch(e){
+                    logger.log(e);
+                    logger.log(e.stack);
+                    var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                    next();
+                }
+            },
+            apiLogMiddleware.apiLogger
+        );
+    };
+
     router.get(
         '/test',
         function(req, res, next){
@@ -225,49 +253,11 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     );
 
     //Tenants
-    router.get(
-        '/tenants/:numberOfPage/:pageNumber',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next){
-            try{
-                apiController.getTenants(req,res, next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-    router.get(
-        '/tenant',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next){
-            try{
-                apiController.getTenant(req,res, next);
-            }catch(e){
-                logger.log(e);
-                logger.log(e.stack);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
+    _hookUpRoutes(router, 'get', '/tenants/:numberOfPage/:pageNumber', apiController.getTenants);
+    _hookUpRoutes(router, 'get', '/tenant/:tenantId?', apiController.getTenant);
+    _hookUpRoutes(router, 'put', '/tenant/:tenantId?', apiController.putTenant);
+    _hookUpRoutes(router, 'post', '/tenant/:tenantId?', apiController.postTenant);
+
 
 
     return router;

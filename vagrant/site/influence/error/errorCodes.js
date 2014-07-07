@@ -66,8 +66,15 @@ module.exports = function(){
 
         //authBusiness.js findAdminAuthToken
         C_400_011_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400011001, desc : "Missing required parameters" },
-        C_400_011_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400011002, desc : "xxx" }
+        C_400_011_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400011002, desc : "xxx" },
 
+        //tenantsBusiness.js  updateTenant
+        C_400_012_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400012001, desc : "Missing required parameters" },
+
+        //accountBusiness.js  updateAdmin
+        C_400_013_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400013001, desc : "Missing required parameters" },
+        C_400_013_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400013002, desc : "Invalid Admin ID, not able to update." },
+        C_400_013_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400013003, desc : "Email or Username has already been taken by an other admin." }
 
     };
 }();

@@ -90,6 +90,9 @@ module.exports = function(config, MongoDb, logger){
         upsertAdminAccount = function(adminDo){
             return _upsertByMatch(collections.AdminAccount, {createdOn:1}, {tenantId:adminDo.tenantId,email:adminDo.email}, adminDo);
         },
+        updateAdminAccountt = function(adminId, updateDo){
+            return _upsertByMatch(collections.AdminAccount, {}, {_id : new MongoDb.ObjectID(adminId)}, {$set: updateDo});
+        },
 
         //App Account CURD
         findAppAccountByAppKey = function(appKey){
@@ -113,6 +116,9 @@ module.exports = function(config, MongoDb, logger){
         },
         upsertTenant = function(tenant){
             return _insertNew(collections.Tenants, tenant);
+        },
+        updateTenant = function(tenantId, updateDo){
+            return _upsertByMatch(collections.Tenants, {}, {_id : new MongoDb.ObjectID(tenantId)}, {$set: updateDo});
         },
         loadTenants = function(numberOfPage, pageNumber){
             numberOfPage = numberOfPage || 10;
@@ -289,6 +295,7 @@ module.exports = function(config, MongoDb, logger){
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,
+        updateAdminAccountt                 : updateAdminAccountt,
 
         findAppAccountByAppKey              : findAppAccountByAppKey,
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
@@ -298,7 +305,8 @@ module.exports = function(config, MongoDb, logger){
 
         findTenantById                      : findTenantById,
         loadTenants                         : loadTenants,
-        upsertTenant                        : upsertTenant
+        upsertTenant                        : upsertTenant,
+        updateTenant                        : updateTenant
     };
 };
 

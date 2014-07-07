@@ -80,13 +80,12 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             return df.promise;
         },
 
-
-        createTenant = function(name){
+        createTenant = function(name, createdBy){
             var df = Q.defer();
 
             //validation
             //required fields
-            if(!name){
+            if(!name || !createdBy){
                 df.reject(
                     new InfluenceError(
                         errCodes.C_400_006_001.code,
@@ -96,7 +95,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                 return df.promise;
             }
 
-            logger.log("createTenant, name: %s", name);
+            logger.log("createTenant, name: %s, createdBy: %s", name, createdBy);
 
             var
 
@@ -104,7 +103,9 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                     name        : name,
                     isActive    : true,
                     createdOn   : new Date(),
-                    updatedOn   : new Date()
+                    createdBy   : createdBy,
+                    updatedOn   : new Date(),
+                    updatedBy   : createdBy
                 };
 
             Q.when(tenantsDataHandler.upsertTenant(tenant)).then(
@@ -127,11 +128,71 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
 
 
             return df.promise;
+        },
+
+        updateTenant = function(tenantId, updatedBy, name, isActive){
+            var df = Q.defer();
+
+            //validation
+            //required fields
+            if(!tenantId || !updatedBy){
+                df.reject(
+                    new InfluenceError(
+                        errCodes.C_400_012_001.code,
+                        "Missing parameters"
+                    ));
+
+                return df.promise;
+            }
+
+            //TODO params verification, e.g.
+            // - name length
+            // - isActive has to be bool
+
+            logger.log("updateTenant, tenantId: %s, name: %s, isActive: %s updatedBy: %s", tenantId, name, isActive, updatedBy);
+
+
+            var
+
+                tenant = {
+                    updatedOn   : new Date(),
+                    updatedBy   : updatedBy
+                };
+
+            if(name){
+                tenant.name = name;
+            }
+
+            if(isActive !== null){
+                tenant.isActive = isActive;
+            }
+
+            Q.when(tenantsDataHandler.updateTenant(tenantId, tenant)).then(
+                //
+                function(tenant){
+                    logger.log("tenantsBusiness.js updateTenant: tenantsDataHandler.updateTenant promise resolved");
+                    logger.log("here is the tenant object");
+                    logger.log(tenant);
+
+                    df.resolve(tenant);
+                }
+            ).catch(function(err){
+                    logger.log("tenantsBusiness.js updateTenant: caught an error!");
+                    logger.log(err);
+
+                    df.reject(err);
+                }).done(function(){
+                    logger.log("tenantsBusiness.js updateTenant: done!");
+                });
+
+
+            return df.promise;
         };
 
     return {
         getTenantById       : getTenantById,
         getTenants          : getTenants,
-        createTenant        : createTenant
+        createTenant        : createTenant,
+        updateTenant        : updateTenant
     };
 }

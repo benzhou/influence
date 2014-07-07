@@ -25,7 +25,7 @@
         function($resource, influenceAdminAppConfig){
             var apiConfig = influenceAdminAppConfig.API;
             return $resource(
-                [apiConfig.URL, "/auth/admin"].join(''), //endpoint
+                [apiConfig.URL, "/admin/:adminId"].join(''), //endpoint
                 {}
             );
         }
@@ -36,7 +36,7 @@
         function($resource, influenceAdminAppConfig){
             var apiConfig = influenceAdminAppConfig.API;
             return $resource(
-                [apiConfig.URL, "/tenant"].join(''), //endpoint
+                [apiConfig.URL, "/tenant/:tenantId?"].join(''), //endpoint
                 {},
                 {
                     query     : { method: "GET", url : [apiConfig.URL, "/tenants/:numberOfPage/:pageNumber"].join('')},

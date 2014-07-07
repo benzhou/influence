@@ -9,12 +9,16 @@ module.exports = function(dbProvider){
         },
         upsertTenant = function(tenant){
             return dbProvider.upsertTenant(tenant);
+        },
+        updateTenant = function(tenantId, updateDo){
+            return dbProvider.updateTenant(tenantId, updateDo);
         };
 
     return {
         findTenantById                      : findTenantById,
         loadTenants                         : loadTenants,
-        upsertTenant                        : upsertTenant
+        upsertTenant                        : upsertTenant,
+        updateTenant                        : updateTenant
     };
 };
 

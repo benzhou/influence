@@ -15,6 +15,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             next();
         },
 
+        //Admin Account
         getAdminAccount = function(req,res,next){
             //TODO request validation
 
@@ -60,17 +61,29 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             );
         },
-
         postAdminAccount = function(req,res,next){
             //TODO request validation
 
             var reqAdmin = req.body,
-                authToken = req[constants.reqParams.PROP_AUTHTOKEN];
+                authToken = req[constants.reqParams.PROP_AUTHTOKEN],
+                adminId = req.params.adminId,
+                promise;
 
             var currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
-            Q.when(
-                accountBusiness
+            if(adminId){
+                promise = accountBusiness.updateAdminAccount(
+                    adminId,
+                    reqAdmin.username,
+                    reqAdmin.email,
+                    reqAdmin.firstName,
+                    reqAdmin.lastName,
+                    reqAdmin.displayName,
+                    currentAdminId
+                );
+            }else{
+                promise =
+                    accountBusiness
                     .createAdminAccount(
                         reqAdmin.tenantId,
                         reqAdmin.username,
@@ -80,10 +93,12 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         reqAdmin.lastname,
                         reqAdmin.displayname,
                         currentAdminId
-            )).then(
+                    )
+            }
 
+            Q.when(promise).then(
                 function(admin){
-                    logger.log("Success when call accountBusiness.createAdminAccount in postAdminAccount");
+                    logger.log("postAdminAccount create or update promise is fulfilled!");
                     logger.log(admin);
 
                     res.json({
@@ -103,7 +118,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(
                 function(err){
-                    logger.log("Failed when call accountBusiness.createAdminAccount in postAdminAccount");
+                    logger.log("postAdminAccount create or update caught an error!");
                     logger.log(err);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     logger.log(err);
@@ -123,6 +138,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             );
         },
 
+        //Admin Auth Token
         getAdminAccountLogin = function(req,res,next){
 
             Q.when(authBusiness.adminAccountLogin(req.query.appKey, req.params.tenantId,req.params.username,req.params.password)).then(
@@ -162,7 +178,6 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     next();
                 });
         },
-
         deleteAdminAuthToken = function(req,res,next){
 
             Q.when(authBusiness.invalidateAdminAuthToken(req[constants.reqParams.PROP_AUTHTOKEN].token)).then(
@@ -193,7 +208,6 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     next();
                 });
         },
-
         getAdminAuthToken = function(req,res,next){
 
             Q.when(authBusiness.findAdminAuthToken(req[constants.reqParams.PROP_AUTHTOKEN])).then(
@@ -264,7 +278,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         },
         getTenant = function(req,res,next){
 
-            Q.when(tenantsBusiness.getTenantById(req.query.tenantId)).then(
+            Q.when(tenantsBusiness.getTenantById(req.params.tenantId)).then(
                 function(tenant){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -286,6 +300,85 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     );
                 }).done(function(){
                     logger.log("apiController.js getTenantById: done!");
+                    next();
+                });
+        },
+        postTenant = function(req,res,next){
+            var tenantDo = req.body,
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"]
+                tenantId = req.params.tenantId,
+                promise;
+
+            if(tenantId){
+                promise = tenantsBusiness.updateTenant(
+                    req.params.tenantId,
+                    currentAdminId,
+                    tenantDo.name,
+                    tenantDo.isActive);
+            }else{
+                promise = tenantsBusiness.createTenant(
+                    tenantDo.name,
+                    currentAdminId
+                )
+            }
+
+
+            Q.when(promise).then(
+                function(tenant){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            tenant : tenant
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js postTenant: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js postTenant: done!");
+                    next();
+                });
+        },
+        putTenant = function(req,res,next){
+            var tenantUpdateDo = req.body,
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];;
+
+            Q.when(tenantsBusiness.updateTenant(
+                req.params.tenantId,
+                currentAdminId,
+                tenantUpdateDo.name,
+                tenantUpdateDo.isActive)
+            ).then(
+                function(tenant){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            tenant : tenant
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js putTenant: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js putTenant: done!");
                     next();
                 });
         },
@@ -396,6 +489,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
         getTenants          : getTenants,
         getTenant           : getTenant,
+        postTenant          : postTenant,
+        putTenant           : putTenant,
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount

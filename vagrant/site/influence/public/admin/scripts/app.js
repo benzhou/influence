@@ -40,7 +40,7 @@
                     templateUrl: '/admin/scripts/views/partials/tenants.html',
                     controller: 'influenceAdminTenantsCtrl'
                 }).
-                when('/home/config/tenant', {
+                when('/home/config/tenant/:tenantId?', {
                     templateUrl: '/admin/scripts/views/partials/tenant.html',
                     controller: 'influenceAdminTenantCtrl'
                 }).
