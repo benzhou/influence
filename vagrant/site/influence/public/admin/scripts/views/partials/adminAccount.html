@@ -1,10 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
+<div class="row">
+    <menu-directive></menu-directive>
 
-</body>
-</html>
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <h1 class="page-header">Admin</h1>
+        <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <form role="form">
+                    <div class="form-group" ng-if='admin && admin.id'>
+                        <label for="adminId">Admin</label>
+                        <label id="adminId">{{admin.id}}</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="text" class="form-control" id="email" placeholder="Email" ng-model="admin.email">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" class="form-control" id="username" placeholder="Username" ng-model="admin.username">
+                    </div>
+                    <div class="form-group" ng-if='!admin.id'>
+                        <label for="password">Password:</label>
+                        <input type="text" class="form-control" id="password" placeholder="Password" ng-model="admin.password">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" class="form-control" id="firstName" placeholder="First Name" ng-model="admin.firstName">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" class="form-control" id="lastName" placeholder="Last Name" ng-model="admin.lastName">
+                    </div>
+                    <div class="form-group">
+                        <label for="displayName">Display Name:</label>
+                        <input type="text" class="form-control" id="displayName" placeholder="Display Name" ng-model="admin.displayName">
+                    </div>
+                    <a type="submit" class="btn btn-default" ng-click="createUpdateAdmin()">Submit</a>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>

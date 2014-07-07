@@ -74,7 +74,10 @@ module.exports = function(){
         //accountBusiness.js  updateAdmin
         C_400_013_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400013001, desc : "Missing required parameters" },
         C_400_013_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400013002, desc : "Invalid Admin ID, not able to update." },
-        C_400_013_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400013003, desc : "Email or Username has already been taken by an other admin." }
+        C_400_013_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400013003, desc : "Email or Username has already been taken by an other admin." },
+
+        //accountBusiness.js  loadAdminAccounts
+        C_400_014_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400014001, desc : "Missing required parameters" },
 
     };
 }();

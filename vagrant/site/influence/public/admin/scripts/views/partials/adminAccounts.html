@@ -1,0 +1,37 @@
+<div class="row">
+    <menu-directive></menu-directive>
+
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <h1 class="page-header">Admins</h1>
+        <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <button type="button" class="btn btn-primary" ng-click="createAdmin()">Create New</button>
+            </div>
+        </div>
+
+        <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Admin ID</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="admin in admins" ng-click="editAdmin(admin)">
+                    <td>{{admin.id}}</td>
+                    <td>{{admin.email}}</td>
+                    <td>{{admin.username}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

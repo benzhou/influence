@@ -7,6 +7,9 @@ module.exports = function(dbProvider){
         },
 
         //Admin Account
+        loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
+            return dbProvider.loadAdminAccountss(tenantId, numberOfPage, pageNumber);
+        },
         findAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
         },
@@ -61,6 +64,7 @@ module.exports = function(dbProvider){
     return {
         insertApiCallLog                    : insertApiCallLog,
 
+        loadAdminAccounts                   : loadAdminAccounts,
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,

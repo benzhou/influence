@@ -8,6 +8,55 @@ module.exports = function(helpers, util, logger, accountDataHandler){
 
     var
         //Admin Accounts
+        loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
+            var df = Q.defer();
+
+            //validation
+            //required fields
+            if(!tenantId){
+                df.reject(
+                    new InfluenceError(errorCodes.C_400_014_001.code)
+                );
+
+                return df.promise;
+            }
+
+            //Cleaning and set defaults
+            numberOfPage = numberOfPage || 10;
+            pageNumber   = pageNumber || 1;
+
+            numberOfPage = parseInt(numberOfPage);
+            pageNumber = parseInt(pageNumber);
+
+            if(isNaN(numberOfPage)){
+                numberOfPage = 10;
+            }
+
+            if(isNaN(pageNumber)){
+                pageNumber = 1;
+            }
+
+            Q.when(accountDataHandler.loadAdminAccounts(tenantId, numberOfPage, pageNumber)).then(
+                function(admins){
+
+                    df.resolve(admins);
+                }
+            ).catch(
+                function(err){
+                    logger.log('accountBusiness.loadAdminAccounts catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done(
+                function(){
+                    logger.log('accountBusiness.loadAdminAccounts done block was called');
+                }
+            );
+
+            return df.promise;
+        },
+
         getAdminAccountById = function(adminId){
             var df = Q.defer();
 
@@ -36,7 +85,11 @@ module.exports = function(helpers, util, logger, accountDataHandler){
 
                     df.reject(err);
                 }
-            ).done();
+            ).done(
+                function(){
+                    logger.log('accountBusiness.getAdminAccountById done block was called');
+                }
+            );
 
             return df.promise;
         },
@@ -351,6 +404,7 @@ module.exports = function(helpers, util, logger, accountDataHandler){
         };
 
     return {
+        loadAdminAccounts       : loadAdminAccounts,
         createAdminAccount      : createAdminAccount,
         getAdminAccountById     : getAdminAccountById,
         updateAdminAccount      : updateAdminAccount,

@@ -16,6 +16,62 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         },
 
         //Admin Account
+        getAdminAccounts = function(req,res,next){
+            //TODO request validation
+
+            var tenantId = req.params.tenantId;
+
+            //TODO: Added selected fields
+
+            Q.when(accountBusiness.loadAdminAccounts(tenantId)).then(
+
+                function(admins){
+                    logger.log("apiController.js getAdminAccounts accountBusiness.loadAdminAccounts fulfilled.");
+                    logger.log(admins);
+
+                    var returnAdmins = [];
+
+                    admins.forEach(function(item){
+                        returnAdmins.push(
+                            {
+                                id          : item._id,
+                                tenantId    : item.tenantId,
+                                username    : item.username,
+                                email       : item.email,
+                                firstName   : item.firstName,
+                                lastName    : item.lastName,
+                                displayName : item.displayName
+                            }
+                        );
+                    });
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            admins : returnAdmins
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getAdminAccounts caught an error!.");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
         getAdminAccount = function(req,res,next){
             //TODO request validation
 
@@ -33,6 +89,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         data    : {
                             admin : {
                                 id          : admin._id,
+                                tenantId    : admin.tenantId,
                                 username    : admin.username,
                                 email       : admin.email,
                                 firstName   : admin.firstName,
@@ -89,9 +146,9 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         reqAdmin.username,
                         reqAdmin.email,
                         reqAdmin.password,
-                        reqAdmin.firstname,
-                        reqAdmin.lastname,
-                        reqAdmin.displayname,
+                        reqAdmin.firstName,
+                        reqAdmin.lastName,
+                        reqAdmin.displayName,
                         currentAdminId
                     )
             }
@@ -109,8 +166,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                                 id          : admin._id,
                                 username    : admin.username,
                                 email       : admin.email,
-                                firstname   : admin.firstname,
-                                lastname    : admin.lastname,
+                                firstName   : admin.firstName,
+                                lastName    : admin.lastName,
                                 displayName : admin.displayName
                             }
                         }
@@ -305,7 +362,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         },
         postTenant = function(req,res,next){
             var tenantDo = req.body,
-                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"]
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"],
                 tenantId = req.params.tenantId,
                 promise;
 
@@ -480,6 +537,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
     return {
         test : test,
+        getAdminAccounts    : getAdminAccounts,
         postAdminAccount    : postAdminAccount,
         getAdminAccount     : getAdminAccount,
         getAdminAccountLogin: getAdminAccountLogin,

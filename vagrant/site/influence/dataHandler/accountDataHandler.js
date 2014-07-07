@@ -2,6 +2,9 @@ module.exports = function(dbProvider){
 
     var
         //Admin Account
+        loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
+            return dbProvider.loadAdminAccounts(tenantId, numberOfPage, pageNumber);
+        },
         getAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
         },
@@ -18,7 +21,7 @@ module.exports = function(dbProvider){
             return dbProvider.upsertAdminAccount(adminDo);
         },
         updateAdminAccount = function(adminId, updateDo){
-            return dbProvider.updateAdminAccount(adminid, updateDo);
+            return dbProvider.updateAdminAccount(adminId, updateDo);
         },
 
         //App Account
@@ -30,6 +33,7 @@ module.exports = function(dbProvider){
         };
 
     return {
+        loadAdminAccounts                   : loadAdminAccounts,
         getAdminAccountById                 : getAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,

@@ -75,6 +75,20 @@ module.exports = function(config, MongoDb, logger){
         },
 
         //Admin Account CURD
+        loadAdminAccountss = function(tenantId, numberOfPage, pageNumber){
+            numberOfPage = numberOfPage || 10;
+            pageNumber = pageNumber || 1;
+
+            var
+                skip = pageNumber - 1,
+                limits = numberOfPage,
+                opts = {
+                    skip : skip,
+                    limits : limits
+                };
+
+            return  _find(collections.AdminAccount, {tenantId : new MongoDb.ObjectID(tenantId)}, opts);
+        },
         findAdminAccountById = function(adminId){
             return  _findOneBy(collections.AdminAccount, {_id : adminId});
         },
@@ -88,9 +102,10 @@ module.exports = function(config, MongoDb, logger){
             return  _findOneBy(collections.AdminAccount, {tenantId: new MongoDb.ObjectID(tenantId), username : username});
         },
         upsertAdminAccount = function(adminDo){
-            return _upsertByMatch(collections.AdminAccount, {createdOn:1}, {tenantId:adminDo.tenantId,email:adminDo.email}, adminDo);
+            adminDo.tenantId = new MongoDb.ObjectID(adminDo.tenantId);
+            return _insertNew(collections.AdminAccount, adminDo);
         },
-        updateAdminAccountt = function(adminId, updateDo){
+        updateAdminAccount = function(adminId, updateDo){
             return _upsertByMatch(collections.AdminAccount, {}, {_id : new MongoDb.ObjectID(adminId)}, {$set: updateDo});
         },
 
@@ -288,21 +303,27 @@ module.exports = function(config, MongoDb, logger){
         connect                             : connect,
         close                               : close,
 
+        //Api Call log
         insertApiCallLog                    : insertApiCallLog,
 
+        //Admin Account
+        loadAdminAccountss                  : loadAdminAccountss,
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,
-        updateAdminAccountt                 : updateAdminAccountt,
+        updateAdminAccount                 : updateAdminAccount,
 
+        //App Account
         findAppAccountByAppKey              : findAppAccountByAppKey,
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
+        //Admin Auth Token
         findAdminAuthTokenByToken           : findAdminAuthTokenByToken,
         upsertAdminAuthToken                : upsertAdminAuthToken,
 
+        //Tenant
         findTenantById                      : findTenantById,
         loadTenants                         : loadTenants,
         upsertTenant                        : upsertTenant,

@@ -58,48 +58,10 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
 
     //Account
     //Admin
-    router.get(
-        '/account/admin/:adminId?',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next) {
-            try{
-                apiController.getAdminAccount(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-    router.post(
-        '/account/admin',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next) {
-            try{
-                apiController.postAdminAccount(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
+    _hookUpRoutes(router, 'get', '/account/admins/:tenantId?/:numberOfPage?/:pageNumber?', apiController.getAdminAccounts);
+    _hookUpRoutes(router, 'get', '/account/admin/:adminId?', apiController.getAdminAccount);
+    //_hookUpRoutes(router, 'put', '/account/admin/:adminId?', apiController.putAdminAccount);
+    _hookUpRoutes(router, 'post', '/account/admin/:adminId?', apiController.postAdminAccount);
 
     //App
     router.get(
@@ -253,7 +215,7 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     );
 
     //Tenants
-    _hookUpRoutes(router, 'get', '/tenants/:numberOfPage/:pageNumber', apiController.getTenants);
+    _hookUpRoutes(router, 'get', '/tenants/:numberOfPage?/:pageNumber?', apiController.getTenants);
     _hookUpRoutes(router, 'get', '/tenant/:tenantId?', apiController.getTenant);
     _hookUpRoutes(router, 'put', '/tenant/:tenantId?', apiController.putTenant);
     _hookUpRoutes(router, 'post', '/tenant/:tenantId?', apiController.postTenant);

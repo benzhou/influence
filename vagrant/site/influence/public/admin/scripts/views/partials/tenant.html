@@ -6,7 +6,7 @@
         <div class="row placeholders">
             <div class="col-xs-6 col-sm-3 placeholder">
                 <form role="form">
-                    <div class="form-group" ng-if='tenant'>
+                    <div class="form-group" ng-if='tenant && tenant._id'>
                         <label for="tenantId">Tenant ID</label>
                         <label id="tenantId">{{tenant._id}}</label>
                     </div>
