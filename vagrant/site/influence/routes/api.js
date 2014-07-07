@@ -220,6 +220,16 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     _hookUpRoutes(router, 'put', '/tenant/:tenantId?', apiController.putTenant);
     _hookUpRoutes(router, 'post', '/tenant/:tenantId?', apiController.postTenant);
 
+    //Actions
+    _hookUpRoutes(router, 'get', '/actions/:numberOfPage?/:pageNumber?', apiController.getActions);
+    _hookUpRoutes(router, 'get', '/action/:actionId?', apiController.getAction);
+    _hookUpRoutes(router, 'post', '/action/:actionId?', apiController.postAction);
+
+    //Affiliates
+    _hookUpRoutes(router, 'get', '/affiliates/:numberOfPage?/:pageNumber?', apiController.getAffiliates);
+    _hookUpRoutes(router, 'get', '/affiliate/:affiliateId?', apiController.getAffiliate);
+    _hookUpRoutes(router, 'post', '/affiliate/:affiliateId?', apiController.postAffiliate);
+
 
 
     return router;

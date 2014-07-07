@@ -28,13 +28,41 @@ module.exports = function(plain){
         mixin = function(){
             var args = [].slice(arguments);
             return _.extend.apply(this, args);
+        },
+
+        cleanSearchFilter = function(allowedFilters, passedInFilter){
+            var cleanedFilter = {};
+            if(!passedInFilter) return cleanedFilter;
+
+            for(var prop in passedInFilter){
+                if(passedInFilter.hasOwnProperty(prop) && allowedFilters.hasOwnProperty(prop)){
+                    cleanedFilter[prop] = 1;
+                }
+            }
+
+            return cleanedFilter
+        },
+
+        cleanSort = function(allowedSortFiles, passedInSort){
+            var cleanedSort = {};
+            if(!passedInSort) return cleanedSort;
+
+            for(var prop in passedInSort){
+                if(passedInSort.hasOwnProperty(prop) && allowedSortFiles.hasOwnProperty(prop)){
+                    cleanedSort[prop] = passedInSort[prop];
+                }
+            }
+
+            return cleanedSort
         };
 
     return {
-        sha256Hash : sha256Hash,
-        getUrlSafeBase64EncodedToken   : getUrlSafeBase64EncodedToken,
-        typeIs      : typeIs,
-        mixin       : mixin
+        sha256Hash                      : sha256Hash,
+        getUrlSafeBase64EncodedToken    : getUrlSafeBase64EncodedToken,
+        typeIs                          : typeIs,
+        mixin                           : mixin,
+        cleanSearchFilter               : cleanSearchFilter,
+        cleanSort                       : cleanSort
     }
 }();
 

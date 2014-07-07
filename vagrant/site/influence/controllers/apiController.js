@@ -440,7 +440,288 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 });
         },
 
+        //Actions
+        getActions = function(req,res,next){
+            //TODO request validation
 
+            //TODO: Added selected fields
+
+            var filter = {};
+
+            Q.when(authBusiness.loadActions(filter, req.params.numberOfPage, req.params.pageNumber)).then(
+                function(actions){
+                    logger.log("apiController.js getActions authBusiness.loadActions fulfilled.");
+                    logger.log(actions);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            actions : actions
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getActions caught an error!.");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
+        getAction = function(req,res,next){
+            //TODO request validation
+
+            Q.when(authBusiness.findActionById(req.params.actionId)).then(
+
+                function(action){
+                    logger.log("apiController.js getAction authBusiness.findActionById fulfilled.");
+                    logger.log(action);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            action : {
+                                id          : action._id,
+                                name        : action.name
+                            }
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getAction caught an error!.");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
+        postAction = function(req,res,next){
+            //TODO request validation
+
+            var action = req.body,
+                actionId = req.params.actionId,
+                promise,
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
+
+            if(actionId){
+                promise = authBusiness.updateAction(
+                    actionId,
+                    action.name,
+                    currentAdminId
+                );
+            }else{
+                promise =
+                    authBusiness
+                        .createAction(
+                            action.name,
+                            currentAdminId
+                        );
+            }
+
+            Q.when(promise).then(
+                function(newAction){
+                    logger.log("apiController.js postAction create or update promise is fulfilled!");
+                    logger.log(newAction);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            action : {
+                                id          : newAction._id,
+                                name        : newAction.name
+                            }
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js postAction create or update caught an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    logger.log(err);
+
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(
+                function(){
+                    logger.log("apiController.js postAction: done");
+                    next();
+                }
+            );
+        },
+
+        //Affiliates
+        getAffiliates = function(req,res,next){
+            //TODO request validation
+
+            //TODO: Added selected fields
+
+            var filter  = req.query.q,
+                sort    = req.query.s;
+
+            Q.when(tenantsBusiness.loadAffiliates(filter, req.params.numberOfPage, req.params.pageNumber, sort)).then(
+                function(affiliates){
+                    logger.log("apiController.js getAffiliates tenantsBusiness.loadAffiliates fulfilled.");
+                    logger.log(affiliates);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            affiliates : affiliates
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getAffiliates caught an error!.");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
+        getAffiliate = function(req,res,next){
+            //TODO request validation
+
+            Q.when(tenantsBusiness.findAffiliateById(req.params.affiliateId)).then(
+
+                function(affiliate){
+                    logger.log("apiController.js getAffiliate tenantsBusiness.findAffiliateById fulfilled.");
+                    logger.log(affiliate);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            affiliate : {
+                                id          : affiliate._id,
+                                name        : affiliate.name
+                            }
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getAffiliate caught an error!.");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
+        postAffiliate = function(req,res,next){
+            //TODO request validation
+
+            var affiliate = req.body,
+                affiliateId = req.params.affiliateId,
+                promise,
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
+
+            if(affiliateId){
+                promise = tenantsBusiness.updateAffiliate(
+                    affiliateId,
+                    affiliate.name,
+                    currentAdminId
+                );
+            }else{
+                promise =
+                    tenantsBusiness.createAffiliate(
+                        affiliate.name,
+                        affiliate.tenantId,
+                        currentAdminId
+                    );
+            }
+
+            Q.when(promise).then(
+                function(newAffiliate){
+                    logger.log("apiController.js postAffiliate create or update promise is fulfilled!");
+                    logger.log(newAffiliate);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            affiliate : {
+                                id          : newAffiliate._id,
+                                name        : newAffiliate.name
+                            }
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js postAffiliate create or update caught an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    logger.log(err);
+
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(
+                function(){
+                    logger.log("apiController.js postAffiliate: done");
+                    next();
+                }
+            );
+        },
+
+        //App Account
         getAppAccount = function(req,res,next){
             //TODO request validation
 
@@ -549,6 +830,14 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         getTenant           : getTenant,
         postTenant          : postTenant,
         putTenant           : putTenant,
+
+        getActions          : getActions,
+        getAction           : getAction,
+        postAction          : postAction,
+
+        getAffiliates       : getAffiliates,
+        getAffiliate        : getAffiliate,
+        postAffiliate       : postAffiliate,
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount

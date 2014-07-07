@@ -12,13 +12,33 @@ module.exports = function(dbProvider){
         },
         updateTenant = function(tenantId, updateDo){
             return dbProvider.updateTenant(tenantId, updateDo);
+        },
+
+        //Affiliate
+        createAffiliate = function(actionDo){
+            return dbProvider.updateAffiliate(actionDo);
+        },
+        updateAffiliate = function(actionId, updateDo){
+            return dbProvider.updateAffiliate(actionId, updateDo);
+        },
+        findAffiliateById = function(affiliateId){
+            return dbProvider.findAffiliateById(affiliateId);
+        },
+        loadAffiliates = function(filter, numberOfPage, pageNumber, sort) {
+            return dbProvider.loadActions(filter, numberOfPage, pageNumber, sort);
         };
 
     return {
         findTenantById                      : findTenantById,
         loadTenants                         : loadTenants,
         upsertTenant                        : upsertTenant,
-        updateTenant                        : updateTenant
+        updateTenant                        : updateTenant,
+
+        //Affiliates
+        createAffiliate                     : createAffiliate,
+        updateAffiliate                     : updateAffiliate,
+        findAffiliateById                   : findAffiliateById,
+        loadAffiliates                      : loadAffiliates
     };
 };
 

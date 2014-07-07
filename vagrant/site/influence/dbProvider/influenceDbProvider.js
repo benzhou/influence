@@ -57,6 +57,34 @@ module.exports = function(dbProvider){
         },
         updateTenant = function(tenantId, updateDo){
             return dbProvider.updateTenant(tenantId, updateDo);
+        },
+
+        //Affiliate
+        createAffiliate = function(affiliateDo){
+            return dbProvider.updateAffiliate(affiliateDo);
+        },
+        updateAffiliate = function(affiliateId, updateDo){
+            return dbProvider.updateAffiliate(affiliateId, updateDo);
+        },
+        findAffiliateById = function(affiliateId){
+            return dbProvider.findAffiliateById(affiliateId);
+        },
+        loadAffiliates = function(filter, numberOfPage, pageNumber, sort) {
+            return dbProvider.loadActions(filter, numberOfPage, pageNumber, sort);
+        },
+
+        //Actions
+        createAction = function(actionDo){
+            return dbProvider.createAction(actionDo);
+        },
+        updateAction = function(actionId, updateDo){
+            return dbProvider.updateAction(actionId, updateDo);
+        },
+        findActionById = function(actionId){
+            return dbProvider.findActionById(actionId);
+        },
+        loadActions = function(filter, numberOfPage, pageNumber){
+            return dbProvider.loadActions(filter, numberOfPage, pageNumber);
         };
 
 
@@ -81,7 +109,19 @@ module.exports = function(dbProvider){
         findTenantById                      : findTenantById,
         loadTenants                         : loadTenants,
         upsertTenant                        : upsertTenant,
-        updateTenant                        : updateTenant
+        updateTenant                        : updateTenant,
+
+        //Affiliates
+        createAffiliate                     : createAffiliate,
+        updateAffiliate                     : updateAffiliate,
+        findAffiliateById                   : findAffiliateById,
+        loadAffiliates                      : loadAffiliates,
+
+        //Actions
+        createAction                        : createAction,
+        updateAction                        : updateAction,
+        findActionById                      : findActionById,
+        loadActions                         : loadActions
     };
 };
 

@@ -79,6 +79,25 @@ module.exports = function(){
         //accountBusiness.js  loadAdminAccounts
         C_400_014_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400014001, desc : "Missing required parameters" },
 
+        //authBusiness.js  findActionById
+        C_400_015_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400015001, desc : "Missing required parameters" },
+        C_400_015_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400015002, desc : "Invalid Action ID" },
+
+        //authBusiness.js createAction
+        C_400_016_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400016001, desc : "Missing required parameters" },
+
+        //authBusiness.js updateAction
+        C_400_017_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400017001, desc : "Missing required parameters" },
+
+        //tenantsBusiness.js  findAffiliateById
+        C_400_018_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400018001, desc : "Missing required parameters" },
+        C_400_018_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400018002, desc : "Invalid Affiliate ID" },
+
+        //tenantsBusiness.js createAffiliate
+        C_400_019_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400019001, desc : "Missing required parameters" },
+
+        //tenantsBusiness.js updateAffiliate
+        C_400_020_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400020001, desc : "Missing required parameters" }
     };
 }();
 

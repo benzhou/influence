@@ -10,7 +10,9 @@ module.exports = function(config, MongoDb, logger){
             AppAccount          : "AppAccount",
             AdminAuthToken      : "AdminAuthToken",
             Tenants             : "Tenants",
-            APICallLog          : "APICallLog"
+            APICallLog          : "APICallLog",
+            Actions             : "Actions",
+            Affiliates          : "Affiliates"
         },
         db = null,
         connectionDefer = null,
@@ -75,7 +77,7 @@ module.exports = function(config, MongoDb, logger){
         },
 
         //Admin Account CURD
-        loadAdminAccountss = function(tenantId, numberOfPage, pageNumber){
+        loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
             numberOfPage = numberOfPage || 10;
             pageNumber = pageNumber || 1;
 
@@ -135,7 +137,7 @@ module.exports = function(config, MongoDb, logger){
         updateTenant = function(tenantId, updateDo){
             return _upsertByMatch(collections.Tenants, {}, {_id : new MongoDb.ObjectID(tenantId)}, {$set: updateDo});
         },
-        loadTenants = function(numberOfPage, pageNumber){
+        loadTenants = function(numberOfPage, pageNumber, filter){
             numberOfPage = numberOfPage || 10;
             pageNumber = pageNumber || 1;
 
@@ -147,7 +149,63 @@ module.exports = function(config, MongoDb, logger){
                     limits : limits
                 };
 
-            return  _find(collections.Tenants, {}, opts);
+            filter = filter || {};
+            return  _find(collections.Tenants, filter, opts);
+        },
+
+        //Affiliates
+        createAffiliate = function(affiliateDo){
+            return _insertNew(collections.Affiliates, affiliateDo);
+        },
+        updateAffiliate = function(affiliateId, updateDo){
+            return _upsertByMatch(collections.Affiliates, {}, {_id : new MongoDb.ObjectID(affiliateId)}, {$set: updateDo});
+        },
+        findAffiliateById = function(affiliateId){
+            return  _findOneBy(collections.Affiliates, {_id : affiliateId});
+        },
+        loadAffiliates = function(filter, numberOfPage, pageNumber, sort){
+            numberOfPage = numberOfPage || 10;
+            pageNumber = pageNumber || 1;
+
+            var
+                skip = pageNumber - 1,
+                limits = numberOfPage,
+                opts = {
+                    skip : skip,
+                    limits : limits
+                };
+
+            filter = filter || {};
+            if(sort){
+                opt.sort = sort;
+            }
+            return  _find(collections.Affiliates, filter, opts);
+        },
+
+        //Actions
+        createAction = function(actionDo){
+            return _insertNew(collections.Actions, actionDo);
+        },
+        updateAction = function(actionId, updateDo){
+            return _upsertByMatch(collections.Actions, {}, {_id : new MongoDb.ObjectID(actionId)}, {$set: updateDo});
+        },
+        findActionById = function(actionId){
+            return  _findOneBy(collections.Actions, {_id : actionId});
+        },
+        loadActions = function(filter, numberOfPage, pageNumber){
+            numberOfPage = numberOfPage || 10;
+            pageNumber = pageNumber || 1;
+
+            var
+                skip = pageNumber - 1,
+                limits = numberOfPage,
+                opts = {
+                    skip : skip,
+                    limits : limits
+                };
+
+            filter = filter || {};
+            return  _find(collections.Actions, filter, opts);
         },
 
         //Private Helper methods
@@ -307,7 +365,7 @@ module.exports = function(config, MongoDb, logger){
         insertApiCallLog                    : insertApiCallLog,
 
         //Admin Account
-        loadAdminAccountss                  : loadAdminAccountss,
+        loadAdminAccounts                   : loadAdminAccounts,
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
@@ -327,7 +385,19 @@ module.exports = function(config, MongoDb, logger){
         findTenantById                      : findTenantById,
         loadTenants                         : loadTenants,
         upsertTenant                        : upsertTenant,
-        updateTenant                        : updateTenant
+        updateTenant                        : updateTenant,
+
+        //Affiliates
+        createAffiliate                     : createAffiliate,
+        updateAffiliate                     : updateAffiliate,
+        findAffiliateById                   : findAffiliateById,
+        loadAffiliates                      : loadAffiliates,
+
+        //Actions
+        createAction                        : createAction,
+        updateAction                        : updateAction,
+        findActionById                      : findActionById,
+        loadActions                         : loadActions
     };
 };
 
