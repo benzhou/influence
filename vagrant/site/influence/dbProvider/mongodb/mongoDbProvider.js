@@ -82,7 +82,7 @@ module.exports = function(config, MongoDb, logger){
             pageNumber = pageNumber || 1;
 
             var
-                skip = pageNumber - 1,
+                skip = (pageNumber - 1) * numberOfPage,
                 limits = numberOfPage,
                 opts = {
                     skip : skip,
@@ -142,7 +142,7 @@ module.exports = function(config, MongoDb, logger){
             pageNumber = pageNumber || 1;
 
             var
-                skip = pageNumber - 1,
+                skip = (pageNumber - 1) * numberOfPage,
                 limits = numberOfPage,
                 opts = {
                     skip : skip,
@@ -173,7 +173,7 @@ module.exports = function(config, MongoDb, logger){
             pageNumber = pageNumber || 1;
 
             var
-                skip = pageNumber - 1,
+                skip = (pageNumber - 1) * numberOfPage,
                 limits = numberOfPage,
                 opts = {
                     skip : skip,
@@ -192,6 +192,8 @@ module.exports = function(config, MongoDb, logger){
             logger.log("MongoDbProvider.js loadAffiliates");
             logger.log(filter);
             logger.log(sort);
+            logger.log("skip %s, limits:%s", skip, limits);
+
             return  _find(collections.Affiliates, filter, opts);
         },
 
@@ -210,7 +212,7 @@ module.exports = function(config, MongoDb, logger){
             pageNumber = pageNumber || 1;
 
             var
-                skip = pageNumber - 1,
+                skip = (pageNumber - 1) * numberOfPage,
                 limits = numberOfPage,
                 opts = {
                     skip : skip,
