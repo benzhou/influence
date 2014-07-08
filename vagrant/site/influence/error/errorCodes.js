@@ -85,9 +85,11 @@ module.exports = function(){
 
         //authBusiness.js createAction
         C_400_016_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400016001, desc : "Missing required parameters" },
+        C_400_016_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400016002, desc : "Action Key already exist!" },
 
         //authBusiness.js updateAction
         C_400_017_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400017001, desc : "Missing required parameters" },
+        C_400_017_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400017002, desc : "Action Key already exists!" },
 
         //tenantsBusiness.js  findAffiliateById
         C_400_018_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400018001, desc : "Missing required parameters" },
@@ -97,7 +99,12 @@ module.exports = function(){
         C_400_019_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400019001, desc : "Missing required parameters" },
 
         //tenantsBusiness.js updateAffiliate
-        C_400_020_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400020001, desc : "Missing required parameters" }
+        C_400_020_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400020001, desc : "Missing required parameters" },
+
+        //authBusiness.js findActionByKey
+        C_400_021_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400021001, desc : "Missing required parameters" },
+        C_400_021_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400021002, desc : "Invalid Action Key" }
+
     };
 }();
 

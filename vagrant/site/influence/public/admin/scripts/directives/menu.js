@@ -23,7 +23,8 @@
                                 {name:"Admins", active:true, href:"/home/config/admins"},
                                 {name:"Apps", active:false, href:"/home/config/apps"},
                                 {name:"Tenants", active:false, href:"/home/config/tenants"},
-                                {name:"Affiliates", active:false, href:"/home/config/affiliates"}
+                                {name:"Affiliates", active:false, href:"/home/config/affiliates"},
+                                {name:"Actions", active:false, href:"/home/config/actions"}
                             ]
                         }
                     ],

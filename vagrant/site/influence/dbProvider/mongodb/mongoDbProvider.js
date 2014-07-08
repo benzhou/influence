@@ -12,7 +12,8 @@ module.exports = function(config, MongoDb, logger){
             Tenants             : "Tenants",
             APICallLog          : "APICallLog",
             Actions             : "Actions",
-            Affiliates          : "Affiliates"
+            Affiliates          : "Affiliates",
+            Posts               : "Posts"
         },
         db = null,
         connectionDefer = null,
@@ -204,8 +205,14 @@ module.exports = function(config, MongoDb, logger){
         updateAction = function(actionId, updateDo){
             return _upsertByMatch(collections.Actions, {}, {_id : new MongoDb.ObjectID(actionId)}, {$set: updateDo});
         },
+        updateActionByKey = function(actionKey, updateDo){
+            return _upsertByMatch(collections.Actions, {}, {key : actionKey}, {$set: updateDo});
+        },
         findActionById = function(actionId){
             return  _findOneBy(collections.Actions, {_id : actionId});
+        },
+        findActionByKey = function(actionKey){
+            return  _findOneBy(collections.Actions, {key : actionKey});
         },
         loadActions = function(filter, numberOfPage, pageNumber){
             numberOfPage = numberOfPage || 10;
@@ -221,6 +228,45 @@ module.exports = function(config, MongoDb, logger){
 
             filter = filter || {};
             return  _find(collections.Actions, filter, opts);
+        },
+
+        //Posts
+        createPost = function(postDo){
+            return _insertNew(collections.Posts, postDo);
+        },
+        updatePost = function(postId, updateDo){
+            return _upsertByMatch(collections.Posts, {}, {_id : new MongoDb.ObjectID(postId)}, {$set: updateDo});
+        },
+        findPostById = function(postId){
+            return  _findOneBy(collections.Posts, {_id : postId});
+        },
+        loadPosts = function(filter, numberOfPage, pageNumber, sort) {
+            numberOfPage = numberOfPage || 10;
+            pageNumber = pageNumber || 1;
+
+            var
+                skip = (pageNumber - 1) * numberOfPage,
+                limits = numberOfPage,
+                opts = {
+                    skip : skip,
+                    limits : limits
+                };
+
+            filter = filter || {};
+            if(sort){
+                opts.sort = sort;
+            }
+
+            if(filter.affiliateId){
+                filter.affiliateId = new MongoDb.ObjectID(filter.affiliateId);
+            }
+
+            logger.log("MongoDbProvider.js loadPosts");
+            logger.log(filter);
+            logger.log(sort);
+            logger.log("skip %s, limits:%s", skip, limits);
+
+            return  _find(collections.Affiliates, filter, opts);
         },
 
         //Private Helper methods
@@ -411,8 +457,16 @@ module.exports = function(config, MongoDb, logger){
         //Actions
         createAction                        : createAction,
         updateAction                        : updateAction,
+        updateActionByKey                   : updateActionByKey,
         findActionById                      : findActionById,
-        loadActions                         : loadActions
+        findActionByKey                     : findActionByKey,
+        loadActions                         : loadActions,
+
+        //Posts
+        createPost                          : createPost,
+        updatePost                          : updatePost,
+        findPostById                        : findPostById,
+        loadPosts                           : loadPosts
     };
 };
 

@@ -307,8 +307,16 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
         //Tenants
         getTenants = function(req,res,next){
+            var filter = {},
+                activeOnly = req.query[constants.QUERY_STRING_PARAM.GET_TENANTS.ACTIVE_ONLY] || "1";
 
-            Q.when(tenantsBusiness.getTenants(req.params.numberOfPage, req.params.pageNumber)).then(
+
+            //We only add filter when request asked for only show active tenants, the opposite is include all, therefore, no filter needed.
+            if(activeOnly == "1"){
+                filter.isActive = true;
+            }
+
+            Q.when(tenantsBusiness.getTenants(req.params.numberOfPage, req.params.pageNumber, filter)).then(
                 function(tenants){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -459,7 +467,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         returnActions.push(
                             {
                                 id          : item._id,
-                                name        : item.name
+                                name        : item.name,
+                                key         : item.key
                             }
                         );
                     });
@@ -506,7 +515,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         data    : {
                             action : {
                                 id          : action._id,
-                                name        : action.name
+                                name        : action.name,
+                                key         : action.key
                             }
                         }
                     });
@@ -514,6 +524,46 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getAction caught an error!.");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
+        getActionByKey = function(req,res,next){
+            //TODO request validation
+
+            Q.when(authBusiness.findActionByKey(req.params.actionKey)).then(
+
+                function(action){
+                    logger.log("apiController.js getActionByKey authBusiness.findActionByKey fulfilled.");
+                    logger.log(action);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            action : {
+                                id          : action._id,
+                                name        : action.name,
+                                key         : action.key
+                            }
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getActionByKey caught an error!.");
                     logger.log(err);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
@@ -541,14 +591,16 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             if(actionId){
                 promise = authBusiness.updateAction(
                     actionId,
+                    currentAdminId,
                     action.name,
-                    currentAdminId
+                    action.key
                 );
             }else{
                 promise =
                     authBusiness
                         .createAction(
                             action.name,
+                            action.key,
                             currentAdminId
                         );
             }
@@ -564,7 +616,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         data    : {
                             action : {
                                 id          : newAction._id,
-                                name        : newAction.name
+                                name        : newAction.name,
+                                key         : newAction.key
                             }
                         }
                     });
@@ -574,7 +627,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     logger.log("apiController.js postAction create or update caught an error!");
                     logger.log(err);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
-                    logger.log(err);
+                    logger.log(err.stack);
+
 
                     res.json(
                         resObj.httpStatus,
@@ -867,6 +921,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
         getActions          : getActions,
         getAction           : getAction,
+        getActionByKey      : getActionByKey,
         postAction          : postAction,
 
         getAffiliates       : getAffiliates,

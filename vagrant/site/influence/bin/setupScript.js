@@ -46,7 +46,7 @@ logger.log("Getting start to initialize our DB");
 logger.log("=======================================");
 
 logger.log("Creating tenant record...");
-Q.when(tenantsBusiness.createTenant(tenantDo.name)).then(
+Q.when(tenantsBusiness.createTenant(tenantDo.name, 1)).then(
     function(tenant){
         if(!tenant){
             throw new Error("Not able to create tenant.");

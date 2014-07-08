@@ -40,8 +40,9 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             return df.promise;
         },
 
-        getTenants = function(numberOfPage, pageNumber){
-            var df = Q.defer();
+        getTenants = function(numberOfPage, pageNumber, filter){
+            var df = Q.defer(),
+                cleanedFilter;
 
             //Cleaning and set defaults
             numberOfPage = numberOfPage || 10;
@@ -58,7 +59,12 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                 pageNumber = 1;
             }
 
-            Q.when(tenantsDataHandler.loadTenants(numberOfPage, pageNumber)).then(
+            cleanedFilter = helpers.cleanSearchFilter({isActive : 1}, filter);
+            logger.log("tenantsBusiness.js getTenants");
+            logger.log("cleanedFilter:");
+            logger.log(cleanedFilter);
+
+            Q.when(tenantsDataHandler.loadTenants(numberOfPage, pageNumber, cleanedFilter)).then(
                 //
                 function(tenants){
                     logger.log("tenantsBusiness.js getTenants: loadTenants promise resolved");
@@ -83,6 +89,8 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
         createTenant = function(name, createdBy){
             var df = Q.defer();
 
+            logger.log("createTenant, name: %s, createdBy: %s", name, createdBy);
+
             //validation
             //required fields
             if(!name || !createdBy){
@@ -94,8 +102,6 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
 
                 return df.promise;
             }
-
-            logger.log("createTenant, name: %s, createdBy: %s", name, createdBy);
 
             var
 
@@ -159,7 +165,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                     updatedBy   : updatedBy
                 };
 
-            if(name){
+            if(name != null){
                 tenant.name = name;
             }
 
@@ -294,11 +300,11 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                     updatedBy   : updatedBy
                 };
 
-            if(name){
+            if(name != null){
                 affiliate.name = name;
             }
 
-            if(location){
+            if(location != null){
                 affiliate.location = location;
             }
 

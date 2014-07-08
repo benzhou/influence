@@ -49,8 +49,8 @@ module.exports = function(dbProvider){
         findTenantById = function(tenantId){
             return dbProvider.findTenantById(tenantId);
         },
-        loadTenants = function(numberOfPage, pageNumber){
-            return dbProvider.loadTenants(numberOfPage, pageNumber);
+        loadTenants = function(numberOfPage, pageNumber, filter){
+            return dbProvider.loadTenants(numberOfPage, pageNumber, filter);
         },
         upsertTenant = function(tenant){
             return dbProvider.upsertTenant(tenant);
@@ -83,8 +83,28 @@ module.exports = function(dbProvider){
         findActionById = function(actionId){
             return dbProvider.findActionById(actionId);
         },
+        updateActionByKey = function(actionKey, updateDo){
+            return dbProvider.updateActionByKey(actionKey, updateDo);
+        },
+        findActionByKey = function(actionKey){
+            return dbProvider.findActionByKey(actionKey);
+        },
         loadActions = function(filter, numberOfPage, pageNumber){
             return dbProvider.loadActions(filter, numberOfPage, pageNumber);
+        },
+
+        //Posts
+        createPost = function(postDo){
+            return dbProvider.createPost(postDo);
+        },
+        updatePost = function(postId, updateDo){
+            return dbProvider.updatePost(postId, updateDo);
+        },
+        findPostById = function(postId){
+            return dbProvider.findPostById(postId);
+        },
+        loadPosts = function(filter, numberOfPage, pageNumber, sort) {
+            return dbProvider.loadPosts(filter, numberOfPage, pageNumber, sort);
         };
 
 
@@ -120,8 +140,16 @@ module.exports = function(dbProvider){
         //Actions
         createAction                        : createAction,
         updateAction                        : updateAction,
+        updateActionByKey                   : updateActionByKey,
         findActionById                      : findActionById,
-        loadActions                         : loadActions
+        findActionByKey                     : findActionByKey,
+        loadActions                         : loadActions,
+
+        //Posts
+        createPost                          : createPost,
+        updatePost                          : updatePost,
+        findPostById                        : findPostById,
+        loadPosts                           : loadPosts
     };
 };
 

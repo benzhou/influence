@@ -12,21 +12,20 @@ module.exports = function(){
         },
         admin : {
             app : {
-                //Mac Laptop
-                key        : "NjE1YjhiMDQtM2U3My00ZjhiLWFjZjEtYTc5OTdjOWU1Yzc1OmM4ZTcwNjQzLTg1YzAtNDY4YS04YmFmLTNkNzE1ZThlNjIyMw,,",
-                secret     : "ZmY3NmVlZmQtZWZjNC00YTE4LTk1NTItNzU0NDViZTQ5MWFjOjk3MjljMmIxLTlmNmEtNDlhOC1hNjA1LTE3NTQ3NGE0YzFjNw,,",
+                //Office
+                key      : "NTlmMTdhOGUtNTEyNS00NTMxLWE3MTYtY2NjNjVjZmYzMjRkOjcyYWMxMDg0LTljNTItNDAwMi04NWM0LWVlZmEyYTYyMzNhMw,,",
+                secret   : "ZWNkMjhjMzctYTRkYi00YmE3LWJhYmUtZjUwN2Q0ZTA1Y2Q4OjY2MGMxNTA3LWQxYjEtNDYxYi05ZTAyLTUxMTkwMTA3MTg1Ng",
 
-                tenantId : '53b374ba0d45fa990c8dc866'
-
+                tenantId : "53bc05cd7f7847e21faab5d1"
 
 /*
 
+ //Mac Laptop
+ key        : "NjE1YjhiMDQtM2U3My00ZjhiLWFjZjEtYTc5OTdjOWU1Yzc1OmM4ZTcwNjQzLTg1YzAtNDY4YS04YmFmLTNkNzE1ZThlNjIyMw,,",
+ secret     : "ZmY3NmVlZmQtZWZjNC00YTE4LTk1NTItNzU0NDViZTQ5MWFjOjk3MjljMmIxLTlmNmEtNDlhOC1hNjA1LTE3NTQ3NGE0YzFjNw,,",
 
- //Office
- key      : "YTFmNGE3ZWMtMjI4Zi00YzA3LTkyYTgtMWUwNjc5Y2YyNDNlOjk0ZmU2NGQ3LTAxMjUtNDg3My1iMTk4LWQ1NzMxZmY3NDdhNw,,",
- secret   : "   MmY4MjY5YTEtNTg3NS00MTZlLWIzZjItOTljMjlmZTQ4NDdhOmNjODdhZDhjLWMwM2ItNGU1Ni04ZDYwLWRkMDkxZWRjMGQ4Ng,,",
+ tenantId : '53b374ba0d45fa990c8dc866'
 
- tenantId : "53ac3c7a14f1670f0eb93c55"
 
 
                */

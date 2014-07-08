@@ -6,7 +6,8 @@
         'influenceAdminApp.constants',
         'influenceAdminApp.config',
         'influenceAdminApp.session',
-        'influenceAdminApp.apiServices'
+        'influenceAdminApp.apiServices',
+        'influenceAdminApp.dirtyChecker'
     ])
         .controller('influenceAdminAppCtrl', function($scope, $rootScope, $log, influenceAdminAppConstants){
             $log.log("!!!!!!!!influenceAdminAppCtrl called!");
@@ -120,9 +121,9 @@
 
         })
         .controller('influenceAdminAccountsCtrl', function(
-            $scope, $rootScope, $location, $log,
+            $scope, $rootScope, $location, $log, $q,
             influenceAdminAppConstants, influenceAdminAppSession,
-            adminService){
+            adminService, tenantsService){
             $log.log("influenceAdminAccountsCtrl called!");
 
             //If user not authenticated, then go to home/index view directly
@@ -131,32 +132,66 @@
                 return;
             }
 
-            var loadAdmins = function(numberOfPage, pageNumber){
-                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                adminService.query({tenantId: influenceAdminAppSession.token.admin.tenantId, numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
-                    function(docs){
-                        $log.log('influenceAdminAccountsCtrl query fullfilled.');
-                        $scope.admins = docs.data.admins;
-                    }
-                ).catch(
-                    function(err){
-                        $log.log('influenceAdminAccountsCtrl query rejected!');
-                        $log.log(err);
+            var
+                loadTenants = function(){
+                    var df = $q.defer();
 
-                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
-                    }
-                ).finally(
-                    function(){
-                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
-                    }
-                );
-            };
+                    tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                        function(docs){
+                            $log.log('influenceAdminAccountsCtrl loadTenants fulfilled');
+
+                            $scope.tenants = docs.data.tenants;
+
+                            df.resolve(docs);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminAccountsCtrl loadTenants rejected');
+                            $log.log(err);
+                            df.reject(err);
+                        }
+                    );
+
+                    return df.promise;
+                },
+                loadAdmins = function(tenantId, numberOfPage, pageNumber){
+                    var df = $q.defer();
+
+                    adminService.query({tenantId: tenantId, numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
+                        function(docs){
+                            $log.log('influenceAdminAccountsCtrl query fullfilled.');
+                            $scope.admins = docs.data.admins;
+
+                            df.resolve(docs);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminAccountsCtrl query rejected!');
+                            $log.log(err);
+
+                            df.reject(err);
+                        }
+                    ).finally(
+                        function(){
+                            //$rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                        }
+                    );
+
+                    return df.promise;
+                },
+                refresh = function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                    loadAdmins($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber)
+                        .finally(function(){
+                            $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                        });
+                };
 
             $scope.numberOfPage = 10;
             $scope.pageNumber = 1;
 
             $scope.nextPage = function(){
-                loadAdmins($scope.numberOfPage, $scope.pageNumber);
+                refresh();
             };
 
             $scope.editAdmin = function(admin){
@@ -171,14 +206,47 @@
                 $location.path('/home/config/admin')
             };
 
+            $scope.onChangeTenant = function(){
+                $log.log("changed tenant:");
+                refresh();
+            }
+
             //initial load
-            loadAdmins($scope.numberOfPage, $scope.pageNumber);
+            $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+            loadTenants().then(
+                function(result){
+                    $log.log('influenceAdminAccountsCtrl initial Load fulfiled!');
+
+                    if(result.data.tenants.length === 0){
+                        throw {
+                            data : {
+                                code : 500,
+                                message : "No tenants"
+                            }
+                        }
+                    }
+
+                    $scope.selectedTenant = result.data.tenants[0];
+
+                    return loadAdmins($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber);
+                }
+            ).catch(
+                function(err){
+                    $log.log('influenceAdminAccountsCtrl initial Load rejected!');
+                    $log.log(err);
+
+                    $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                }
+            ).finally(function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                }
+            );
 
         })
         .controller('influenceAdminAccountCtrl', function(
             $scope, $rootScope, $location, $log, $routeParams,
             influenceAdminAppConstants, influenceAdminAppSession,
-            adminService){
+            adminService, tenantsService){
             $log.log("influenceAdminAccountCtrl called!");
 
             //If user not authenticated, then go to home/index view directly
@@ -192,10 +260,24 @@
             //Code for when load the admin view
             if(!adminId){
                 //When no passed-in adminId, assume this is an create
-                $scope.admin = {
+                $scope.admin = {};
 
-                };
+                tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(docs){
+                        $log.log('influenceAdminAccountCtrl tenantsService.query fulfilled');
+                        $log.log(docs);
 
+                        $scope.tenants = docs.data.tenants;
+                        $scope.admin.tenantId = $scope.tenants[0]._id;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAccountCtrl tenantsService.query rejected');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                );
 
             }else{
                 //When has passed in adminId, assume this is an update
@@ -240,7 +322,7 @@
                 if($scope.admin && $scope.admin.id){
                     params.adminId = $scope.admin.id;
                 }else{
-                    postData.tenantId = influenceAdminAppSession.token.admin.tenantId;
+                    postData.tenantId = $scope.admin.tenantId;
                     postData.password = $scope.admin.password;
                 }
 
@@ -372,7 +454,7 @@
 
             var loadTenants = function(numberOfPage, pageNumber){
                 $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                tenantsService.query({numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
+                tenantsService.query({ao:0,numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminTenantsCtrl');
                         $scope.tenants = docs.data.tenants;
@@ -412,6 +494,149 @@
 
             //initial load
             loadTenants($scope.numberOfPage, $scope.pageNumber);
+
+        })
+        .controller('influenceAdminActionCtrl', function(
+            $scope, $rootScope, $location, $log, $routeParams,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            actionsService){
+            $log.log("influenceAdminActionCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var actionId = $routeParams.actionId;
+            $log.log('influenceAdminActionCtrl $routeParams');
+            $log.log($routeParams);
+
+            //Code for when load the action view
+            if(!actionId){
+                //When no passed-in actionId, assume this is an create
+                $scope.action = {};
+
+
+            }else{
+                //When has passed in tenantId, assume this is an update
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                actionsService.get({actionId:actionId,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminActionCtrl get fulfilled!');
+                        $log.log(result.data.action);
+                        $scope.action = result.data.action;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminActionCtrl get rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            }
+
+            //Handler when user update or create action
+            $scope.createUpdateAction = function(){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                $log.log('influenceAdminActionCtrl createUpdateAction.');
+
+                var params = {
+                        token: influenceAdminAppSession.token.token
+                    },
+                    postData = {
+                        name : $scope.action.name,
+                        key : $scope.action.key
+                    };
+
+                if($scope.action && $scope.action.id){
+                    params.actionId = $scope.action.id;
+                }
+
+                actionsService.save(
+                    //params
+                    params,
+                    //Post data
+                    postData
+                ).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminActionCtrl post fulfilled!');
+                        $log.log(result.data.action);
+                        $scope.action = result.data.action;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminActionCtrl post rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            }
+        })
+        .controller('influenceAdminActionsCtrl', function(
+            $scope, $rootScope, $location, $log,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            actionsService){
+            $log.log("influenceAdminActionsCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var loadActions = function(numberOfPage, pageNumber){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                actionsService.query({numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(docs){
+                        $log.log('influenceAdminActionsCtrl');
+                        $scope.actions = docs.data.actions;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminActionsCtrl query rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            };
+
+            $scope.numberOfPage = 10;
+            $scope.pageNumber = 1;
+
+            $scope.nextPage = function(){
+                loadActions($scope.numberOfPage, $scope.pageNumber);
+            };
+
+            $scope.editAction = function(action){
+                $log.log("Editing action:");
+                $log.log(action);
+
+                $location.path(['/home/config/action/', action.id].join(''));
+            };
+
+            $scope.createAction = function(){
+                $log.log("Creating action:");
+                $location.path('/home/config/action')
+            };
+
+            //initial load
+            loadActions($scope.numberOfPage, $scope.pageNumber);
 
         })
         .controller('influenceAdminAffiliatesCtrl', function(
@@ -473,7 +698,7 @@
                             $log.log('influenceAdminAffiliatesCtrl loadAffiliates rejected!');
                             $log.log(err);
 
-                            $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                            df.reject(err);
                         }
                     ).finally();
 
@@ -481,9 +706,10 @@
                 },
                 refresh = function(){
                     $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                    loadAffiliates($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc).finally(function(){
-                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
-                    });
+                    loadAffiliates($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc)
+                        .finally(function(){
+                            $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                        });
                 };
 
             $scope.numberOfPage = 10;
@@ -514,7 +740,7 @@
 
             //initial load
             $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-            loadTenants($scope.numberOfPage, $scope.pageNumber).then(
+            loadTenants().then(
                 function(result){
                     $log.log('influenceAdminAffiliatesCtrl initial Load : loadTenants fulfilled!');
                     $log.log(result);
@@ -546,7 +772,7 @@
         })
         .controller('influenceAdminAffiliateCtrl', function(
             $scope, $rootScope, $location, $log, $routeParams,
-            influenceAdminAppConstants, influenceAdminAppSession,
+            influenceAdminAppConstants, influenceAdminAppSession, dirtyCheckerService,
             tenantsService, affiliatesService){
             $log.log("influenceAdminAffiliateCtrl called!");
 
@@ -556,22 +782,27 @@
                 return;
             }
 
-            var affiliateId = $routeParams.affiliateId;
+            var affiliateId = $routeParams.affiliateId,
+                originalAffiliate;
             $log.log('influenceAdminAffiliateCtrl $routeParams');
             $log.log($routeParams);
 
+            //$scope.selectedTenant = {};
+
             //Code for when load the affiliate view
             if(!affiliateId){
-                //When no passed-in affiliateid, assume this is an create
+                //When no passed-in affiliateId, assume this is an create
                 $scope.affiliate = {};
 
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
                 tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminAffiliateCtrl tenantsService.query fulfilled');
                         $log.log(docs);
                         $scope.tenants = docs.data.tenants;
 
-                        $scope.selectedTenant = $scope.tenants[0];
+                        //$scope.selectedTenant.tenant = $scope.tenants[0];
+                        $scope.affiliate.tenantId = $scope.tenants[0]._id;
                     }
                 ).catch(
                     function(err){
@@ -579,6 +810,10 @@
                         $log.log(err);
 
                         $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
                     }
                 );
 
@@ -590,6 +825,7 @@
                         $log.log('influenceAdminAffiliateCtrl get fulfilled!');
                         $log.log(result.data.affiliate);
                         $scope.affiliate = result.data.affiliate;
+                        originalAffiliate = angular.copy(result.data.affiliate);
                     }
                 ).catch(
                     function(err){
@@ -613,14 +849,19 @@
                 var params = {
                         token: influenceAdminAppSession.token.token
                     },
-                    postData = {
-                        name : $scope.affiliate.name
-                    };
+                    postData = {};
 
+                //Edit
                 if($scope.affiliate && $scope.affiliate.id){
                     params.affiliateId = $scope.affiliate.id;
+
+                    //Dirty check
+                    postData = dirtyCheckerService.getDirtyProperties(originalAffiliate, $scope.affiliate);
+
                 }else{
-                    postData.tenantId = $scope.selectedTenant._id;
+                    //Create
+                    postData.tenantId = $scope.affiliate.tenantId;
+                    postData.name = $scope.affiliate.name;
                 }
 
                 affiliatesService.save(

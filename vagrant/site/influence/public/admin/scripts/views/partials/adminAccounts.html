@@ -11,7 +11,8 @@
 
         <div class="row placeholders">
             <div class="col-xs-6 col-sm-3 placeholder">
-
+                <label for="tenant">Tenant:</label>
+                <select id="tenant" ng-model="selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in tenants"></select>
             </div>
         </div>
 

@@ -271,19 +271,21 @@ module.exports = function(helpers, util, logger, accountDataHandler){
                         updatedOn           : new Date()
                     };
 
+                    //Notice username/email and first, lastname et al is checking differently.
+                    //For first, lastname et al, we need to allow them to be set it empty string
                     if(username){
                         updateAdminDo.username = username;
                     }
                     if(email){
                         updateAdminDo.email = email;
                     }
-                    if(firstName){
+                    if(firstName != null){
                         updateAdminDo.firstName = firstName;
                     }
-                    if(lastName){
+                    if(lastName != null){
                         updateAdminDo.lastName = lastName;
                     }
-                    if(displayName){
+                    if(displayName != null){
                         updateAdminDo.displayName = displayName;
                     }
 

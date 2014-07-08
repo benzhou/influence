@@ -48,6 +48,14 @@
                     templateUrl: '/admin/scripts/views/partials/tenant.html',
                     controller: 'influenceAdminTenantCtrl'
                 }).
+                when('/home/config/actions', {
+                    templateUrl: '/admin/scripts/views/partials/actions.html',
+                    controller: 'influenceAdminActionsCtrl'
+                }).
+                when('/home/config/action/:actionId?', {
+                    templateUrl: '/admin/scripts/views/partials/action.html',
+                    controller: 'influenceAdminActionCtrl'
+                }).
                 when('/home/config/affiliates', {
                     templateUrl: '/admin/scripts/views/partials/affiliates.html',
                     controller: 'influenceAdminAffiliatesCtrl'

@@ -23,6 +23,12 @@ module.exports = function(dbProvider){
         findActionById = function(actionId){
             return dbProvider.findActionById(actionId);
         },
+        updateActionByKey = function(actionKey, updateDo){
+            return dbProvider.updateActionByKey(actionKey, updateDo);
+        },
+        findActionByKey = function(actionKey){
+            return dbProvider.findActionByKey(actionKey);
+        },
         loadActions = function(filter, numberOfPage, pageNumber){
             return dbProvider.loadActions(filter, numberOfPage, pageNumber);
         };
@@ -35,7 +41,9 @@ module.exports = function(dbProvider){
         //Actions
         createAction                : createAction,
         updateAction                : updateAction,
+        updateActionByKey           : updateActionByKey,
         findActionById              : findActionById,
+        findActionByKey             : findActionByKey,
         loadActions                 : loadActions
     };
 };

@@ -303,58 +303,110 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
             return df.promise;
         },
 
-        createAction = function(name, createdBy){
+        findActionByKey = function(actionKey){
             var df = Q.defer();
 
-            //validation
-            //required fields
-            if(!name || !createdBy){
-                df.reject(new InfluenceError(errCodes.C_400_016_001.code));
+            if(!actionKey){
+                df.reject(new InfluenceError(errorCodes.C_400_021_001.code));
 
                 return df.promise;
             }
 
-            logger.log("createAction, name: %s, createdBy: %s", name, createdBy);
-
-            var
-
-                action = {
-                    name        : name,
-                    createdOn   : new Date(),
-                    createdBy   : createdBy,
-                    updatedOn   : new Date(),
-                    updatedBy   : createdBy
-                };
-
-            Q.when(authDataHandler.createAction(action)).then(
-                //
-                function(newAction){
-                    logger.log("authDataHandler.js createAction: createAction promise resolved");
+            Q.when(authDataHandler.findActionByKey(actionKey)).then(
+                function(action){
+                    logger.log("authBusiness.js findActionByKey: findActionByKey promise resolved");
                     logger.log("here is the action object");
+                    logger.log(action);
+
+                    if(!action){
+                        throw new InfluenceError(errorCodes.C_400_021_002.code);
+                    }
+
+                    df.resolve(action);
+                }
+            ).catch(
+                function(err){
+                    logger.log("authBusiness.js findActionByKey caught an error!");
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done(
+                function(){
+                    logger.log("authBusiness.js findActionByKey done!");
+                }
+            );
+
+            return df.promise;
+        },
+
+        createAction = function(name, key, createdBy){
+            var df = Q.defer();
+
+            //validation
+            //required fields
+            if(!name || !key || !createdBy){
+                df.reject(new InfluenceError(errorCodes.C_400_016_001.code));
+
+                return df.promise;
+            }
+
+            logger.log("createAction, name: %s, key:%s createdBy: %s", name, key, createdBy);
+
+            Q.when(authDataHandler.findActionByKey(key)).then(
+                //
+                function(existingAction){
+                    logger.log("authBusiness.js createAction: findActionByKey promise resolved");
+                    logger.log("here is the existingAction object");
+                    logger.log(existingAction);
+
+                    if(existingAction){
+                        throw new InfluenceError(errorCodes.C_400_016_002.code);
+                    }
+
+                    var
+
+                        action = {
+                            name        : name,
+                            key         : key,
+                            createdOn   : new Date(),
+                            createdBy   : createdBy,
+                            updatedOn   : new Date(),
+                            updatedBy   : createdBy
+                        };
+
+                    return authDataHandler.createAction(action);
+                }
+            ).then(
+                function(newAction){
+                    logger.log("authBusiness.js createAction: authDataHandler.createAction promise resolved");
+                    logger.log("here is the newAction object");
                     logger.log(newAction);
 
                     df.resolve(newAction);
                 }
             ).catch(function(err){
-                    logger.log("authDataHandler.js createAction: caught an error!");
+                    logger.log("authBusiness.js createAction: caught an error!");
                     logger.log(err);
 
                     df.reject(err);
-                }).done(function(){
-                    logger.log("authDataHandler.js createAction: done!");
-                });
-
+                }
+            ).done(function(){
+                    logger.log("authBusiness.js createAction: done!");
+                }
+            );
 
             return df.promise;
         },
 
-        updateAction = function(actionId, updatedBy, name){
-            var df = Q.defer();
+        updateAction = function(actionId, updatedBy, name, key){
+            var df = Q.defer(),
+                findKeyPromise;
 
             //validation
             //required fields
             if(!actionId || !updatedBy){
-                df.reject(new InfluenceError(errCodes.C_400_017_001.code));
+                df.reject(new InfluenceError(errorCodes.C_400_017_001.code));
 
                 return df.promise;
             }
@@ -362,21 +414,44 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
             //TODO params verification, e.g.
             // - name length
 
-            logger.log("updateAction, actionId: %s, name: %s, updatedBy: %s", tenantId, name, updatedBy);
+            logger.log("updateAction, actionId: %s, name: %s, key:%s, updatedBy: %s", actionId, name, key, updatedBy);
 
-
-            var
-
-                action = {
-                    updatedOn   : new Date(),
-                    updatedBy   : updatedBy
-                };
-
-            if(name){
-                action.name = name;
+            //When updating key, we need to ensure the uniqueness of the key in the system
+            if(key){
+                findKeyPromise = authDataHandler.findActionByKey(key);
+            }else{
+                findKeyPromise = null;
             }
 
-            Q.when(authDataHandler.updateAction(actionId, action)).then(
+            Q.when(findKeyPromise).then(
+                function(ExistingAction){
+                    logger.log("authBusiness.js updateAction: authDataHandler.findActionByKey promise fulfilled.");
+                    logger.log(ExistingAction);
+
+                    //If the key already exists, then need to reject
+                    if(ExistingAction && ExistingAction._id.toString() !== actionId){
+                        throw new InfluenceError(errorCodes.C_400_017_002.code);
+                    }
+
+                    var
+
+                        action = {
+                            updatedOn   : new Date(),
+                            updatedBy   : updatedBy
+                        };
+
+                    //As long as name is null, even if it is an empty string, we will update it
+                    if(name != null){
+                        action.name = name;
+                    }
+
+                    if(key){
+                        action.key = key;
+                    }
+
+                    return authDataHandler.updateAction(actionId, action);
+                }
+            ).then(
                 //
                 function(newAction){
                     logger.log("authBusiness.js updateAction: authDataHandler.updateAction promise resolved");
@@ -449,6 +524,7 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
 
         //Actions
         findActionById          : findActionById,
+        findActionByKey         : findActionByKey,
         createAction            : createAction,
         updateAction            : updateAction,
         loadActions             : loadActions

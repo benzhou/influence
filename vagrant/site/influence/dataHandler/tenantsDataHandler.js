@@ -4,8 +4,8 @@ module.exports = function(dbProvider){
         findTenantById = function(tenantId){
             return dbProvider.findTenantById(tenantId);
         },
-        loadTenants = function(numberOfPage, pageNumber){
-            return dbProvider.loadTenants(numberOfPage, pageNumber);
+        loadTenants = function(numberOfPage, pageNumber, filter){
+            return dbProvider.loadTenants(numberOfPage, pageNumber, filter);
         },
         upsertTenant = function(tenant){
             return dbProvider.upsertTenant(tenant);

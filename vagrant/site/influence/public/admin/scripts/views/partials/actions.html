@@ -13,13 +13,13 @@
             <table class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Action ID</th>
+                    <th>Key</th>
                     <th>Name</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="action in actions" ng-click="editAction(action)">
-                    <td>{{action._id}}</td>
+                    <td>{{action.key}}</td>
                     <td>{{action.name}}</td>
                 </tr>
                 </tbody>

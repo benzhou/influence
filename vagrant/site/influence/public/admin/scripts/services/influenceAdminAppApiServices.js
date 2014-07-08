@@ -56,7 +56,21 @@
                 [apiConfig.URL, "/affiliate/:affiliateId"].join(''), //endpoint
                 {},
                 {
-                    query     : { method: "GET", url : [apiConfig.URL, "/affiliates/:tenantId/:numberOfPage/:pageNumber"].join('')},
+                    query     : { method: "GET", url : [apiConfig.URL, "/affiliates/:tenantId/:numberOfPage/:pageNumber"].join('')}
+                }
+            );
+        }
+    ]).factory('actionsService', [
+        '$resource',
+        'influenceAdminAppConfig'
+        ,
+        function($resource, influenceAdminAppConfig){
+            var apiConfig = influenceAdminAppConfig.API;
+            return $resource(
+                [apiConfig.URL, "/action/:actionId"].join(''), //endpoint
+                {},
+                {
+                    query     : { method: "GET", url : [apiConfig.URL, "/actions/:numberOfPage/:pageNumber"].join('')}
                 }
             );
         }

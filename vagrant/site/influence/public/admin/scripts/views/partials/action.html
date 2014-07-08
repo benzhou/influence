@@ -2,24 +2,23 @@
     <menu-directive></menu-directive>
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        <h1 class="page-header">Tenants</h1>
+        <h1 class="page-header">Action</h1>
         <div class="row placeholders">
             <div class="col-xs-6 col-sm-3 placeholder">
                 <form role="form">
-                    <div class="form-group" ng-if='tenant && tenant._id'>
-                        <label for="tenantId">Tenant ID</label>
-                        <label id="tenantId">{{tenant._id}}</label>
+                    <div class="form-group" ng-if='action && action.id'>
+                        <label for="actionId">Action ID</label>
+                        <label id="actionId">{{action.id}}</label>
                     </div>
                     <div class="form-group">
-                        <label for="tenantName">Tenant Name</label>
-                        <input type="text" class="form-control" id="tenantName" placeholder="tenantName" ng-model="tenant.name">
+                        <label for="actionKey">Action Key</label>
+                        <input type="text" class="form-control" id="actionKey" placeholder="Key" required ng-model="action.key">
                     </div>
-                    <div lass="checkbox" ng-if='tenant && tenant._id'>
-                        <label for="tenantIsActive">
-                            Active: <input type="checkbox" class="form-control" id="tenantIsActive" ng-model="tenant.isActive">
-                        </label>
+                    <div class="form-group">
+                        <label for="actionName">Action Name</label>
+                        <input type="text" class="form-control" id="actionName" placeholder="Name" ng-model="action.name">
                     </div>
-                    <a type="submit" class="btn btn-default" ng-click="createUpdateTenant()">Submit</a>
+                    <a type="submit" class="btn btn-default" ng-click="createUpdateAction()">Submit</a>
                 </form>
             </div>
         </div>

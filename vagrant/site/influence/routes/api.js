@@ -222,6 +222,7 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
 
     //Actions
     _hookUpRoutes(router, 'get', '/actions/:numberOfPage?/:pageNumber?', apiController.getActions);
+    _hookUpRoutes(router, 'get', '/action/key/:actionKey?', apiController.getActionByKey);
     _hookUpRoutes(router, 'get', '/action/:actionId?', apiController.getAction);
     _hookUpRoutes(router, 'post', '/action/:actionId?', apiController.postAction);
 
