@@ -39,10 +39,24 @@
         function($resource, influenceAdminAppConfig){
             var apiConfig = influenceAdminAppConfig.API;
             return $resource(
-                [apiConfig.URL, "/tenant/:tenantId?"].join(''), //endpoint
+                [apiConfig.URL, "/tenant/:tenantId"].join(''), //endpoint
                 {},
                 {
                     query     : { method: "GET", url : [apiConfig.URL, "/tenants/:numberOfPage/:pageNumber"].join('')},
+                }
+            );
+        }
+    ]).factory('affiliatesService', [
+        '$resource',
+        'influenceAdminAppConfig'
+        ,
+        function($resource, influenceAdminAppConfig){
+            var apiConfig = influenceAdminAppConfig.API;
+            return $resource(
+                [apiConfig.URL, "/affiliate/:affiliateId"].join(''), //endpoint
+                {},
+                {
+                    query     : { method: "GET", url : [apiConfig.URL, "/affiliates/:tenantId/:numberOfPage/:pageNumber"].join('')},
                 }
             );
         }

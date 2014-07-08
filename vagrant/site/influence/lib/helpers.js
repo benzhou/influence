@@ -36,7 +36,7 @@ module.exports = function(plain){
 
             for(var prop in passedInFilter){
                 if(passedInFilter.hasOwnProperty(prop) && allowedFilters.hasOwnProperty(prop)){
-                    cleanedFilter[prop] = 1;
+                    cleanedFilter[prop] = passedInFilter[prop];
                 }
             }
 

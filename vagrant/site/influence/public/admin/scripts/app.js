@@ -28,10 +28,6 @@
                     templateUrl: '/admin/scripts/views/partials/welcome.html',
                     controller: 'influenceAdminHomeCtrl'
                 }).
-                when('/home/affiliates', {
-                    templateUrl: '/admin/scripts/views/partials/affiliates.html',
-                    controller: 'influenceAdminHomeCtrl'
-                }).
                 when('/home/posts', {
                     templateUrl: '/admin/scripts/views/partials/posts.html',
                     controller: 'influenceAdminHomeCtrl'
@@ -51,6 +47,14 @@
                 when('/home/config/tenant/:tenantId?', {
                     templateUrl: '/admin/scripts/views/partials/tenant.html',
                     controller: 'influenceAdminTenantCtrl'
+                }).
+                when('/home/config/affiliates', {
+                    templateUrl: '/admin/scripts/views/partials/affiliates.html',
+                    controller: 'influenceAdminAffiliatesCtrl'
+                }).
+                when('/home/config/affiliate/:affiliateId?', {
+                    templateUrl: '/admin/scripts/views/partials/affiliate.html',
+                    controller: 'influenceAdminAffiliateCtrl'
                 }).
                 when('/contactus', {
                     templateUrl: '/admin/scripts/views/partials/contactus.html',

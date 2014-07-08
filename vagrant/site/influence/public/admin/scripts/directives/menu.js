@@ -14,7 +14,6 @@
                             name : "main",
                             menues : [
                                 {name:"Overview", active:true, href:"/welcome"},
-                                {name:"Affiliates", active:false, href:"/home/affiliates"},
                                 {name:"Posts", active:false, href:"/home/posts"}
                             ]
                         },
@@ -23,7 +22,8 @@
                             menues : [
                                 {name:"Admins", active:true, href:"/home/config/admins"},
                                 {name:"Apps", active:false, href:"/home/config/apps"},
-                                {name:"Tenants", active:false, href:"/home/config/tenants"}
+                                {name:"Tenants", active:false, href:"/home/config/tenants"},
+                                {name:"Affiliates", active:false, href:"/home/config/affiliates"}
                             ]
                         }
                     ],

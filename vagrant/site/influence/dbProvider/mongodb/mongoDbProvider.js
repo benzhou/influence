@@ -155,6 +155,11 @@ module.exports = function(config, MongoDb, logger){
 
         //Affiliates
         createAffiliate = function(affiliateDo){
+            affiliateDo.tenantId = new MongoDb.ObjectID(affiliateDo.tenantId);
+            affiliateDo.createdBy = new MongoDb.ObjectID(affiliateDo.createdBy);
+            affiliateDo.updatedBy = new MongoDb.ObjectID(affiliateDo.updatedBy);
+            logger.log("MongoDbProvider.js createAffiliate");
+            logger.log(affiliateDo);
             return _insertNew(collections.Affiliates, affiliateDo);
         },
         updateAffiliate = function(affiliateId, updateDo){
@@ -177,8 +182,16 @@ module.exports = function(config, MongoDb, logger){
 
             filter = filter || {};
             if(sort){
-                opt.sort = sort;
+                opts.sort = sort;
             }
+
+            if(filter.tenantId){
+                filter.tenantId = new MongoDb.ObjectID(filter.tenantId);
+            }
+
+            logger.log("MongoDbProvider.js loadAffiliates");
+            logger.log(filter);
+            logger.log(sort);
             return  _find(collections.Affiliates, filter, opts);
         },
 

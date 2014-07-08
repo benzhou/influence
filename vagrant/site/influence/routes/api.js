@@ -226,7 +226,7 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     _hookUpRoutes(router, 'post', '/action/:actionId?', apiController.postAction);
 
     //Affiliates
-    _hookUpRoutes(router, 'get', '/affiliates/:numberOfPage?/:pageNumber?', apiController.getAffiliates);
+    _hookUpRoutes(router, 'get', '/affiliates/:tenantId/:numberOfPage?/:pageNumber?', apiController.getAffiliates);
     _hookUpRoutes(router, 'get', '/affiliate/:affiliateId?', apiController.getAffiliate);
     _hookUpRoutes(router, 'post', '/affiliate/:affiliateId?', apiController.postAffiliate);
 

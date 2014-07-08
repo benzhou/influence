@@ -8,7 +8,7 @@ module.exports = function(dbProvider){
 
         //Admin Account
         loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
-            return dbProvider.loadAdminAccountss(tenantId, numberOfPage, pageNumber);
+            return dbProvider.loadAdminAccounts(tenantId, numberOfPage, pageNumber);
         },
         findAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
@@ -61,7 +61,7 @@ module.exports = function(dbProvider){
 
         //Affiliate
         createAffiliate = function(affiliateDo){
-            return dbProvider.updateAffiliate(affiliateDo);
+            return dbProvider.createAffiliate(affiliateDo);
         },
         updateAffiliate = function(affiliateId, updateDo){
             return dbProvider.updateAffiliate(affiliateId, updateDo);
@@ -70,7 +70,7 @@ module.exports = function(dbProvider){
             return dbProvider.findAffiliateById(affiliateId);
         },
         loadAffiliates = function(filter, numberOfPage, pageNumber, sort) {
-            return dbProvider.loadActions(filter, numberOfPage, pageNumber, sort);
+            return dbProvider.loadAffiliates(filter, numberOfPage, pageNumber, sort);
         },
 
         //Actions

@@ -1,6 +1,6 @@
 var Q = require("q"),
     util = require("util"),
-    errCodes        = require('../error/errorCodes'),
+    errorCodes    = require('../error/errorCodes'),
     InfluenceError = require('../error/influenceError');
 
 module.exports = function(helpers, logger, tenantsDataHandler) {
@@ -10,7 +10,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             var df = Q.defer();
 
             if(!tenantId){
-                df.reject(new InfluenceError(errCodes.C_400_005_001.code));
+                df.reject(new InfluenceError(errorCodes.C_400_005_001.code));
                 return df.promise;
             }
 
@@ -22,7 +22,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                     logger.log(tenant);
 
                     if(!tenant){
-                        throw new InfluenceError(errCodes.C_400_005_002.code);
+                        throw new InfluenceError(errorCodes.C_400_005_002.code);
                     }
 
                     df.resolve(tenant);
@@ -88,7 +88,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             if(!name || !createdBy){
                 df.reject(
                     new InfluenceError(
-                        errCodes.C_400_006_001.code,
+                        errorCodes.C_400_006_001.code,
                         "Missing parameters"
                     ));
 
@@ -138,7 +138,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             if(!tenantId || !updatedBy){
                 df.reject(
                     new InfluenceError(
-                        errCodes.C_400_012_001.code,
+                        errorCodes.C_400_012_001.code,
                         "Missing parameters"
                     ));
 
@@ -193,6 +193,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
         findAffiliateById = function(affiliateId){
             var df = Q.defer();
 
+            logger.log("tenantsBusiness.js findAffiliateById, affiliateId:%s", affiliateId);
             if(!affiliateId){
                 df.reject(new InfluenceError(errorCodes.C_400_018_001.code));
 
@@ -223,18 +224,18 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             return df.promise;
         },
 
-        createAffiliate = function(name, tenantId, location, createdBy){
+        createAffiliate = function(name, tenantId, createdBy, location){
             var df = Q.defer();
+
+            logger.log("createAffiliate, name: %s,tenantId:%s createdBy: %s", name, tenantId, createdBy);
 
             //validation
             //required fields
             if(!name || !tenantId || !createdBy){
-                df.reject(new InfluenceError(errCodes.C_400_019_001.code));
+                df.reject(new InfluenceError(errorCodes.C_400_019_001.code));
 
                 return df.promise;
             }
-
-            logger.log("createAffiliate, name: %s, createdBy: %s", name, createdBy);
 
             var
 
@@ -248,7 +249,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                     updatedBy   : createdBy
                 };
 
-            Q.when(tenantsDataHandler.createAction(affiliate)).then(
+            Q.when(tenantsDataHandler.createAffiliate(affiliate)).then(
                 //
                 function(newAffiliates){
                     logger.log("tenantsBusiness.js createAffiliate: tenantsDataHandler.createAction promise resolved");
@@ -276,7 +277,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             //validation
             //required fields
             if(!affiliateId || !updatedBy){
-                df.reject(new InfluenceError(errCodes.C_400_020_001.code));
+                df.reject(new InfluenceError(errorCodes.C_400_020_001.code));
 
                 return df.promise;
             }

@@ -16,7 +16,7 @@ module.exports = function(dbProvider){
 
         //Affiliate
         createAffiliate = function(actionDo){
-            return dbProvider.updateAffiliate(actionDo);
+            return dbProvider.createAffiliate(actionDo);
         },
         updateAffiliate = function(actionId, updateDo){
             return dbProvider.updateAffiliate(actionId, updateDo);
@@ -25,7 +25,7 @@ module.exports = function(dbProvider){
             return dbProvider.findAffiliateById(affiliateId);
         },
         loadAffiliates = function(filter, numberOfPage, pageNumber, sort) {
-            return dbProvider.loadActions(filter, numberOfPage, pageNumber, sort);
+            return dbProvider.loadAffiliates(filter, numberOfPage, pageNumber, sort);
         };
 
     return {

@@ -453,11 +453,22 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     logger.log("apiController.js getActions authBusiness.loadActions fulfilled.");
                     logger.log(actions);
 
+                    var returnActions = [];
+
+                    actions.forEach(function(item){
+                        returnActions.push(
+                            {
+                                id          : item._id,
+                                name        : item.name
+                            }
+                        );
+                    });
+
                     res.json({
                         code    : errorCodes.SU_200.code,
                         message : errorCodes.SU_200.message,
                         data    : {
-                            actions : actions
+                            actions : returnActions
                         }
                     });
                 }
@@ -586,19 +597,40 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             //TODO: Added selected fields
 
-            var filter  = req.query.q,
-                sort    = req.query.s;
+            var tenantId  = req.params.tenantId,
+                sortFieldName    = req.query.sfn,
+                sortFieldAscOrDesc = req.query.sad
+                filter = { tenantId : tenantId},
+                sort = {};
+
+            if(sortFieldName){
+                sortFieldAscOrDesc =  sortFieldAscOrDesc == "1"? 1 : -1;
+                sort[sortFieldName] = sortFieldAscOrDesc;
+            }
 
             Q.when(tenantsBusiness.loadAffiliates(filter, req.params.numberOfPage, req.params.pageNumber, sort)).then(
                 function(affiliates){
                     logger.log("apiController.js getAffiliates tenantsBusiness.loadAffiliates fulfilled.");
                     logger.log(affiliates);
 
+                    var returnAffiliates = [];
+
+                    affiliates.forEach(function(item){
+                        returnAffiliates.push(
+                            {
+                                id          : item._id,
+                                name        : item.name,
+                                tenantId    : item.tenantId,
+                                location    : item.location
+                            }
+                        );
+                    });
+
                     res.json({
                         code    : errorCodes.SU_200.code,
                         message : errorCodes.SU_200.message,
                         data    : {
-                            affiliates : affiliates
+                            affiliates : returnAffiliates
                         }
                     });
                 }
@@ -645,6 +677,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 function(err){
                     logger.log("apiController.js getAffiliate caught an error!.");
                     logger.log(err);
+                    logger.log(err.stack);
+
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -671,8 +705,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             if(affiliateId){
                 promise = tenantsBusiness.updateAffiliate(
                     affiliateId,
-                    affiliate.name,
-                    currentAdminId
+                    currentAdminId,
+                    affiliate.name
                 );
             }else{
                 promise =

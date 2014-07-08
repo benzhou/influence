@@ -414,6 +414,240 @@
             loadTenants($scope.numberOfPage, $scope.pageNumber);
 
         })
+        .controller('influenceAdminAffiliatesCtrl', function(
+            $scope, $rootScope, $location, $log, $q,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            tenantsService, affiliatesService){
+            $log.log("influenceAdminAffiliatesCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var
+                loadTenants = function(){
+                    var df = $q.defer();
+
+                    tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                        function(docs){
+                            $log.log('influenceAdminAffiliatesCtrl loadTenants fulfilled');
+
+                            $scope.tenants = docs.data.tenants;
+
+                            df.resolve(docs);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminAffiliatesCtrl loadTenants rejected');
+                            $log.log(err);
+                            df.reject(err);
+                        }
+                    );
+
+                    return df.promise;
+                },
+
+                loadAffiliates = function(tenantId, numberOfPage, pageNumber, sortFieldName, sortFieldAscOrDesc){
+                    var df = $q.defer();
+
+                    affiliatesService.query(
+                        {
+                            numberOfPage:numberOfPage,
+                            pageNumber:pageNumber,
+                            tenantId : tenantId,
+                            sfn    : sortFieldName,
+                            sad    : sortFieldAscOrDesc,
+                            token: influenceAdminAppSession.token.token
+                        }
+                    ).$promise.then(function(result){
+                            $log.log('influenceAdminAffiliatesCtrl loadAffiliates fulfilled!');
+                            $log.log(result);
+
+                            $scope.affiliates = result.data.affiliates;
+                            df.resolve(result);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminAffiliatesCtrl loadAffiliates rejected!');
+                            $log.log(err);
+
+                            $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                        }
+                    ).finally();
+
+                    return df.promise;
+                },
+                refresh = function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                    loadAffiliates($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc).finally(function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    });
+                };
+
+            $scope.numberOfPage = 10;
+            $scope.pageNumber = 1;
+            $scope.sortFieldName = "name";
+            $scope.sortFieldAscOrDesc = 1;
+
+            $scope.nextPage = function(){
+                refresh();
+            };
+
+            $scope.editAffiliate = function(affiliate){
+                $log.log("Editing affiliate:");
+                $log.log(affiliate);
+
+                $location.path(['/home/config/affiliate/', affiliate.id].join(''));
+            };
+
+            $scope.createAffiliate = function(){
+                $log.log("Creating Affiliate:");
+                $location.path('/home/config/affiliate');
+            };
+
+            $scope.onChangeTenant = function(){
+                $log.log("changed tenant:");
+                refresh();
+            }
+
+            //initial load
+            $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+            loadTenants($scope.numberOfPage, $scope.pageNumber).then(
+                function(result){
+                    $log.log('influenceAdminAffiliatesCtrl initial Load : loadTenants fulfilled!');
+                    $log.log(result);
+
+                    if(result.data.tenants.length === 0){
+                        throw {
+                            data : {
+                                code : 500,
+                                message : "No tenants"
+                            }
+                        }
+                    }
+
+                    $scope.selectedTenant = result.data.tenants[0];
+                    return loadAffiliates($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc);
+                }
+            ).catch(
+                function(err){
+                    $log.log('influenceAdminAffiliatesCtrl initial Load rejected!');
+                    $log.log(err);
+
+                    $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                }
+            ).finally(function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                }
+            );
+
+        })
+        .controller('influenceAdminAffiliateCtrl', function(
+            $scope, $rootScope, $location, $log, $routeParams,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            tenantsService, affiliatesService){
+            $log.log("influenceAdminAffiliateCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var affiliateId = $routeParams.affiliateId;
+            $log.log('influenceAdminAffiliateCtrl $routeParams');
+            $log.log($routeParams);
+
+            //Code for when load the affiliate view
+            if(!affiliateId){
+                //When no passed-in affiliateid, assume this is an create
+                $scope.affiliate = {};
+
+                tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(docs){
+                        $log.log('influenceAdminAffiliateCtrl tenantsService.query fulfilled');
+                        $log.log(docs);
+                        $scope.tenants = docs.data.tenants;
+
+                        $scope.selectedTenant = $scope.tenants[0];
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAffiliateCtrl tenantsService.query rejected');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                );
+
+            }else{
+                //When has passed in affiliateId, assume this is an update
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                affiliatesService.get({affiliateId:affiliateId,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminAffiliateCtrl get fulfilled!');
+                        $log.log(result.data.affiliate);
+                        $scope.affiliate = result.data.affiliate;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAffiliateCtrl get rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            }
+
+            //Handler when user update or create affiliate
+            $scope.createUpdateAffiliate = function(){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                $log.log('influenceAdminAffiliateCtrl createUpdateAffiliate.');
+
+                var params = {
+                        token: influenceAdminAppSession.token.token
+                    },
+                    postData = {
+                        name : $scope.affiliate.name
+                    };
+
+                if($scope.affiliate && $scope.affiliate.id){
+                    params.affiliateId = $scope.affiliate.id;
+                }else{
+                    postData.tenantId = $scope.selectedTenant._id;
+                }
+
+                affiliatesService.save(
+                    //params
+                    params,
+                    //Post data
+                    postData
+                ).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminAffiliateCtrl post fulfilled!');
+                        $log.log(result.data.affiliate);
+                        $scope.affiliate = result.data.affiliate;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAffiliateCtrl post rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            }
+        })
         .controller('influenceAdminContactusCtrl', function($scope, $log){
             $log.log("influenceAdminContactusCtrl called!");
 
