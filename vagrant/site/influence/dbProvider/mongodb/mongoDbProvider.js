@@ -13,7 +13,8 @@ module.exports = function(config, MongoDb, logger){
             APICallLog          : "APICallLog",
             Actions             : "Actions",
             Affiliates          : "Affiliates",
-            Posts               : "Posts"
+            Posts               : "Posts",
+            AdminAuthorizations : "AdminAuthorizations"
         },
         db = null,
         connectionDefer = null,
@@ -126,6 +127,17 @@ module.exports = function(config, MongoDb, logger){
         },
         upsertAdminAuthToken = function(token, updateObj){
             return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, updateObj || token);
+        },
+
+        //Admin Authorization
+        findAdminAuthorizationsByAdminId = function(adminId){
+            return  _findOneBy(collections.AdminAuthorizations, {adminId : adminId});
+        },
+        createAdminAuthorizations = function(tenant){
+            return _insertNew(collections.Tenants, tenant);
+        },
+        updateAdminAuthorizations = function(tenantId, updateDo){
+            return _upsertByMatch(collections.Tenants, {}, {_id : new MongoDb.ObjectID(tenantId)}, {$set: updateDo});
         },
 
         //Tenants

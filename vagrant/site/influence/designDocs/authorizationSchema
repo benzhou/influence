@@ -1,0 +1,43 @@
+{
+	Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //App level
+	Tenants : [
+		{
+			Tenant_ID : "Tenant_ID_1",
+			Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Tenant_ID_1 level
+			Affiliate+s : [
+				{
+					Affiliate_ID: "Affiliate_ID_1_IN_TEANANT_ID_1",
+					Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Affiliate_ID_1_IN_TEANANT_ID_1 level
+				},
+				{
+					Affiliate_ID: "Affiliate_ID_2_IN_TEANANT_ID_1",
+					Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Affiliate_ID_2_IN_TEANANT_ID_1 level
+				}
+				,
+				{
+					Affiliate_ID: "Affiliate_ID_3_IN_TEANANT_ID_1",
+					Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Affiliate_ID_3_IN_TEANANT_ID_1 level
+				}
+			]
+		},
+		{
+			Tenant_ID : "Tenant_ID_2",
+			Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Tenant_ID_1 level
+			Affiliate+s : [
+				{
+					Affiliate_ID: "Affiliate_ID_1_IN_TEANANT_ID_2",
+					Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Affiliate_ID_1_IN_TEANANT_ID_2 level
+				},
+				{
+					Affiliate_ID: "Affiliate_ID_2_IN_TEANANT_ID_2",
+					Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Affiliate_ID_2_IN_TEANANT_ID_2 level
+				}
+				,
+				{
+					Affiliate_ID: "Affiliate_ID_3_IN_TEANANT_ID_3",
+					Actions: ["ACTION_ID_1", "ACTION_ID_2","ACTION_ID_3"], //Affiliate_ID_3_IN_TEANANT_ID_2 level
+				}
+			]
+		}
+	]
+}
