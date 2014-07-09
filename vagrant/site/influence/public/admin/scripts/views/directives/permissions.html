@@ -1,0 +1,17 @@
+<div class="form-group" ng-if="permissionLevel === 'app'">
+    <label for="appActions">Application Actions:</label>
+    <ul id="appActions">
+        <li ng-repeat="action in actions">
+            <input type="checkbox" ng-checked="isAppActionsContains(action)"/>{{action.key}}
+        </li>
+    </ul>
+</div>
+
+<div class="form-group" ng-if="permissionLevel === 'tenant'">
+    <label for="appActions">Tenant Actions:</label>
+    <ul id="tenantActions">
+        <li ng-repeat="action in actions">
+            <input type="checkbox" ng-checked="isTenantActionsContains(action)"/>{{action.key}}
+        </li>
+    </ul>
+</div>

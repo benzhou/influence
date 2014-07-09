@@ -107,12 +107,20 @@ module.exports = function(){
 
         //authBusiness.js findAdminAuthorizationsByAdminId
         C_400_022_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400022001, desc : "Missing required parameters" },
-        C_400_022_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400022002, desc : "Invalid Admin ID" },
 
         //authBusiness.js createAdminPermissions
         C_400_023_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023001, desc : "Missing required parameters" },
         C_400_023_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023002, desc : "Invalid Affiliates Permission" },
-        C_400_023_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023003, desc : "Invalid Tenants Permission" }
+        C_400_023_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023003, desc : "Invalid Tenants Permission" },
+        C_400_023_004       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023004, desc : "Invalid Admin ID" },
+
+        //accountBusiness.js  findAdminAccountByTenantAndUsername
+        C_400_024_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400024001, desc : "Missing required parameters" },
+        C_400_024_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400024002, desc : "Username doesn't exist in Tenant" },
+
+        //accountBusiness.js  findAdminAccountByTenantAndEmail
+        C_400_025_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400025001, desc : "Missing required parameters" },
+        C_400_025_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400025002, desc : "Email doesn't exist in Tenant" }
 
 
     };

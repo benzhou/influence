@@ -21,19 +21,21 @@ describe('AuthBusiness', function(){
     describe('#adminAccountLogin()', function(done){
         it('Admin login pass no password, should be rejected', function(){
             var
-                accountDataHandler = {
-                    findAdminAccountByTenantAndUsername: function(){},
-                    createAdminLoginToken : function () {}
+                accountBusiness = {
+                    findAdminAccountByTenantAndUsername: function(){}
                 },
-                findAdminAccountByTenantAndUsernameStub = sinon.stub(accountDataHandler, "findAdminAccountByTenantAndUsername"),
-                createAdminLoginTokenStub = sinon.stub(accountDataHandler, "createAdminLoginToken");
+                authDataHandler = {
+                    createAdminAuthToken : function () {}
+                },
+                findAdminAccountByTenantAndUsernameStub = sinon.stub(accountBusiness, "findAdminAccountByTenantAndUsername"),
+                createAdminLoginTokenStub = sinon.stub(authDataHandler, "createAdminAuthToken");
 
             findAdminAccountByTenantAndUsernameStub.withArgs(1, 'fakeUsername').returns(true);
             createAdminLoginTokenStub.returns({
                 token : 'test'
             });
 
-            var authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountDataHandler);
+            var authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountBusiness, authDataHandler);
             var promise = authBusiness.adminAccountLogin('fakeAppKey', 1, 'fakeUsername');
 
             return promise.should.eventually.be.rejected;
@@ -41,26 +43,27 @@ describe('AuthBusiness', function(){
 
         it('Admin login do not pass required parameters, should be rejected', function(){
             var
-                accountDataHandler = {
-                    findAdminAccountByTenantAndUsername: function(){},
-                    createAdminLoginToken : function () {}
-                };
-
-            var authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountDataHandler);
-            var promise = authBusiness.adminAccountLogin();
+                accountBusiness = {
+                    findAdminAccountByTenantAndUsername: function(){}
+                },
+                authDataHandler = {
+                    createAdminAuthToken : function () {}
+                },
+                authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountBusiness, authDataHandler),
+                promise = authBusiness.adminAccountLogin();
 
             return promise.should.eventually.be.rejected;
         }),
 
         it('Admin login pass case: ', function(done){
             var
-                accountDataHandler = {
+                accountBusiness = {
                     findAdminAccountByTenantAndUsername: function(){}
                 },
                 authDataHandler = {
                     createAdminAuthToken : function () {}
                 },
-                findAdminAccountByTenantAndUsernameStub = sinon.stub(accountDataHandler, "findAdminAccountByTenantAndUsername"),
+                findAdminAccountByTenantAndUsernameStub = sinon.stub(accountBusiness, "findAdminAccountByTenantAndUsername"),
                 createAdminAuthTokenStub = sinon.stub(authDataHandler, "createAdminAuthToken"),
                 df1 = Q.defer(),
                 df2 = Q.defer(),
@@ -85,7 +88,7 @@ describe('AuthBusiness', function(){
             findAdminAccountByTenantAndUsernameStub.returns(df1.promise);
             createAdminAuthTokenStub.returns(df2.promise);
 
-            var authBusiness = require('../business/authBusiness')( helpers, util, console, appConfig.app, accountDataHandler, authDataHandler);
+            var authBusiness = require('../business/authBusiness')( helpers, util, console, appConfig.app, accountBusiness, authDataHandler);
             var promise = authBusiness.adminAccountLogin(appKey, tenantId, username, password);
 
             Q.all([

@@ -1,6 +1,7 @@
 "use strict";
 
-var Q = require("q");
+var Q = require("q"),
+    util = require("util");
 
 module.exports = function(config, MongoDb, logger){
 
@@ -133,10 +134,24 @@ module.exports = function(config, MongoDb, logger){
         findAdminAuthorizationsByAdminId = function(adminId){
             return  _findOneBy(collections.AdminAuthorizations, {adminId : adminId});
         },
-        createAdminPermissions = function(permission){
+        createAdminPermissions = function(adminId, permission){
+            permission.adminId = new MongoDb.ObjectID(permission.adminId);
+
+            if(permission.tenants && util.isArray(permission.tenants)){
+                for(var tenant in permission.tenants){
+                    tenant.tenantId = new MongoDb.ObjectID(tenant.tenantId);
+
+                    if(tenant.affiliates && util.isArray(tenant.affiliates)){
+                        for(var affiliate in tenant.affiliates){
+                            affiliate.affiliateId = new MongoDb.ObjectID(affiliate.affiliateId);
+                        }
+                    }
+                }
+            }
+
             return _insertNew(collections.AdminAuthorizations, permission);
         },
-        updatePermissions = function(adminId, updateDo){
+        updateAdminPermissions = function(adminId, updateDo){
             return _upsertByMatch(collections.AdminAuthorizations, {}, {adminId : new MongoDb.ObjectID(adminId)}, {$set: updateDo});
         },
 
@@ -449,7 +464,7 @@ module.exports = function(config, MongoDb, logger){
         //Admin Authorizations
         findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
         createAdminPermissions              : createAdminPermissions,
-        updatePermissions                   : updatePermissions,
+        updateAdminPermissions              : updateAdminPermissions,
 
         //App Account
         findAppAccountByAppKey              : findAppAccountByAppKey,

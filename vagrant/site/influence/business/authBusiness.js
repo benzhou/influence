@@ -4,7 +4,7 @@ var  Q = require("q"),
     permissionDataObjects = require('../dataObjects/permissions');
 
 
-module.exports = function(helpers, util, logger, config, accountDataHandler, authDataHandler){
+module.exports = function(helpers, util, logger, config, accountBusiness, authDataHandler){
 
     var
         adminAccountLogin = function(appKey, tenantId, username, password){
@@ -28,7 +28,7 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
 
             //TODO: Validates AppKey is authorized for this method
 
-            Q.when(accountDataHandler.findAdminAccountByTenantAndUsername(tenantId, username)).then(
+            Q.when(accountBusiness.findAdminAccountByTenantAndUsername(tenantId, username)).then(
                 //
                 function(admin){
                     logger.log("authBusiness.js adminAccountLogin: findAdminAccountByTenantAndUsername promise resolved");
@@ -154,7 +154,7 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
                 return df.promise;
             }
 
-            Q.when(accountDataHandler.getAdminAccountById(tokenObj.adminId)).then(
+            Q.when(accountBusiness.getAdminAccountById(tokenObj.adminId)).then(
                 //
                 function(admin){
                     logger.log("authBusiness.js findAdminAuthToken: getAdminAccountById promise resolved");
@@ -287,10 +287,6 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
                 function(permission){
                     logger.log('authBusiness.findAdminAuthorizationsByAdminId authDataHandler.findAdminAuthorizationsByAdminId primise fulfilled!');
 
-                    if(!permission){
-                        throw new InfluenceError(errorCodes.C_400_022_002.code);
-                    }
-
                     df.resolve(permission);
                 }
             ).catch(
@@ -309,60 +305,159 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
             return df.promise;
         },
 
-        createAdminPermissions = function(adminId, permission){
+        createOrUpdateAdminPermissions = function(adminId, permission, createdOrUpdatedBy){
             var df = Q.defer();
 
-            logger.log("createAdminPermissions adminId:%s", adminId);
+            logger.log("createOrUpdateAdminPermissions adminId:%s, createdOrUpdatedBy:%s", adminId, createdOrUpdatedBy);
             logger.log(permission);
             
             //validation
             //required fields
-            if(!adminId || !permission){
+            if(!adminId || !permission || !createdOrUpdatedBy){
                 df.reject(new InfluenceError(errorCodes.C_400_023_001.code));
 
                 return df.promise;
             }
 
-            var newPerm = new permissionDataObjects.AppPerm(permission.actions, permission.roles);
+            Q.when(accountBusiness.getAdminAccountById(adminId)).then(
+                function(admin){
+                    logger.log('authBusiness.createOrUpdateAdminPermissions accountBusiness.getAdminAccountById promise fulfilled!');
+                    if(!admin){
+                        throw new InfluenceError(errorCodes.C_400_023_004.code);
+                    }
 
-            if(permission.tenants){
-                if(!util.isArray(permission.tenants)){
-                    new InfluenceError(errorCodes.C_400_023_003.code)
+                    return findAdminAuthorizationsByAdminId(adminId);
                 }
+            ).then(
+                function(existingPermission){
+                    logger.log('authBusiness.createOrUpdateAdminPermissions findAdminAuthorizationsByAdminId promise fulfilled!');
+                    logger.log(existingPermission);
 
-                for(var tenant in permission.tenants){
-                    //Only creates tenant level permission when at least has assigned actions or roles or affiliates
-                    if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
-                        var tenPerm = new permissionDataObjects.TenantPerm(tenant.tenantId, tenant.actions, tenant.roles);
+                    //If permissions exist, then we need to update them
+                    if(existingPermission){
+                        var updatedPermision = {
+                            updatedBy : createdOrUpdatedBy,
+                            updatedOn : new Date()
+                        };
 
-                        if(tenant.affiliates){
-                            if(!util.isArray(tenant.affiliates)){
-                                new InfluenceError(errorCodes.C_400_023_002.code)
-                            }
-
-                            for(var aff in tenant.affilaites){
-                                //Only creates affiliate level permission when at least has assigned actions or roles
-                                if(!aff.affiliateId && (aff.actions || aff.roles)){
-                                    var affPerm = new permissionDataObjects.AffiliatePerm(aff.affiliateId, aff.actions, aff.roles);
-                                    tenPerm.affiliates.push(affPerm);
+                        if(permission.actions){
+                            updatedPermision.actions = permission.actions;
+                        }
+                        if(permission.roles){
+                            updatedPermision.roles = permission.roles;
+                        }
+                        if(permission.tenants){
+                            if(!util.isArray(permission.tenants)){
+                                if(permission.tanants !== "*"){
+                                    throw new InfluenceError(errorCodes.C_400_023_003.code);
                                 }
 
+                                updatedPermision.tenants = "*";
+                            }else{
+                                updatedPermision.tenants = [];
+                                for(var tenant in permission.tenants){
+                                    if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
+                                        var tenantUpdate = {
+                                            tenantId : tenant.tenantId
+                                        };
+                                        if(tenant.actions && util.isArray(tenant.actions)){
+                                            tenantUpdate.actions = tenant.actions;
+                                        }
+                                        if(tenant.roles && util.isArray(tenant.roles)){
+                                            tenantUpdate.roles = tenant.roles;
+                                        }
+
+                                        if(!util.isArray(tenant.affiliates)){
+                                            if(tenant.affiliates !== "*"){
+                                                throw new InfluenceError(errorCodes.C_400_023_002.code);
+                                            }
+
+                                            tenantUpdate.affiliates === "*";
+                                        }else{
+                                            tenantUpdate.affiliates = [];
+                                            for(var affiliate in tenant.affiliates){
+                                                if(!affiliate.affiliateId && (affiliate.actions || affiliate.roles)){
+                                                    var affiliateToUpdate = {
+                                                        affiliateId : affiliate.affiliateId
+                                                    };
+                                                    if(affiliate.actions && util.isArray(affiliate.actions)){
+                                                        affiliateToUpdate.actions = affiliate.actions;
+                                                    }
+                                                    if(affiliate.roles && util.isArray(affiliate.roles)){
+                                                        affiliateToUpdate.roles = affiliate.roles;
+                                                    }
+                                                    tenantUpdate.affiliates.push(affiliateToUpdate);
+                                                }
+                                            }
+                                        }
+                                        updatedPermision.tenants.push(tenantUpdate);
+                                    }
+                                }
                             }
                         }
 
-                        newPerm.tenants.push(tenPerm);
+                        return authDataHandler.createOrUpdateAdminPermissions(adminId, permission);
+                    }else{
+                        //If no existing permissions, we need to create them
+                        var newPerm = new permissionDataObjects.AppPerm(adminId, createdOrUpdatedBy, permission.actions, permission.roles);
+
+                        if(permission.tenants){
+                            if(!util.isArray(permission.tenants)){
+                                if(permission.tenants !== "*"){
+                                    throw new InfluenceError(errorCodes.C_400_023_003.code);
+                                }
+
+                                newPerm.tenants = "*";
+                            }else{
+                                for(var tenant in permission.tenants){
+                                    //Only creates tenant level permission when at least has assigned actions or roles or affiliates
+                                    if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
+                                        var tenPerm = new permissionDataObjects.TenantPerm(tenant.tenantId, tenant.actions, tenant.roles);
+
+                                        if(tenant.affiliates){
+                                            if(!util.isArray(tenant.affiliates)){
+                                                new InfluenceError(errorCodes.C_400_023_002.code)
+                                            }
+
+                                            for(var aff in tenant.affilaites){
+                                                //Only creates affiliate level permission when at least has assigned actions or roles
+                                                if(!aff.affiliateId && (aff.actions || aff.roles)){
+                                                    var affPerm = new permissionDataObjects.AffiliatePerm(aff.affiliateId, aff.actions, aff.roles);
+                                                    tenPerm.affiliates.push(affPerm);
+                                                }
+                                            }
+                                        }
+                                        newPerm.tenants.push(tenPerm);
+                                    } //End of if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
+                                } //End of for(var tenant in permission.tenants){
+                            }
+                        }//End of if(permission.tenants){
+
+                        return authDataHandler.createAdminPermissions(adminId, permission);
                     }
-
                 }
+            ).then(
+                function(updatedOrCreatedPermission){
+                    logger.log('authBusiness.createOrUpdateAdminPermissions authDataHandler.createAdminPermissions promise fulfilled!');
+                    logger.log(updatedOrCreatedPermission);
 
-            }
+                    df.resolve(updatedOrCreatedPermission);
+                }
+            ).catch(
+                function(err){
+                    logger.log('authBusiness.createOrUpdateAdminPermissions catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done(
+                function(){
+                    logger.log('authBusiness.createOrUpdateAdminPermissions finally was called');
+                }
+            );
 
 
-
-
-        },
-        updatePermissions = function(adminId, updateDo){
-
+            return df.promise;
         },
 
         //Actions
@@ -621,8 +716,7 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
 
         //Admin Authorizations
         findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
-        createAdminPermissions              : createAdminPermissions,
-        updatePermissions                   : updatePermissions,
+        createOrUpdateAdminPermissions      : createOrUpdateAdminPermissions,
 
 
         //Actions

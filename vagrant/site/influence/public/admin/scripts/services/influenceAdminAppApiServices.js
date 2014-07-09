@@ -74,6 +74,17 @@
                 }
             );
         }
+    ]).factory('adminPermissionsService', [
+        '$resource',
+        'influenceAdminAppConfig'
+        ,
+        function($resource, influenceAdminAppConfig){
+            var apiConfig = influenceAdminAppConfig.API;
+            return $resource(
+                [apiConfig.URL, "/permissions/admin/:adminId"].join(''), //endpoint
+                {}
+            );
+        }
     ]);
 
 })();

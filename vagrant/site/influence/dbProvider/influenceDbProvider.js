@@ -36,8 +36,8 @@ module.exports = function(dbProvider){
         createAdminPermissions = function(permission){
             return dbProvider.createAdminPermissions(permission);
         },
-        updatePermissions = function(adminId, updateDo){
-            return dbProvider.updatePermissions(adminId, updateDo);
+        updateAdminPermissions = function(adminId, updateDo){
+            return dbProvider.updateAdminPermissions(adminId, updateDo);
         },
 
         //App Account
@@ -134,7 +134,7 @@ module.exports = function(dbProvider){
         //Admin Authorizations
         findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
         createAdminPermissions              : createAdminPermissions,
-        updatePermissions                   : updatePermissions,
+        updateAdminPermissions              : updateAdminPermissions,
 
         findAppAccountByAppKey              : findAppAccountByAppKey,
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,

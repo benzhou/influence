@@ -201,6 +201,13 @@
                 $location.path(['/home/config/admin/', admin.id].join(''));
             };
 
+            $scope.editAdminPermission = function(admin){
+                $log.log("Editing admin permission:");
+                $log.log(admin);
+
+                $location.path(['/home/config/permissions/', admin.id].join(''));
+            };
+
             $scope.createAdmin = function(){
                 $log.log("Creating admin:");
                 $location.path('/home/config/admin')
@@ -894,9 +901,9 @@
 
         //Admin Permissions
         .controller('influenceAdminAdminPermissionsCtrl', function(
-            $scope, $rootScope, $location, $log, $routeParams,
+            $scope, $rootScope, $location, $log, $routeParams, $q,
             influenceAdminAppConstants, influenceAdminAppSession, dirtyCheckerService,
-            tenantsService, affiliatesService){
+            actionsService, tenantsService, affiliatesService, adminService, adminPermissionsService){
             $log.log("influenceAdminAdminPermissionsCtrl called!");
 
             //If user not authenticated, then go to home/index view directly
@@ -904,7 +911,103 @@
                 $location.path('/');
                 return;
             }
+            var adminId = $routeParams.adminId;
 
+            if(!adminId){
+                $location.path('/error').search({code:500000000, msg:"Admin ID is required to edit admin permission"});
+                return;
+            }
+
+            $scope.loadTenants = function(){
+                var df = $q.defer();
+
+                tenantsService.query({numberOfPage:1,pageNumber:1000,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(docs){
+                        $log.log('influenceAdminAdminPermissionsCtrl loadTenants promise fulfilled!');
+
+                        df.resolve(docs);
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAdminPermissionsCtrl loadTenants promise rejected!');
+                        $log.log(err);
+
+                        df.reject(err);
+                    }
+                ).finally(
+                    function(){
+
+                    }
+                );
+
+                return df.promise;
+            };
+
+            $scope.loadAffiliates = function(tenant){
+                var df = $q.defer();
+
+                affiliatesService.query({tenantId:tenant.tenantId, numberOfPage:1,pageNumber:1000,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(docs){
+                        $log.log('influenceAdminAdminPermissionsCtrl loadAffiliates promise fulfilled!');
+
+                        df.resolve(docs);
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAdminPermissionsCtrl loadAffiliates promise rejected!');
+                        $log.log(err);
+
+                        df.reject(err);
+                    }
+                ).finally(
+                    function(){
+
+                    }
+                );
+
+                return df.promise;
+            };
+
+            //Initial page load
+            $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+            $scope.permissionLevels = [
+                { name: "Application Level", level : "app"},
+                { name: "Tenant level", level : "tenant"},
+                { name: "Affiliate Level", level : "affiliate"}
+            ];
+            $scope.selectedPermissionLevel = $scope.permissionLevels[0];
+
+            $q.all([
+                actionsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise,
+                adminService.get({adminId:adminId, token: influenceAdminAppSession.token.token}).$promise,
+                adminPermissionsService.get({adminId:adminId, token: influenceAdminAppSession.token.token}).$promise
+            ])
+            .then(
+                function(results){
+                    $log.log('influenceAdminAdminPermissionsCtrl actionsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise get fulfilled!');
+                    $log.log('influenceAdminAdminPermissionsCtrl adminService.get({adminId:adminId, token: influenceAdminAppSession.token.token}).$promise get fulfilled!');
+                    $log.log('influenceAdminAdminPermissionsCtrl adminPermissionsService.get({adminId:adminId, token: influenceAdminAppSession.token.token}).$promise get fulfilled!');
+
+                    $log.log(results[0].data.actions);
+                    $log.log(results[1].data.admin);
+                    $log.log(results[2].data.permissions);
+
+                    $scope.actions = results[0].data.actions;
+                    $scope.admin = results[1].data.admin;
+                    $scope.permissions = results[2].data.permissions || {};
+                }
+            ).catch(
+                function(err){
+                    $log.log('influenceAdminAdminPermissionsCtrl get rejected!');
+                    $log.log(err);
+
+                    $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                }
+            ).finally(
+                function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                }
+            );
 
         })
 

@@ -2,23 +2,32 @@
     <menu-directive></menu-directive>
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        <h1 class="page-header">Permissions</h1>
+        <h1 class="page-header">Permissions for {{admin.displayName || admin.firstName || admin.username}}</h1>
         <div class="row placeholders">
             <div class="col-xs-6 col-sm-3 placeholder">
                 <form role="form">
-                    <div class="form-group" ng-if='action && action.id'>
-                        <label for="actionId">Action ID</label>
-                        <label id="actionId">{{action.id}}</label>
-                    </div>
                     <div class="form-group">
-                        <label for="actionKey">Action Key</label>
-                        <input type="text" class="form-control" id="actionKey" placeholder="Key" required ng-model="action.key">
+                        <label for="permissionLevels">Permissions Levels:</label>
+                        <select id="permissionLevels" ng-model="selectedPermissionLevel" ng-options="permissionLevel.name for permissionLevel in permissionLevels"></select>
                     </div>
-                    <div class="form-group">
-                        <label for="actionName">Action Name</label>
-                        <input type="text" class="form-control" id="actionName" placeholder="Name" ng-model="action.name">
-                    </div>
-                    <a type="submit" class="btn btn-default" ng-click="createUpdateAction()">Submit</a>
+                    <admin-permissions
+                            permission-level="selectedPermissionLevel.level"
+                            actions="actions"
+                            permissions="permissions"
+                            loadTenants="loadTenants()"
+                            loadAffiliates="loadAffiliates(tenant)" />
+
+                        <!--
+                        <label for="appActions">Application Actions:</label>
+                        <ul id="appActions">
+                            <li ng-repeat="action in actions">
+                                <input type="checkbox" ng-checked=""/>{{action.key}}
+                            </li>
+                        </ul>
+                        <<select id="actions" multiple ng-options="action for action in permissions.actions"></select>
+                        -->
+
+                    <a type="submit" class="btn btn-default" ng-click="savePermissions">Submit</a>
                 </form>
             </div>
         </div>

@@ -94,6 +94,88 @@ module.exports = function(helpers, util, logger, accountDataHandler){
             return df.promise;
         },
 
+        findAdminAccountByTenantAndUsername = function(tenantId, username){
+            var df = Q.defer();
+            logger.log("accountBusiness.findAdminAccountByTenantAndUsername tenantId:%s, username:%s", tenantId, username);
+
+            //validation
+            //required fields
+            if(!tenantId || !username){
+                df.reject(
+                    new InfluenceError(errorCodes.C_400_024_001.code)
+                );
+
+                return df.promise;
+            }
+
+            Q.when(accountDataHandler.findAdminAccountByTenantAndUsername(tenantId, username)).then(
+                function(admin){
+                    logger.log('accountBusiness.findAdminAccountByTenantAndUsername accountDataHandler.findAdminAccountByTenantAndUsername promise fulfilled:');
+                    logger.log(admin);
+
+                    if(!admin){
+                        throw new InfluenceError(errorCodes.C_400_024_002.code);
+                    }
+
+                    df.resolve(admin);
+                }
+            ).catch(
+                function(err){
+                    logger.log('accountBusiness.findAdminAccountByTenantAndUsername catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done(
+                function(){
+                    logger.log('accountBusiness.findAdminAccountByTenantAndUsername done block was called');
+                }
+            );
+
+            return df.promise;
+        },
+
+        findAdminAccountByTenantAndEmail = function(tenantId, email){
+            var df = Q.defer();
+            logger.log("accountBusiness.findAdminAccountByTenantAndEmail tenantId:%s, email:%s", tenantId, email);
+
+            //validation
+            //required fields
+            if(!tenantId || !email){
+                df.reject(
+                    new InfluenceError(errorCodes.C_400_025_001.code)
+                );
+
+                return df.promise;
+            }
+
+            Q.when(accountDataHandler.findAdminAccountByTenantAndEmail(tenantId, email)).then(
+                function(admin){
+                    logger.log('accountBusiness.findAdminAccountByTenantAndEmail accountDataHandler.findAdminAccountByTenantAndEmail promise fulfilled:');
+                    logger.log(admin);
+
+                    if(!admin){
+                        throw new InfluenceError(errorCodes.C_400_025_001.code);
+                    }
+
+                    df.resolve(admin);
+                }
+            ).catch(
+                function(err){
+                    logger.log('accountBusiness.findAdminAccountByTenantAndEmail catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done(
+                function(){
+                    logger.log('accountBusiness.findAdminAccountByTenantAndEmail done block was called');
+                }
+            );
+
+            return df.promise;
+        },
+
         createAdminAccount = function(
             tenantId,
             username,
@@ -215,7 +297,7 @@ module.exports = function(helpers, util, logger, accountDataHandler){
             lastName,
             displayName,
             updatedBy
-            ){
+         ){
             var df = Q.defer();
 
             logger.log("accountBusiness.js updateAdminAccount, adminId:%s", adminId);
@@ -406,10 +488,12 @@ module.exports = function(helpers, util, logger, accountDataHandler){
         };
 
     return {
-        loadAdminAccounts       : loadAdminAccounts,
-        createAdminAccount      : createAdminAccount,
-        getAdminAccountById     : getAdminAccountById,
-        updateAdminAccount      : updateAdminAccount,
+        loadAdminAccounts                   : loadAdminAccounts,
+        createAdminAccount                  : createAdminAccount,
+        getAdminAccountById                 : getAdminAccountById,
+        findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
+        findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
+        updateAdminAccount                  : updateAdminAccount,
 
         getAppAccountByAppKey   : getAppAccountByAppKey,
         createAppAccount        : createAppAccount

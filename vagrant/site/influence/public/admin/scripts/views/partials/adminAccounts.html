@@ -23,6 +23,7 @@
                     <th>Admin ID</th>
                     <th>Email</th>
                     <th>Username</th>
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -30,6 +31,7 @@
                     <td>{{admin.id}}</td>
                     <td>{{admin.email}}</td>
                     <td>{{admin.username}}</td>
+                    <td><a ng-click="editAdminPermission(admin);$event.stopPropagation()">Edit permission</a></td>
                 </tr>
                 </tbody>
             </table>

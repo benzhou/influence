@@ -4,7 +4,7 @@
     angular.module('influenceAdminApp', [
         'ngRoute',
         'influenceAdminApp.constants',
-        //'influenceAdminApp.config',
+        'influenceAdminApp.adminPermissions',
         'influenceAdminApp.loadingModal',
         'influenceAdminApp.navigation',
         'influenceAdminApp.menu',

@@ -124,9 +124,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             var reqAdmin = req.body,
                 authToken = req[constants.reqParams.PROP_AUTHTOKEN],
                 adminId = req.params.adminId,
-                promise;
-
-            var currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
+                promise,
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
             if(adminId){
                 promise = accountBusiness.updateAdminAccount(
@@ -301,6 +300,64 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     );
                 }).done(function(){
                     logger.log("apiController.js getAdminAuthToken: done!");
+                    next();
+                });
+        },
+
+        //Admin Permissions
+        getAdminPermissions = function(req,res,next){
+            Q.when(authBusiness.findAdminAuthorizationsByAdminId(req.params.adminId)).then(
+                function(perms){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            permissions : perms
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js getAdminPermissions: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js getAdminPermissions: done!");
+                    next();
+                });
+        },
+        postAdminPermissions = function(req,res,next){
+            var adminIdToCreateOrUpdate = req.param.adminId,
+                permissions = req.body,
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
+
+            Q.when(authBusiness.createOrUpdateAdminPermissions(adminIdToCreateOrUpdate, permissions, currentAdminId)).then(
+                function(perms){
+                    res.json({
+                        code : errorCodes.SU_200.code,
+                        data : {
+                            permissions : perms
+                        }
+                    });
+                }
+            ).catch(function(err){
+                    logger.log("apiController.js postAdminPermissions: catch an error!");
+                    logger.log(err);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(function(){
+                    logger.log("apiController.js postAdminPermissions: done!");
                     next();
                 });
         },
@@ -910,6 +967,10 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         postAdminAccount    : postAdminAccount,
         getAdminAccount     : getAdminAccount,
         getAdminAccountLogin: getAdminAccountLogin,
+
+        //Admin Permissions
+        getAdminPermissions : getAdminPermissions,
+        postAdminPermissions: postAdminPermissions,
 
         getAdminAuthToken   : getAdminAuthToken,
         deleteAdminAuthToken: deleteAdminAuthToken,

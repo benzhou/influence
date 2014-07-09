@@ -15,10 +15,15 @@
                 this.roles = roles || [];
                 this.affilaites = affiliates || [];
             },
-            AppPerm = function(actions, roles, tenants){
-                this.actions = actions;
-                this.roles = roles;
-                this.tenants = tenants;
+            AppPerm = function(adminId, createdBy, actions, roles, tenants){
+                this.adminId = adminId;
+                this.createdBy = createdBy;
+                this.createdOn = new Date();
+                this.updatedBy = createdBy;
+                this.updatedOn = new Date();
+                this.actions = actions || [];
+                this.roles = roles || [];
+                this.tenants = tenants || [];
             };
 
         return {
