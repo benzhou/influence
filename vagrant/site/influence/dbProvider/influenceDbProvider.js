@@ -29,6 +29,17 @@ module.exports = function(dbProvider){
             return dbProvider.updateAdminAccount(adminId, updateDo);
         },
 
+        //Admin Permissions
+        findAdminAuthorizationsByAdminId = function(adminId){
+            return dbProvider.findAdminAuthorizationsByAdminId(adminId);
+        },
+        createAdminPermissions = function(permission){
+            return dbProvider.createAdminPermissions(permission);
+        },
+        updatePermissions = function(adminId, updateDo){
+            return dbProvider.updatePermissions(adminId, updateDo);
+        },
+
         //App Account
         findAppAccountByAppKey = function(appKey){
             return dbProvider.findAppAccountByAppKey(appKey);
@@ -119,6 +130,11 @@ module.exports = function(dbProvider){
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,
         updateAdminAccount                  : updateAdminAccount,
+
+        //Admin Authorizations
+        findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
+        createAdminPermissions              : createAdminPermissions,
+        updatePermissions                   : updatePermissions,
 
         findAppAccountByAppKey              : findAppAccountByAppKey,
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,

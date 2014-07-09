@@ -40,6 +40,11 @@
                     templateUrl: '/admin/scripts/views/partials/adminAccount.html',
                     controller: 'influenceAdminAccountCtrl'
                 }).
+                when('/home/config/permissions/:adminId?', {
+                    templateUrl: '/admin/scripts/views/partials/adminPermissions.html',
+                    controller: 'influenceAdminAdminPermissionsCtrl'
+                }).
+
                 when('/home/config/tenants', {
                     templateUrl: '/admin/scripts/views/partials/tenants.html',
                     controller: 'influenceAdminTenantsCtrl'

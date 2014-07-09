@@ -13,6 +13,17 @@ module.exports = function(dbProvider){
             return dbProvider.findAdminAuthTokenByToken(tokenStr);
         },
 
+        //Admin Permissions
+        findAdminAuthorizationsByAdminId = function(adminId){
+            return dbProvider.findAdminAuthorizationsByAdminId(adminId);
+        },
+        createAdminPermissions = function(permission){
+            return dbProvider.createAdminPermissions(permission);
+        },
+        updatePermissions = function(adminId, updateDo){
+            return dbProvider.updatePermissions(adminId, updateDo);
+        },
+
         //Actions
         createAction = function(actionDo){
             return dbProvider.createAction(actionDo);
@@ -37,6 +48,12 @@ module.exports = function(dbProvider){
         createAdminAuthToken        : createAdminAuthToken,
         invalidateAdminAuthToken    : invalidateAdminAuthToken,
         findAdminAuthTokenByToken   : findAdminAuthTokenByToken,
+
+        //Admin Authorizations
+        findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
+        createAdminPermissions              : createAdminPermissions,
+        updatePermissions                   : updatePermissions,
+
 
         //Actions
         createAction                : createAction,

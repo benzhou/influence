@@ -639,6 +639,8 @@
             loadActions($scope.numberOfPage, $scope.pageNumber);
 
         })
+
+        //Affiliates
         .controller('influenceAdminAffiliatesCtrl', function(
             $scope, $rootScope, $location, $log, $q,
             influenceAdminAppConstants, influenceAdminAppSession,
@@ -889,6 +891,23 @@
                 );
             }
         })
+
+        //Admin Permissions
+        .controller('influenceAdminAdminPermissionsCtrl', function(
+            $scope, $rootScope, $location, $log, $routeParams,
+            influenceAdminAppConstants, influenceAdminAppSession, dirtyCheckerService,
+            tenantsService, affiliatesService){
+            $log.log("influenceAdminAdminPermissionsCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+
+        })
+
         .controller('influenceAdminContactusCtrl', function($scope, $log){
             $log.log("influenceAdminContactusCtrl called!");
 

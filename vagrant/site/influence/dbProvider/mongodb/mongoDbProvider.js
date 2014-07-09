@@ -129,15 +129,15 @@ module.exports = function(config, MongoDb, logger){
             return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, updateObj || token);
         },
 
-        //Admin Authorization
+        //Admin Permissions
         findAdminAuthorizationsByAdminId = function(adminId){
             return  _findOneBy(collections.AdminAuthorizations, {adminId : adminId});
         },
-        createAdminAuthorizations = function(tenant){
-            return _insertNew(collections.Tenants, tenant);
+        createAdminPermissions = function(permission){
+            return _insertNew(collections.AdminAuthorizations, permission);
         },
-        updateAdminAuthorizations = function(tenantId, updateDo){
-            return _upsertByMatch(collections.Tenants, {}, {_id : new MongoDb.ObjectID(tenantId)}, {$set: updateDo});
+        updatePermissions = function(adminId, updateDo){
+            return _upsertByMatch(collections.AdminAuthorizations, {}, {adminId : new MongoDb.ObjectID(adminId)}, {$set: updateDo});
         },
 
         //Tenants
@@ -444,7 +444,12 @@ module.exports = function(config, MongoDb, logger){
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,
-        updateAdminAccount                 : updateAdminAccount,
+        updateAdminAccount                  : updateAdminAccount,
+
+        //Admin Authorizations
+        findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
+        createAdminPermissions              : createAdminPermissions,
+        updatePermissions                   : updatePermissions,
 
         //App Account
         findAppAccountByAppKey              : findAppAccountByAppKey,

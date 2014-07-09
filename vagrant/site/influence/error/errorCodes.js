@@ -103,7 +103,17 @@ module.exports = function(){
 
         //authBusiness.js findActionByKey
         C_400_021_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400021001, desc : "Missing required parameters" },
-        C_400_021_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400021002, desc : "Invalid Action Key" }
+        C_400_021_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400021002, desc : "Invalid Action Key" },
+
+        //authBusiness.js findAdminAuthorizationsByAdminId
+        C_400_022_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400022001, desc : "Missing required parameters" },
+        C_400_022_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400022002, desc : "Invalid Admin ID" },
+
+        //authBusiness.js createAdminPermissions
+        C_400_023_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023001, desc : "Missing required parameters" },
+        C_400_023_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023002, desc : "Invalid Affiliates Permission" },
+        C_400_023_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023003, desc : "Invalid Tenants Permission" }
+
 
     };
 }();
