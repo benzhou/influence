@@ -312,6 +312,9 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
         createAdminPermissions = function(adminId, permission){
             var df = Q.defer();
 
+            logger.log("createAdminPermissions adminId:%s", adminId);
+            logger.log(permission);
+            
             //validation
             //required fields
             if(!adminId || !permission){
@@ -354,28 +357,12 @@ module.exports = function(helpers, util, logger, config, accountDataHandler, aut
 
             }
 
-            var
-                newPerm = {
-                    Actions: [], //App level
-                    Roles : [],
-                    Tenants : []
-                },
-                affiliatePerm = {
-                    Affiliate_ID : "",
-                    Actions : [],
-                    Roles : []
-                },
-                TenantPerm = {
-                    Tenant_ID : "",
-                    Actions : [],
-                    Roles : [],
-                    Affiliates : []
-                };
+
 
 
         },
         updatePermissions = function(adminId, updateDo){
-            return dbProvider.updatePermissions(adminId, updateDo);
+
         },
 
         //Actions
