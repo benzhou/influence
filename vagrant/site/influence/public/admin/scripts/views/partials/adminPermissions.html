@@ -14,13 +14,13 @@
                             permission-level="selectedPermissionLevel"
                             actions="actions"
                             permissions="permissions"
-                            loadingStart="loadingStart()"
-                            loadingEnd="loadingEnd()"
-                            loadTenants="loadTenants()"
-                            loadAffiliates="loadAffiliates(tenant)"
-                            onError="onError()"/>
+                            asyn-load-begin="loadingStart()"
+                            asyn-load-end="loadingEnd()"
+                            load-tenants="loadTenants()"
+                            load-affiliates="loadAffiliates(tenant)"
+                            onError="onError()"></admin-permissions>
 
-                    <a type="submit" class="btn btn-default" ng-click="savePermissions">Submit</a>
+                    <a type="submit" class="btn btn-default" ng-click="savePermissions"> Submit</a>
                 </form>
             </div>
         </div>

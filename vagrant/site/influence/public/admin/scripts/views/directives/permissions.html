@@ -9,8 +9,8 @@
 
 <div class="form-group" ng-if="permissionLevel.level === 'tenant'">
     <label for="tenant">Tenant:</label>
-    <select id="tenant" ng-model="selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in tenants"></select>
-    <div ng-if="selectedTenant">
+    <select id="tenant" ng-model="data.selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in metaData.tenants"></select>
+    <div ng-if="data.selectedTenant">
         <label for="appActions">Tenant Actions:</label>
         <ul id="tenantActions">
             <li ng-repeat="action in actions">
@@ -22,10 +22,10 @@
 
 <div class="form-group" ng-if="permissionLevel.level === 'affiliate'">
     <label for="tenantsForAffilaite">Tenant:</label>
-    <select id="tenantsForAffilaite" ng-model="selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in tenants"></select>
-    <label for="affiliates">Affiliate:</label>
-    <select id="affiliates" ng-model="selectedTenant" ng-options="affilaite.name for affiliate in affilaites"></select>
-    <div ng-if="selectedAffiliate">
+    <select id="tenantsForAffilaite" ng-model="data.selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in metaData.tenants"></select>
+    <label for="affiliatesDropDown">Affiliate:</label>
+    <select id="affiliatesDropDown" ng-model="data.selectedAffiliate" ng-options="affiliate.name for affiliate in metaData.affiliates"></select>
+    <div ng-if="data.selectedAffiliate">
         <label for="affiliateAction">Affiliate Actions:</label>
         <ul id="affiliateAction">
             <li ng-repeat="action in actions">

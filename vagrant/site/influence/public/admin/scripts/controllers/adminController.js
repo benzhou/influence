@@ -744,6 +744,7 @@
 
             $scope.onChangeTenant = function(){
                 $log.log("changed tenant:");
+                $log.log($scope.selectedTenant);
                 refresh();
             }
 
@@ -921,7 +922,7 @@
             $scope.loadTenants = function(){
                 var df = $q.defer();
 
-                tenantsService.query({numberOfPage:1,pageNumber:1000,token: influenceAdminAppSession.token.token}).$promise.then(
+                tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminAdminPermissionsCtrl loadTenants promise fulfilled!');
 
@@ -946,7 +947,7 @@
             $scope.loadAffiliates = function(tenant){
                 var df = $q.defer();
 
-                affiliatesService.query({tenantId:tenant.tenantId, numberOfPage:1,pageNumber:1000,token: influenceAdminAppSession.token.token}).$promise.then(
+                affiliatesService.query({tenantId:tenant._id, numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminAdminPermissionsCtrl loadAffiliates promise fulfilled!');
 
@@ -978,6 +979,10 @@
 
             $scope.onError = function(err){
                 $location.path('/error').search({code:err.data.code, msg:err.data.message});
+            };
+
+            $scope.savePermissions = function(){
+
             };
 
             //Initial page load
