@@ -11,21 +11,14 @@
                         <select id="permissionLevels" ng-model="selectedPermissionLevel" ng-options="permissionLevel.name for permissionLevel in permissionLevels"></select>
                     </div>
                     <admin-permissions
-                            permission-level="selectedPermissionLevel.level"
+                            permission-level="selectedPermissionLevel"
                             actions="actions"
                             permissions="permissions"
+                            loadingStart="loadingStart()"
+                            loadingEnd="loadingEnd()"
                             loadTenants="loadTenants()"
-                            loadAffiliates="loadAffiliates(tenant)" />
-
-                        <!--
-                        <label for="appActions">Application Actions:</label>
-                        <ul id="appActions">
-                            <li ng-repeat="action in actions">
-                                <input type="checkbox" ng-checked=""/>{{action.key}}
-                            </li>
-                        </ul>
-                        <<select id="actions" multiple ng-options="action for action in permissions.actions"></select>
-                        -->
+                            loadAffiliates="loadAffiliates(tenant)"
+                            onError="onError()"/>
 
                     <a type="submit" class="btn btn-default" ng-click="savePermissions">Submit</a>
                 </form>

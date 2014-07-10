@@ -1,4 +1,4 @@
-<div class="form-group" ng-if="permissionLevel === 'app'">
+<div class="form-group" ng-if="permissionLevel.level === 'app'">
     <label for="appActions">Application Actions:</label>
     <ul id="appActions">
         <li ng-repeat="action in actions">
@@ -7,11 +7,30 @@
     </ul>
 </div>
 
-<div class="form-group" ng-if="permissionLevel === 'tenant'">
-    <label for="appActions">Tenant Actions:</label>
-    <ul id="tenantActions">
-        <li ng-repeat="action in actions">
-            <input type="checkbox" ng-checked="isTenantActionsContains(action)"/>{{action.key}}
-        </li>
-    </ul>
+<div class="form-group" ng-if="permissionLevel.level === 'tenant'">
+    <label for="tenant">Tenant:</label>
+    <select id="tenant" ng-model="selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in tenants"></select>
+    <div ng-if="selectedTenant">
+        <label for="appActions">Tenant Actions:</label>
+        <ul id="tenantActions">
+            <li ng-repeat="action in actions">
+                <input type="checkbox" ng-checked="isTenantActionsContains(action)"/>{{action.key}}
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="form-group" ng-if="permissionLevel.level === 'affiliate'">
+    <label for="tenantsForAffilaite">Tenant:</label>
+    <select id="tenantsForAffilaite" ng-model="selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in tenants"></select>
+    <label for="affiliates">Affiliate:</label>
+    <select id="affiliates" ng-model="selectedTenant" ng-options="affilaite.name for affiliate in affilaites"></select>
+    <div ng-if="selectedAffiliate">
+        <label for="affiliateAction">Affiliate Actions:</label>
+        <ul id="affiliateAction">
+            <li ng-repeat="action in actions">
+                <input type="checkbox" ng-checked="isAffiliateActionsContains(action)"/>{{action.key}}
+            </li>
+        </ul>
+    </div>
 </div>

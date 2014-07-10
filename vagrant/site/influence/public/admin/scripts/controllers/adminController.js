@@ -968,6 +968,18 @@
                 return df.promise;
             };
 
+            $scope.loadingStart = function(){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+            };
+
+            $scope.loadingEnd = function(){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+            };
+
+            $scope.onError = function(err){
+                $location.path('/error').search({code:err.data.code, msg:err.data.message});
+            };
+
             //Initial page load
             $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
             $scope.permissionLevels = [
