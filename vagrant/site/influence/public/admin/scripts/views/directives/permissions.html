@@ -14,7 +14,7 @@
         <label for="appActions">Tenant Actions:</label>
         <ul id="tenantActions">
             <li ng-repeat="action in actions">
-                <input type="checkbox" ng-checked="isTenantActionsContains(action)"/>{{action.key}}
+                <input type="checkbox" ng-checked="isTenantActionsContains(data.selectedTenant, action)"/>{{action.key}}
             </li>
         </ul>
     </div>
@@ -29,7 +29,7 @@
         <label for="affiliateAction">Affiliate Actions:</label>
         <ul id="affiliateAction">
             <li ng-repeat="action in actions">
-                <input type="checkbox" ng-checked="isAffiliateActionsContains(action)"/>{{action.key}}
+                <input type="checkbox" ng-checked="isAffiliateActionsContains(data.selectedTenant, data.selectedAffiliates, action)"/>{{action.key}}
             </li>
         </ul>
     </div>
