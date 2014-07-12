@@ -15,7 +15,7 @@
                         actions: ["CONFIG_TENANTS"], //App level
                         tenants : [
                             {
-                                tenantId : "53bc05cd7f7847e21faab5d1",
+                                tenantId : "53b374ba0d45fa990c8dc866",
                                 actions: ["READ_ACTIONS"], //Tenant_ID_1 level
                                 affiliates : [
                                     {
@@ -188,19 +188,21 @@
                     //if(permViewModel.all.actions) return true;
                     if(!permViewModel.actions) return false;
 
-                    return permViewModel.actions.indexOf(action.key) > 0;
+                    return permViewModel.actions[action.key];
                 };
                 $scope.isTenantActionsContains = function(tenant, action){
                     if(!permViewModel.actions) return false;
                     //if(permViewModel.all.actions || permViewModel.tenants.all.actions || permViewModel.tenants["ID_" + tenant.tenantId].all.actions) return true;
-
-                    return permViewModel.tenants.actions.indexOf(action.key) > 0;
+                    var permViewModelTenant = permViewModel.tenants['ID_'+tenant._id];
+                    return  permViewModelTenant && permViewModelTenant.actions[action.key];
                 };
                 $scope.isAffiliateActionsContains = function(tenant, affiliate, action){
                     if(!permViewModel.actions) return false;
                     //if(permViewModel.actions === "*" || permViewModel.tenants.all.actions || permViewModel.tenants["ID_" + tenant.tenantId].all.actions) return true;
 
-                    return permViewModel.actions.indexOf(action.key) > 0;
+                    var permViewModelTenant = permViewModel.tenants['ID_'+tenant._id],
+                        permViewModelTenantAffiliate = permViewModelTenant && permViewModelTenant["ID_" + affiliate.id];
+                    return  permViewModelTenant && permViewModelTenantAffiliate && permViewModelTenantAffiliate.actions[action.key];
                 };
             };
 
