@@ -987,12 +987,6 @@
 
             //Initial page load
             $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-            $scope.permissionLevels = [
-                { name: "Application Level", level : "app"},
-                { name: "Tenant level", level : "tenant"},
-                { name: "Affiliate Level", level : "affiliate"}
-            ];
-            $scope.selectedPermissionLevel = $scope.permissionLevels[0];
 
             $q.all([
                 actionsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise,
