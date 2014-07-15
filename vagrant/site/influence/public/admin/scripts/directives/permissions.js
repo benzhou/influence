@@ -90,13 +90,14 @@
 
                                 for(var prop in input){
                                     if(input.hasOwnProperty(prop) && ["actions","roles", "tenantId", "affiliateId" ,"tenants","affiliates"].indexOf(prop) >= 0){
+                                        var isStringArrayProp = ["actions", "roles"].indexOf(prop) >=0,
+                                            isIdProp = ["tenantId", "affiliateId"].indexOf(prop) >= 0,
+                                            isLevelProp = ["tenants","affiliates"].indexOf(prop) >= 0;
+
                                         if(input[prop] === "*"){
                                             if(!ret.all) ret.all = {};
                                             ret.all[prop] = true;
                                         }else{
-                                            var isStringArrayProp = ["actions", "roles"].indexOf(prop) >=0,
-                                                isIdProp = ["tenantId", "affiliateId"].indexOf(prop) >= 0,
-                                                isLevelProp = ["tenants","affiliates"].indexOf(prop) >= 0;
                                             ret[prop] = {};
                                             if(angular.isArray(input[prop])){
                                                 //"actions", "roles"
@@ -129,6 +130,38 @@
                             };
 
                         return _parser(permDataModel);
+                    },
+                    viewModelToPerm = function(vm){
+                        /*{
+                            all : {
+                                actions : true,
+                                roles   : true,
+                                tenants : true
+                            },
+                            actions : {
+                                READ_ACTIONS : true,
+                                EDIT_ACTIONS : true
+                            },
+                            tenants : {
+                                ID_123456789 : {
+                                    actions : {
+                                        "READ_ACTIONS" : true
+                                    },
+                                    affiliates : {
+                                        ID_987654321 : {
+                                            actions : {
+                                                "EDIT_ACTIONS" : true
+                                            }
+                                        },
+                                        ID_567899999 : {
+                                            all : {
+                                                actions : true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }*/
                     },
                     permViewModel = permParser(perms);
 
