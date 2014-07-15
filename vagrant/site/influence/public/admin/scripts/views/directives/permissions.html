@@ -16,7 +16,17 @@
             <span class="glyphicon glyphicon-minus" ng-click="removeActionFromApp(action)"></span>
         </li>
     </ul>
-
+    <div class="btn-group" dropdown>
+        <a class="btn btn-link dropdown-toggle" ng-disabled="disabled">
+            <span class="glyphicon glyphicon-plus"></span>
+        </a>
+        <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="tenant in metaData.tenants" ng-click="addTenants(tenant)">
+                {{tenant.name}}
+            </li>
+        </ul>
+    </div>
+    <label>Tenants:</label>
     <ui>
         <li ng-repeat="tenant in data.perms.tenants">
             <p>TenantID: {{tenant.tenantId}}</p>

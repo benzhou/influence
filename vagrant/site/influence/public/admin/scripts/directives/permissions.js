@@ -12,43 +12,7 @@
 
                 var
                     unSubQueue = [],
-                    perms = $scope.permissions || {
-                        actions: ["CONFIG_TENANTS"], //App level
-                        tenants : [
-                            {
-                                tenantId : "53b374ba0d45fa990c8dc866",
-                                actions: ["READ_ACTIONS"], //Tenant_ID_1 level
-                                affiliates : [
-                                    {
-                                        affiliateId: "53bc0794a28c2dfe1fb7d03a",
-                                        actions: ["READ_ACTIONS", "EDIT_ACTIONS"]
-                                    },
-                                    {
-                                        affiliateId: "53bc07a3a28c2dfe1fb7d040",
-                                        actions: ["READ_ACTIONS"]
-                                    },
-                                    {
-                                        affiliateId: "53bc0a49a28c2dfe1fb7d06a",
-                                        actions: ["EDIT_ACTIONS"]
-                                    }
-                                ]
-                            },
-                            {
-                                tenantId : "53bc07aba28c2dfe1fb7d043",
-                                actions: ["READ_ACTIONS", "EDIT_ACTIONS", "CONFIG_TENANTS"],
-                                affiliates : [
-                                    {
-                                        affiliateId: "53bc0f5ca28c2dfe1fb7d079",
-                                        actions: ["READ_ACTIONS", "EDIT_ACTIONS","ACTION_ID_3"]
-                                    },
-                                    {
-                                        affiliateId: "53bc0f7aa28c2dfe1fb7d07f",
-                                        actions: ["READ_ACTIONS", "ACTION_ID_2","ACTION_ID_3"]
-                                    }
-                                ]
-                            }
-                        ]
-                    },
+                    perms = $scope.permissions || {},
                     refreshAffiliates = function(){
                         $scope.loadingStart();
                         var tenantsPromiseForAffiliates;
@@ -174,6 +138,25 @@
                     permViewModel : permViewModel,
                     perms          : perms
                 };
+
+                $scope.loadingStart();
+                $scope.loadTenants().then(
+                    function(result){
+                        $scope.metaData.tenants = result.data.tenants;
+                        $scope.data.selectedTenant = result.data.tenants[0];
+                    }
+                ).catch(
+                    function(err){
+                        $log.log("adminPermissions controller: $watch permissionLevel loadTenants promise caught an error!");
+                        $log.log(err);
+
+                        $scope.onError(err);
+                    }
+                ).finally(
+                    function(){
+                        $scope.loadingEnd();
+                    }
+                );
 
 
                 //Handlers
