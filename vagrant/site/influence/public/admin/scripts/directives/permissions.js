@@ -2,10 +2,11 @@
     "use strict";
 
     angular.module('influenceAdminApp.adminPermissions', [
+        'ui.bootstrap',
         'influenceAdminApp.constants'
     ])
         .directive('adminPermissions', function($log){
-            var controller = function($scope, $rootScope, $log, $q, influenceAdminAppConstants){
+            var controller = function($scope, $rootScope, $log, $q, $filter, influenceAdminAppConstants){
                 $log.log("adminPermissions controller: ");
                 $log.log($scope.actions);
 
@@ -20,29 +21,29 @@
                                 affiliates : [
                                     {
                                         affiliateId: "53bc0794a28c2dfe1fb7d03a",
-                                        actions: ["READ_ACTIONS", "EDIT_ACTIONS"] //Affiliate_ID_1_IN_TEANANT_ID_1 level
+                                        actions: ["READ_ACTIONS", "EDIT_ACTIONS"]
                                     },
                                     {
                                         affiliateId: "53bc07a3a28c2dfe1fb7d040",
-                                        actions: ["READ_ACTIONS"] //Affiliate_ID_2_IN_TEANANT_ID_1 level
+                                        actions: ["READ_ACTIONS"]
                                     },
                                     {
                                         affiliateId: "53bc0a49a28c2dfe1fb7d06a",
-                                        actions: ["EDIT_ACTIONS"] //Affiliate_ID_3_IN_TEANANT_ID_1 level
+                                        actions: ["EDIT_ACTIONS"]
                                     }
                                 ]
                             },
                             {
                                 tenantId : "53bc07aba28c2dfe1fb7d043",
-                                actions: ["READ_ACTIONS", "EDIT_ACTIONS", "CONFIG_TENANTS"], //Tenant_ID_1 level
+                                actions: ["READ_ACTIONS", "EDIT_ACTIONS", "CONFIG_TENANTS"],
                                 affiliates : [
                                     {
                                         affiliateId: "53bc0f5ca28c2dfe1fb7d079",
-                                        actions: ["READ_ACTIONS", "EDIT_ACTIONS","ACTION_ID_3"] //Affiliate_ID_1_IN_TEANANT_ID_2 level
+                                        actions: ["READ_ACTIONS", "EDIT_ACTIONS","ACTION_ID_3"]
                                     },
                                     {
                                         affiliateId: "53bc0f7aa28c2dfe1fb7d07f",
-                                        actions: ["READ_ACTIONS", "ACTION_ID_2","ACTION_ID_3"] //Affiliate_ID_2_IN_TEANANT_ID_2 level
+                                        actions: ["READ_ACTIONS", "ACTION_ID_2","ACTION_ID_3"]
                                     }
                                 ]
                             }
@@ -169,11 +170,14 @@
                 $log.debug(permViewModel);
 
                 $scope.metaData = {};
-                $scope.data = {};
+                $scope.data = {
+                    permViewModel : permViewModel,
+                    perms          : perms
+                };
 
 
                 //Handlers
-                unSubQueue.push($scope.$watch("permissionLevel", function(){
+                /*unSubQueue.push($scope.$watch("permissionLevel", function(){
                     $log.log("adminPermissions controller: $watch permissionLevel changed!");
                     $log.log($scope.permissionLevel);
                     if($scope.permissionLevel.level === "tenant" && !$scope.metaData.tenants){
@@ -211,13 +215,98 @@
                         unSubFunc();
                     });
                 });
-
+*/
                 $scope.onChangeTenant = function(){
                     $log.log("permission directive onChangeTenant");
                     refreshAffiliates();
                 }
 
-                $scope.isAppActionsContains = function(action){
+                var removeAction = function(obj, action){
+                    if(!obj || !obj.actions || !angular.isArray(obj.actions) || obj.actions.length === 0){
+                        return false;
+                    }
+                    var index = obj.actions.indexOf(action);
+                    if(index === -1) return false;
+
+                    obj.actions.splice(index, 1);
+                    return true;
+
+
+                },
+                    addAction = function(obj, action){
+                        obj = obj || {};
+                        obj.actions = obj.actions || [];
+
+                        if(!angular.isArray(obj.actions) || obj.actions.indexOf(action) > -1){
+                            return false;
+                        }
+
+                        obj.actions.push(action);
+                        return true;
+                    },
+                    removeOrAddTenantAction = function(tenant, action, removeOrAddFuc){
+                        if(perms.tenants && angular.isArray(perms.tenants)){
+                            var indexOfTargetTenant = -1;
+                            for(var i= 0,l=perms.tenants.length; i<l;i++){
+                                if(perms.tenants[i].tenantId === tenant.tenantId){
+                                    indexOfTargetTenant = i;
+                                    break;
+                                }
+                            }
+                            if(indexOfTargetTenant > -1 && removeOrAddFuc(perms.tenants[indexOfTargetTenant], action)){
+                                permViewModel = permParser(perms);
+                            }
+                        }
+                    },
+                    removeOrAddTenantAffiliateAction = function(tenant, affiliate, action, removeOrAddFuc){
+                        if(perms.tenants && angular.isArray(perms.tenants)){
+                            var indexOfTargetTenant = -1,
+                                indexOfTargetAffiliate = -1;
+                            for(var i= 0,l=perms.tenants.length; i<l;i++){
+                                if(perms.tenants[i].tenantId === tenant.tenantId){
+                                    indexOfTargetTenant = i;
+                                    if(perms.tenants[i].affiliates && angular.isArray(perms.tenants[i].affiliates)){
+                                        for(var k= 0,n=perms.tenants[i].affiliates.length;k<n;k++){
+                                            if(perms.tenants[i].affiliates[k].affiliateId = affiliate.affiliateId){
+                                                indexOfTargetAffiliate = k;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    break;
+                                }
+                            }
+                            if(indexOfTargetAffiliate > -1 && removeOrAddFuc(perms.tenants[indexOfTargetTenant].affiliates[indexOfTargetAffiliate], action)){
+                                permViewModel = permParser(perms);
+                            }
+                        }
+                    };
+                $scope.removeActionFromApp = function(actionKey){
+                    if(removeAction(perms, actionKey)){
+                        permViewModel = permParser(perms);
+                    }
+                };
+                $scope.removeActionFromTenant = function(tenant, actionKey){
+                    removeOrAddTenantAction(tenant, actionKey, removeAction);
+                };
+                $scope.removeActionFromTenantAffiliate = function(tenant, affiliate, actionKey){
+                    removeOrAddTenantAffiliateAction(tenant, affiliate, actionKey, removeAction);
+                };
+
+                $scope.addActionToApp = function(action){
+                    if(addAction(perms, action.key)){
+                        permViewModel = permParser(perms);
+                    }
+                };
+                $scope.addActionToTenant = function(tenant, action){
+                    removeOrAddTenantAction(tenant, action.key, addAction);
+                };
+                $scope.addActionToTenantAffiliate = function(tenant, affiliate, action){
+                    removeOrAddTenantAffiliateAction(tenant, affiliate, action.key, addAction);
+                };
+
+                /*$scope.isAppActionsContains = function(action){
                     //if(permViewModel.all.actions) return true;
                     if(!permViewModel.actions) return false;
 
@@ -236,12 +325,11 @@
                     var permViewModelTenant = permViewModel.tenants['ID_'+tenant._id],
                         permViewModelTenantAffiliate = permViewModelTenant && permViewModelTenant["ID_" + affiliate.id];
                     return  permViewModelTenant && permViewModelTenantAffiliate && permViewModelTenantAffiliate.actions[action.key];
-                };
+                };*/
             };
 
             return {
                 scope : {
-                    permissionLevel : "=",
                     actions : "=",
                     permissions : "=",
                     loadingStart: "&asynLoadBegin",

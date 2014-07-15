@@ -1,36 +1,66 @@
-<div class="form-group" ng-if="permissionLevel.level === 'app'">
-    <label for="appActions">Application Actions:</label>
-    <ul id="appActions">
-        <li ng-repeat="action in actions">
-            <input type="checkbox" ng-checked="isAppActionsContains(action)"/>{{action.key}}
+<div>
+    <div class="btn-group" dropdown>
+        <a class="btn btn-link dropdown-toggle" ng-disabled="disabled">
+            <span class="glyphicon glyphicon-plus"></span>
+        </a>
+        <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="action in actions" ng-click="addActionToApp(action)">
+                {{action.key}}
+            </li>
+        </ul>
+    </div>
+    <label for="existingAppActions">Application Actions:</label>
+    <ul id="existingAppActions">
+        <li ng-repeat="action in data.perms.actions">
+            {{action}}
+            <span class="glyphicon glyphicon-minus" ng-click="removeActionFromApp(action)"></span>
         </li>
     </ul>
-</div>
 
-<div class="form-group" ng-if="permissionLevel.level === 'tenant'">
-    <label for="tenant">Tenant:</label>
-    <select id="tenant" ng-model="data.selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in metaData.tenants"></select>
-    <div ng-if="data.selectedTenant">
-        <label for="appActions">Tenant Actions:</label>
-        <ul id="tenantActions">
-            <li ng-repeat="action in actions">
-                <input type="checkbox" ng-checked="isTenantActionsContains(data.selectedTenant, action)"/>{{action.key}}
-            </li>
-        </ul>
-    </div>
-</div>
+    <ui>
+        <li ng-repeat="tenant in data.perms.tenants">
+            <p>TenantID: {{tenant.tenantId}}</p>
+            <div class="btn-group" dropdown>
+                <a class="btn btn-link dropdown-toggle" ng-disabled="disabled">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                    <li ng-repeat="action in actions" ng-click="addActionToTenant(tenant, action)">
+                        {{action.key}}
+                    </li>
+                </ul>
+            </div>
+            <label>Actions:</label>
+            <ul>
+                <li ng-repeat="action in tenant.actions">
+                    {{action}}<span class="glyphicon glyphicon-minus" ng-click="removeActionFromTenant(tenant, action)"></span>
+                    <!--<span ng-click="removeActionFromTenant(tenant, action)">-</span>-->
+                </li>
+            </ul>
+            <label>Affiliates:</label>
+            <ul>
+                <li ng-repeat="affiliate in tenant.affiliates">
+                    <p>Affiliate ID: {{affiliate.affiliateId}}</p>
+                    <div class="btn-group" dropdown>
+                        <a class="btn btn-link dropdown-toggle" ng-disabled="disabled">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li ng-repeat="action in actions" ng-click="addActionToTenantAffiliate(tenant, affiliate, action)">
+                                {{action.key}}
+                            </li>
+                        </ul>
+                    </div>
+                    <label>Actions:</label>
+                    <ul>
+                        <li ng-repeat="action in affiliate.actions">
+                            {{action}}<span class="glyphicon glyphicon-minus" ng-click="removeActionFromTenantAffiliate(tenant, affiliate, action)"></span>
+                            <!--<span ng-click="removeActionFromTenant(tenant, action)">-</span>-->
+                        </li>
+                    </ul>
+                </li>
+            </ul>
 
-<div class="form-group" ng-if="permissionLevel.level === 'affiliate'">
-    <label for="tenantsForAffilaite">Tenant:</label>
-    <select id="tenantsForAffilaite" ng-model="data.selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in metaData.tenants"></select>
-    <label for="affiliatesDropDown">Affiliate:</label>
-    <select id="affiliatesDropDown" ng-model="data.selectedAffiliate" ng-options="affiliate.name for affiliate in metaData.affiliates"></select>
-    <div ng-if="data.selectedAffiliate">
-        <label for="affiliateAction">Affiliate Actions:</label>
-        <ul id="affiliateAction">
-            <li ng-repeat="action in actions">
-                <input type="checkbox" ng-checked="isAffiliateActionsContains(data.selectedTenant, data.selectedAffiliate, action)"/>{{action.key}}
-            </li>
-        </ul>
-    </div>
+        </li>
+    </ui>
 </div>
