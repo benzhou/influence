@@ -216,7 +216,7 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
 
     //Admin Permissions
     _hookUpRoutes(router, 'get', '/permissions/admin/:adminId?', apiController.getAdminPermissions);
-    _hookUpRoutes(router, 'post', '/permissions/admin/:actionId?', apiController.postAdminPermissions);
+    _hookUpRoutes(router, 'post', '/permissions/admin/:adminId?', apiController.postAdminPermissions);
 
     //Tenants
     _hookUpRoutes(router, 'get', '/tenants/:numberOfPage?/:pageNumber?', apiController.getTenants);

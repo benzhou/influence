@@ -332,7 +332,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 });
         },
         postAdminPermissions = function(req,res,next){
-            var adminIdToCreateOrUpdate = req.param.adminId,
+            var adminIdToCreateOrUpdate = req.params.adminId,
                 permissions = req.body,
                 currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
@@ -348,6 +348,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(function(err){
                     logger.log("apiController.js postAdminPermissions: catch an error!");
                     logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,

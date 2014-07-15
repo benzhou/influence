@@ -982,7 +982,27 @@
             };
 
             $scope.savePermissions = function(){
+                $log.log("savePermissions clicked!");
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                adminPermissionsService.save(
+                    {adminId:adminId, token:influenceAdminAppSession.token.token},
+                    $scope.permissions
+                ).$promise.then(
+                    function(result){
+                        $scope.permissions = result.data.permissions;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('savePermissions get rejected!');
+                        $log.log(err);
 
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
             };
 
             //Initial page load

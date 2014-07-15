@@ -31,5 +31,5 @@
             TenantPerm      : TenantPerm,
             AppPerm         : AppPerm
         };
-    };
+    }();
 })();

@@ -132,9 +132,10 @@ module.exports = function(config, MongoDb, logger){
 
         //Admin Permissions
         findAdminAuthorizationsByAdminId = function(adminId){
+            adminId = new MongoDb.ObjectID(adminId);
             return  _findOneBy(collections.AdminAuthorizations, {adminId : adminId});
         },
-        createAdminPermissions = function(adminId, permission){
+        createAdminPermissions = function(permission){
             permission.adminId = new MongoDb.ObjectID(permission.adminId);
 
             if(permission.tenants && util.isArray(permission.tenants)){

@@ -396,7 +396,7 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                             }
                         }
 
-                        return authDataHandler.createOrUpdateAdminPermissions(adminId, permission);
+                        return authDataHandler.createOrUpdateAdminPermissions(adminId, updatedPermision);
                     }else{
                         //If no existing permissions, we need to create them
                         var newPerm = new permissionDataObjects.AppPerm(adminId, createdOrUpdatedBy, permission.actions, permission.roles);
@@ -409,6 +409,7 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
 
                                 newPerm.tenants = "*";
                             }else{
+                                newPerm.tenants = [];
                                 for(var tenant in permission.tenants){
                                     //Only creates tenant level permission when at least has assigned actions or roles or affiliates
                                     if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
@@ -433,7 +434,7 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                             }
                         }//End of if(permission.tenants){
 
-                        return authDataHandler.createAdminPermissions(adminId, permission);
+                        return authDataHandler.createAdminPermissions(newPerm);
                     }
                 }
             ).then(

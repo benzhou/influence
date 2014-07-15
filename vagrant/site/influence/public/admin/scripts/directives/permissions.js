@@ -3,51 +3,14 @@
 
     angular.module('influenceAdminApp.adminPermissions', [
         'ui.bootstrap',
+        'influenceAdminApp.bootstrap.ui.extend',
         'influenceAdminApp.constants'
     ])
         .directive('adminPermissions', function($log){
             var controller = function($scope, $rootScope, $log, $q, $filter, influenceAdminAppConstants){
                 $log.log("adminPermissions controller: ");
-                $log.log($scope.actions);
 
                 var
-                    unSubQueue = [],
-                    perms = $scope.permissions || {},
-                    refreshAffiliates = function(){
-                        $scope.loadingStart();
-                        var tenantsPromiseForAffiliates;
-                        if(!$scope.metaData.tenants){
-                            tenantsPromiseForAffiliates = $scope.loadTenants();
-                        }
-
-                        $q.when(tenantsPromiseForAffiliates).then(
-                            function(result){
-                                //only set tenants when there is a result back
-                                if(result){
-                                    $scope.metaData.tenants = result.data.tenants;
-                                    $scope.data.selectedTenant = result.data.tenants[0];
-                                }
-
-                                return  $scope.loadAffiliates({tenant: $scope.data.selectedTenant});
-                            }
-                        ).then(
-                            function(result){
-                                $scope.metaData.affiliates = result.data.affiliates;
-                                $scope.data.selectedAffiliate = result.data.affiliates[0];
-                            }
-                        ).catch(
-                            function(err){
-                                $log.log("adminPermissions controller: refreshAffiliates loadTenants or loadAffiliates promise caught an error!");
-                                $log.log(err);
-
-                                $scope.onError(err);
-                            }
-                        ).finally(
-                            function(){
-                                $scope.loadingEnd();
-                            }
-                        );
-                    },
                     permParser = function(permDataModel){
                         var
                             _parser = function(input){
@@ -96,54 +59,100 @@
 
                         return _parser(permDataModel);
                     },
-                    viewModelToPerm = function(vm){
-                        /*{
-                            all : {
-                                actions : true,
-                                roles   : true,
-                                tenants : true
-                            },
-                            actions : {
-                                READ_ACTIONS : true,
-                                EDIT_ACTIONS : true
-                            },
-                            tenants : {
-                                ID_123456789 : {
-                                    actions : {
-                                        "READ_ACTIONS" : true
-                                    },
-                                    affiliates : {
-                                        ID_987654321 : {
-                                            actions : {
-                                                "EDIT_ACTIONS" : true
-                                            }
-                                        },
-                                        ID_567899999 : {
-                                            all : {
-                                                actions : true
+                    permViewModel = permParser($scope.permissions),
+                    removeAction = function(obj, action, compareFuc){
+                        if(!obj || !obj.actions || !angular.isArray(obj.actions) || obj.actions.length === 0){
+                            return false;
+                        }
+                        var index = obj.actions.indexOf(action);
+                        if(index === -1) return false;
+
+                        obj.actions.splice(index, 1);
+                        return true;
+
+
+                    },
+                    addAction = function(obj, action){
+                        obj = obj || {};
+                        obj.actions = obj.actions || [];
+
+                        if(!angular.isArray(obj.actions) || obj.actions.indexOf(action) > -1){
+                            return false;
+                        }
+
+                        obj.actions.push(action);
+                        return true;
+                    },
+                    removeOrAddTenantAction = function(tenant, action, removeOrAddFuc){
+                        if($scope.permissions.tenants && angular.isArray($scope.permissions.tenants)){
+                            var indexOfTargetTenant = -1;
+                            for(var i= 0,l=$scope.permissions.tenants.length; i<l;i++){
+                                if($scope.permissions.tenants[i].tenantId === tenant.tenantId){
+                                    indexOfTargetTenant = i;
+                                    break;
+                                }
+                            }
+                            if(indexOfTargetTenant > -1 && removeOrAddFuc($scope.permissions.tenants[indexOfTargetTenant], action)){
+                                permViewModel = permParser($scope.permissions);
+                            }
+                        }
+                    },
+                    removeOrAddTenantAffiliateAction = function(tenant, affiliate, action, removeOrAddFuc){
+                        if($scope.permissions.tenants && angular.isArray($scope.permissions.tenants)){
+                            var indexOfTargetTenant = -1,
+                                indexOfTargetAffiliate = -1;
+                            for(var i= 0,l=$scope.permissions.tenants.length; i<l;i++){
+                                if($scope.permissions.tenants[i].tenantId === tenant.tenantId){
+                                    indexOfTargetTenant = i;
+                                    if($scope.permissions.tenants[i].affiliates && angular.isArray($scope.permissions.tenants[i].affiliates)){
+                                        for(var k= 0,n=$scope.permissions.tenants[i].affiliates.length;k<n;k++){
+                                            if($scope.permissions.tenants[i].affiliates[k].affiliateId === affiliate.affiliateId){
+                                                indexOfTargetAffiliate = k;
+                                                break;
                                             }
                                         }
                                     }
+
+                                    break;
                                 }
                             }
-                        }*/
+                            if(indexOfTargetAffiliate > -1 && removeOrAddFuc($scope.permissions.tenants[indexOfTargetTenant].affiliates[indexOfTargetAffiliate], action)){
+                                permViewModel = permParser($scope.permissions);
+                            }
+                        }
                     },
-                    permViewModel = permParser(perms);
+                    indexOfArray = function(array, obj, compareFuc){
+                        if(!array || !obj || !angular.isArray(array)) return -1;
+                        if(angular.isString(obj)){
+                            return [].prototype.indexOf.apply(array, obj);
+                        }
+                        if(angular.isObject(obj)){
+                            var ret = -1;
+                            for(var i= 0,l=array.length;i<l;i++){
+                                if(compareFuc && angular.isFunction(compareFuc)){
+                                    if(compareFuc(array[i], obj)){
+                                        ret = i;
+                                    }
+                                }else{
+                                    if(angular.equals(array[i], obj)){
+                                        ret = i;
+                                    }
+                                }
+                            }
 
-                $log.info("permVieModel:");
-                $log.debug(permViewModel);
+                            return ret;
+                        }
+                        return -1;
+                    };
+
+
 
                 $scope.metaData = {};
-                $scope.data = {
-                    permViewModel : permViewModel,
-                    perms          : perms
-                };
 
                 $scope.loadingStart();
                 $scope.loadTenants().then(
                     function(result){
                         $scope.metaData.tenants = result.data.tenants;
-                        $scope.data.selectedTenant = result.data.tenants[0];
                     }
                 ).catch(
                     function(err){
@@ -160,114 +169,9 @@
 
 
                 //Handlers
-                /*unSubQueue.push($scope.$watch("permissionLevel", function(){
-                    $log.log("adminPermissions controller: $watch permissionLevel changed!");
-                    $log.log($scope.permissionLevel);
-                    if($scope.permissionLevel.level === "tenant" && !$scope.metaData.tenants){
-                        $scope.loadingStart();
-                        $scope.loadTenants().then(
-                            function(result){
-                                $scope.metaData.tenants = result.data.tenants;
-                                $scope.data.selectedTenant = result.data.tenants[0];
-                            }
-                        ).catch(
-                            function(err){
-                                $log.log("adminPermissions controller: $watch permissionLevel loadTenants promise caught an error!");
-                                $log.log(err);
-
-                                $scope.onError(err);
-                            }
-                        ).finally(
-                            function(){
-                                $scope.loadingEnd();
-                            }
-                        );
-                    }
-
-                    if($scope.permissionLevel.level === "affiliate"){
-                        refreshAffiliates();
-                    }else{
-                        //When any other level, clear $scope.selectedAffilaite
-                        $scope.selectedAffiliate = null;
-                        $scope.metaData.affiliates = null;
-                    }
-                }));
-                $scope.$on(influenceAdminAppConstants.EVENTS.DESTROY, function(){
-                    $log.log('influenceAdminAppConstants event DESTROY, listened in adminPermissions directive controller');
-                    angular.forEach(unSubQueue, function(unSubFunc){
-                        unSubFunc();
-                    });
-                });
-*/
-                $scope.onChangeTenant = function(){
-                    $log.log("permission directive onChangeTenant");
-                    refreshAffiliates();
-                }
-
-                var removeAction = function(obj, action){
-                    if(!obj || !obj.actions || !angular.isArray(obj.actions) || obj.actions.length === 0){
-                        return false;
-                    }
-                    var index = obj.actions.indexOf(action);
-                    if(index === -1) return false;
-
-                    obj.actions.splice(index, 1);
-                    return true;
-
-
-                },
-                    addAction = function(obj, action){
-                        obj = obj || {};
-                        obj.actions = obj.actions || [];
-
-                        if(!angular.isArray(obj.actions) || obj.actions.indexOf(action) > -1){
-                            return false;
-                        }
-
-                        obj.actions.push(action);
-                        return true;
-                    },
-                    removeOrAddTenantAction = function(tenant, action, removeOrAddFuc){
-                        if(perms.tenants && angular.isArray(perms.tenants)){
-                            var indexOfTargetTenant = -1;
-                            for(var i= 0,l=perms.tenants.length; i<l;i++){
-                                if(perms.tenants[i].tenantId === tenant.tenantId){
-                                    indexOfTargetTenant = i;
-                                    break;
-                                }
-                            }
-                            if(indexOfTargetTenant > -1 && removeOrAddFuc(perms.tenants[indexOfTargetTenant], action)){
-                                permViewModel = permParser(perms);
-                            }
-                        }
-                    },
-                    removeOrAddTenantAffiliateAction = function(tenant, affiliate, action, removeOrAddFuc){
-                        if(perms.tenants && angular.isArray(perms.tenants)){
-                            var indexOfTargetTenant = -1,
-                                indexOfTargetAffiliate = -1;
-                            for(var i= 0,l=perms.tenants.length; i<l;i++){
-                                if(perms.tenants[i].tenantId === tenant.tenantId){
-                                    indexOfTargetTenant = i;
-                                    if(perms.tenants[i].affiliates && angular.isArray(perms.tenants[i].affiliates)){
-                                        for(var k= 0,n=perms.tenants[i].affiliates.length;k<n;k++){
-                                            if(perms.tenants[i].affiliates[k].affiliateId = affiliate.affiliateId){
-                                                indexOfTargetAffiliate = k;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    break;
-                                }
-                            }
-                            if(indexOfTargetAffiliate > -1 && removeOrAddFuc(perms.tenants[indexOfTargetTenant].affiliates[indexOfTargetAffiliate], action)){
-                                permViewModel = permParser(perms);
-                            }
-                        }
-                    };
                 $scope.removeActionFromApp = function(actionKey){
-                    if(removeAction(perms, actionKey)){
-                        permViewModel = permParser(perms);
+                    if(removeAction($scope.permissions, actionKey)){
+                        permViewModel = permParser($scope.permissions);
                     }
                 };
                 $scope.removeActionFromTenant = function(tenant, actionKey){
@@ -278,8 +182,8 @@
                 };
 
                 $scope.addActionToApp = function(action){
-                    if(addAction(perms, action.key)){
-                        permViewModel = permParser(perms);
+                    if(addAction($scope.permissions, action.key)){
+                        permViewModel = permParser($scope.permissions);
                     }
                 };
                 $scope.addActionToTenant = function(tenant, action){
@@ -289,26 +193,95 @@
                     removeOrAddTenantAffiliateAction(tenant, affiliate, action.key, addAction);
                 };
 
-                /*$scope.isAppActionsContains = function(action){
-                    //if(permViewModel.all.actions) return true;
-                    if(!permViewModel.actions) return false;
+                $scope.addTenant = function(tenant){
+                    $scope.permissions = $scope.permissions || {};
+                    $scope.permissions.tenants = $scope.permissions.tenants || [];
 
-                    return permViewModel.actions[action.key];
-                };
-                $scope.isTenantActionsContains = function(tenant, action){
-                    if(!permViewModel.actions) return false;
-                    //if(permViewModel.all.actions || permViewModel.tenants.all.actions || permViewModel.tenants["ID_" + tenant.tenantId].all.actions) return true;
-                    var permViewModelTenant = permViewModel.tenants['ID_'+tenant._id];
-                    return  permViewModelTenant && permViewModelTenant.actions[action.key];
-                };
-                $scope.isAffiliateActionsContains = function(tenant, affiliate, action){
-                    if(!permViewModel.actions) return false;
-                    //if(permViewModel.actions === "*" || permViewModel.tenants.all.actions || permViewModel.tenants["ID_" + tenant.tenantId].all.actions) return true;
+                    //In case it was an object
+                    if(!angular.isArray($scope.permissions.tenants)){
+                        $scope.permissions.tenants = [];
+                    }
 
-                    var permViewModelTenant = permViewModel.tenants['ID_'+tenant._id],
-                        permViewModelTenantAffiliate = permViewModelTenant && permViewModelTenant["ID_" + affiliate.id];
-                    return  permViewModelTenant && permViewModelTenantAffiliate && permViewModelTenantAffiliate.actions[action.key];
-                };*/
+                    if(indexOfArray($scope.permissions.tenants, tenant, function(o1,o2){ return o1.tenantId === o2._id;}) === -1){
+                        $scope.permissions.tenants.push({
+                            tenantId : tenant._id
+                        });
+                        permViewModel = permParser($scope.permissions);
+                    }
+                };
+                $scope.removeTenant = function(tenant){
+                    if($scope.permissions && $scope.permissions.tenants && angular.isArray($scope.permissions.tenants)){
+                        var index = indexOfArray($scope.permissions.tenants, tenant, function(o1, o2){ return o1.tenantId === tenant.tenantId;});
+                        if(index > -1){
+                            $scope.permissions.tenants.splice(index, 1);
+                            permViewModel = permParser($scope.permissions);
+                        }
+                    }
+                };
+
+                $scope.loadTenantAffiliates = function(tenant){
+
+                    $scope.metaData.tenantAffiliate = $scope.metaData.tenantAffiliate || {};
+
+                    if($scope.metaData.tenantAffiliate["ID_" + tenant.tenantId]){
+                        return $scope.metaData.tenantAffiliate["ID_" + tenant.tenantId];
+                    }
+
+                    var df = $q.defer();
+
+                    $scope.loadingStart();
+                    $scope.loadAffiliates({tenant: {_id:tenant.tenantId}}).then(
+                        function(result){
+                            $scope.metaData.tenantAffiliate["ID_" + tenant.tenantId] = result.data.affiliates || [];
+
+                            df.resolve($scope.metaData.tenantAffiliate["ID_" + tenant.tenantId]);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log("loadAffiliates promise caught an error!");
+                            $log.log(err);
+
+                            df.resolve([]);
+                            $scope.onError(err);
+                        }
+                    ).finally(
+                        function(){
+                            $scope.loadingEnd();
+                        }
+                    );
+
+                    return df.promise;
+                }
+                $scope.addTenantAffiliate = function(tenant, affiliate){
+                    var index = indexOfArray($scope.permissions.tenants, tenant, function(o1,o2){ return o1.tenantId === o2.tenantId;});
+
+                    if($scope.permissions.tenants && $scope.permissions.tenants[index]){
+                        $scope.permissions.tenants[index].affiliates = $scope.permissions.tenants[index].affiliates || [];
+
+                        //In case it was an object
+                        if(!angular.isArray( $scope.permissions.tenants[index].affiliates)){
+                            $scope.permissions.tenants[index].affiliates = [];
+                        }
+
+                        if(indexOfArray($scope.permissions.tenants[index].affiliates, affiliate, function(o1,o2){ return o1.affiliateId === o2.id;}) === -1){
+                            $scope.permissions.tenants[index].affiliates.push({
+                                affiliateId : affiliate.id
+                            });
+                            permViewModel = permParser($scope.permissions);
+                        }
+                    }
+                };
+                $scope.removeTenantAffiliate = function(tenant, affiliate){
+                    var index = indexOfArray($scope.permissions.tenants, tenant, function(o1,o2){ return o1.tenantId === o2.tenantId;});
+
+                    if($scope.permissions.tenants && $scope.permissions.tenants[index] && $scope.permissions.tenants[index].affiliates && angular.isArray($scope.permissions.tenants[index].affiliates)){
+                        var indexAffiliate = indexOfArray($scope.permissions.tenants[index].affiliates, affiliate, function(o1, o2){ return o1.affiliateId === o2.affiliateId;});
+                        if(indexAffiliate > -1){
+                            $scope.permissions.tenants[index].affiliates.splice(indexAffiliate, 1);
+                            permViewModel = permParser($scope.permissions);
+                        }
+                    }
+                };
             };
 
             return {
@@ -319,7 +292,8 @@
                     loadingEnd: "&asynLoadEnd",
                     onError:"&",
                     loadTenants : "&",
-                    loadAffiliates : "&"
+                    loadAffiliates : "&",
+                    savePerms : "&savePermissions"
                 },
                 link : function(scope, element, attrs){
                     $log.log("permissions directive link function: ");
