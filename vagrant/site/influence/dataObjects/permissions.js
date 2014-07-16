@@ -13,7 +13,7 @@
 
                 this.actions = actions || [];
                 this.roles = roles || [];
-                this.affilaites = affiliates || [];
+                this.affiliates = affiliates || [];
             },
             AppPerm = function(adminId, createdBy, actions, roles, tenants){
                 this.adminId = adminId;

@@ -7,6 +7,7 @@
     ])
         .directive('loadingModalDirective', function(){
             var loadingModelInstance,
+                lastCallToOpenOrClose = false,
                 unsubQueue = [],
                 modalInstanceCtrl = function ($scope, $modalInstance) {
 
@@ -18,8 +19,19 @@
                         templateContent = "",
                         openOrClose = function(bOpenOrClose){
                             $log.log('***********loadingModalDirective openOrClose: %s', bOpenOrClose);
+                            if(lastCallToOpenOrClose === bOpenOrClose) return;
+                            lastCallToOpenOrClose = bOpenOrClose;
+
                             if(loadingModelInstance){
-                                loadingModelInstance.dismiss("cancel");
+                                try{
+                                    //Noticing an intermittent issue when call dismiss ModelInstance, it couldn't find
+                                    //this model instance it tries to dismiss, It could possibly caused by two quick dismiss
+                                    //call and the first one is still in gress, try to catch the error and set the instance to null
+                                    //Since it doesn't exists any more.
+                                    loadingModelInstance.dismiss("cancel");
+                                }catch(e){
+                                    $log.log("xxxxxxxxxxxxxxx---- loadingModelInstance doesn't exist when try to dismiss it");
+                                }
                                 loadingModelInstance = null;
                             }
 

@@ -335,16 +335,16 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
 
                     //If permissions exist, then we need to update them
                     if(existingPermission){
-                        var updatedPermision = {
+                        var updatedPermission = {
                             updatedBy : createdOrUpdatedBy,
                             updatedOn : new Date()
                         };
 
                         if(permission.actions){
-                            updatedPermision.actions = permission.actions;
+                            updatedPermission.actions = permission.actions;
                         }
                         if(permission.roles){
-                            updatedPermision.roles = permission.roles;
+                            updatedPermission.roles = permission.roles;
                         }
                         if(permission.tenants){
                             if(!util.isArray(permission.tenants)){
@@ -352,10 +352,10 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                                     throw new InfluenceError(errorCodes.C_400_023_003.code);
                                 }
 
-                                updatedPermision.tenants = "*";
+                                updatedPermission.tenants = "*";
                             }else{
-                                updatedPermision.tenants = [];
-                                for(var tenant in permission.tenants){
+                                updatedPermission.tenants = [];
+                                permission.tenants.forEach(function(tenant){
                                     if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
                                         var tenantUpdate = {
                                             tenantId : tenant.tenantId
@@ -375,7 +375,7 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                                             tenantUpdate.affiliates === "*";
                                         }else{
                                             tenantUpdate.affiliates = [];
-                                            for(var affiliate in tenant.affiliates){
+                                            tenant.affiliates.forEach(function(affiliate){
                                                 if(!affiliate.affiliateId && (affiliate.actions || affiliate.roles)){
                                                     var affiliateToUpdate = {
                                                         affiliateId : affiliate.affiliateId
@@ -388,18 +388,20 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                                                     }
                                                     tenantUpdate.affiliates.push(affiliateToUpdate);
                                                 }
-                                            }
+                                            });
                                         }
-                                        updatedPermision.tenants.push(tenantUpdate);
+                                        updatedPermission.tenants.push(tenantUpdate);
                                     }
-                                }
+                                });
                             }
                         }
 
-                        return authDataHandler.createOrUpdateAdminPermissions(adminId, updatedPermision);
+                        logger.log("====> updatedPermission");
+                        logger.log(updatedPermission);
+                        return authDataHandler.updateAdminPermissions(adminId, updatedPermission);
                     }else{
                         //If no existing permissions, we need to create them
-                        var newPerm = new permissionDataObjects.AppPerm(adminId, createdOrUpdatedBy, permission.actions, permission.roles);
+                        var newPerm = new permissionDataObjects.AppPerm(adminId, createdOrUpdatedBy, helpers.dedupArray(permission.actions), helpers.dedupArray(permission.roles));
 
                         if(permission.tenants){
                             if(!util.isArray(permission.tenants)){
@@ -410,29 +412,40 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                                 newPerm.tenants = "*";
                             }else{
                                 newPerm.tenants = [];
-                                for(var tenant in permission.tenants){
+                                permission.tenants.forEach(function(tenant){
                                     //Only creates tenant level permission when at least has assigned actions or roles or affiliates
-                                    if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
-                                        var tenPerm = new permissionDataObjects.TenantPerm(tenant.tenantId, tenant.actions, tenant.roles);
+                                    if(tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
+                                        var tenPerm = new permissionDataObjects.TenantPerm(tenant.tenantId, helpers.dedupArray(tenant.actions), helpers.dedupArray(tenant.roles));
 
                                         if(tenant.affiliates){
                                             if(!util.isArray(tenant.affiliates)){
-                                                new InfluenceError(errorCodes.C_400_023_002.code)
+                                                throw new InfluenceError(errorCodes.C_400_023_002.code)
                                             }
 
-                                            for(var aff in tenant.affilaites){
+                                            tenPerm.affiliates = [];
+                                            tenant.affiliates.forEach(function(aff){
                                                 //Only creates affiliate level permission when at least has assigned actions or roles
-                                                if(!aff.affiliateId && (aff.actions || aff.roles)){
-                                                    var affPerm = new permissionDataObjects.AffiliatePerm(aff.affiliateId, aff.actions, aff.roles);
+                                                if(aff.affiliateId && (aff.actions || aff.roles)){
+                                                    var affPerm = new permissionDataObjects.AffiliatePerm(aff.affiliateId, helpers.dedupArray(aff.actions), helpers.dedupArray(aff.roles));
                                                     tenPerm.affiliates.push(affPerm);
                                                 }
-                                            }
+                                            });
                                         }
-                                        newPerm.tenants.push(tenPerm);
+
+                                        //Only add Tenant if it has valid permission setup
+                                        if(tenPerm.affiliates.length > 0 || tenPerm.roles.length > 0 || tenPerm.actions.length > 0){
+                                            newPerm.tenants.push(tenPerm);
+                                        }
                                     } //End of if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
-                                } //End of for(var tenant in permission.tenants){
+                                });
                             }
                         }//End of if(permission.tenants){
+
+                        logger.log("====> newPerm");
+                        logger.log(newPerm);
+                        if(newPerm.roles.length === 0 && newPerm.actions.length === 0 && newPerm.tenants.length === 0){
+                            throw new InfluenceError(errorCodes.C_400_023_005.code);
+                        }
 
                         return authDataHandler.createAdminPermissions(newPerm);
                     }

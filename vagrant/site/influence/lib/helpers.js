@@ -1,6 +1,7 @@
-var crypto = require('crypto');
-var uuid = require("node-uuid");
-var _ = require("underscore");
+var crypto = require('crypto'),
+    uuid = require("node-uuid"),
+    _ = require("underscore"),
+    util = require("util");
 
 module.exports = function(plain){
     var
@@ -28,6 +29,31 @@ module.exports = function(plain){
         mixin = function(){
             var args = [].slice(arguments);
             return _.extend.apply(this, args);
+        },
+
+        containsArray = function(origArr, containArr){
+            var bContainAll = true;
+
+            bContainAll = !containArr.some(function(item){
+                if(origArr.indexOf(item) === -1){
+                    return true;
+                }
+            });
+
+            return bContainAll;
+        },
+
+        dedupArray = function(inputArray){
+            if(!util.isArray(inputArray)) return inputArray;
+
+            var memory = [];
+            inputArray.forEach(function(item){
+                if(memory.indexOf(item) === -1){
+                    memory.push(item);
+                }
+            });
+
+            return memory;
         },
 
         cleanSearchFilter = function(allowedFilters, passedInFilter){
@@ -62,7 +88,9 @@ module.exports = function(plain){
         typeIs                          : typeIs,
         mixin                           : mixin,
         cleanSearchFilter               : cleanSearchFilter,
-        cleanSort                       : cleanSort
+        cleanSort                       : cleanSort,
+        dedupArray                      : dedupArray,
+        containsArray                   : containsArray
     }
 }();
 
