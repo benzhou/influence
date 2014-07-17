@@ -28,6 +28,118 @@ describe('AuthBusiness', function(){
             expect(result).to.have.length(3);
         });
 
+        it("Test deepEqual", function(){
+            var obj1 = {
+                    prop1 : "abc",
+                    prop2 : ["test1","test2","test3","test4"],
+                    prop3 : {
+                        p1 : "xyc",
+                        p2 : null,
+                        p3 : 123,
+                        p4 : [1,2,3,4]
+                    }
+                },
+                obj2 = {
+                    prop1 : "abc",
+                    prop2 : ["test1","test2","test3","test4"],
+                    prop3 : {
+                        p1 : "xyc",
+                        p2 : null,
+                        p3 : 123,
+                        p4 : [1,2,3,4]
+                    }
+                },
+                obj3 = {
+                    prop1 : "abc",
+                    prop2 : ["test1","test2","test3"],
+                    prop3 : {
+                        p1 : "xyc",
+                        p2 : null,
+                        p3 : 123,
+                        p4 : [1,2,3,4]
+                    }
+                },
+                obj4 = {
+                    actions : ["test1","test2","test3","test4"],
+                    roles : ["test1","test2","test3","test4"],
+                    tenants : [
+                        {
+                            tenantId : "xyz",
+                            actions : ["test1","test2"],
+                            roles : ["test1"],
+                            affiliates : [
+                                {
+                                    affiliateId : "xxx",
+                                    actions : ["test1"],
+                                    roles : ["test1","test2"]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                obj5 = helpers.clone(obj4),
+                obj6 = {
+                    prop1 : "abc",
+                    prop2 : ["test1","test2","test3","test4"],
+                    prop3 : {
+                        p1 : "xyc",
+                        p2 : false,
+                        p3 : 123,
+                        p4 : [1,2,3,4]
+                    }
+                },
+                obj7 = {
+                    prop1 : "abc",
+                    prop2 : ["test1","test2","test3","test5"],
+                    prop3 : {
+                        p1 : "xyc",
+                        p2 : false,
+                        p3 : 123,
+                        p4 : [1,2,3,4]
+                    }
+                },
+                obj8 = {
+                    prop1 : "abc",
+                    prop2 : ["test1","test2","test3","test5"],
+                    prop3 : {
+                        p1 : "xyc",
+                        p2 : false,
+                        p3 : 123,
+                        p4 : [1,2,3,4],
+                        p5 : {
+
+                        }
+                    }
+                };
+
+            var result = helpers.deepEqual(obj1, obj2),
+                result2 = helpers.deepEqual(obj1, obj3),
+                result3 = helpers.deepEqual(obj4, obj5),
+                result4 = helpers.deepEqual(obj1, obj6),
+                result5 = helpers.deepEqual(obj7, obj6),
+                result6 = helpers.deepEqual(obj7, obj8),
+                r1 = helpers.deepEqualFast(obj1, obj2),
+                r2 = helpers.deepEqualFast(obj1, obj3),
+                r3 = helpers.deepEqualFast(obj4, obj5),
+                r4 = helpers.deepEqualFast(obj1, obj6),
+                r5 = helpers.deepEqualFast(obj7, obj6),
+                r6 = helpers.deepEqualFast(obj7, obj8);
+
+            expect(result).to.be.true;
+            result2.should.not.be.true;
+            expect(result3).to.be.true;
+            result4.should.not.be.true;
+            result5.should.not.be.true;
+            result6.should.not.be.true;
+
+            expect(r1).to.be.true;
+            r2.should.not.be.true;
+            expect(r3).to.be.true;
+            r4.should.not.be.true;
+            r6.should.not.be.true;
+            r6.should.not.be.true;
+        });
+
         it('Missing required parameter: no params passed in, should be REJECTED', function(){
             var
                 accountBusiness = {};
@@ -303,6 +415,515 @@ describe('AuthBusiness', function(){
                             permTobeSaved.tenants[0].affiliates[0].roles.length === 3 &&
                             helpers.containsArray(permTobeSaved.tenants[0].affiliates[0].roles, ["Role_5", "Role_6","Role_7"]) &&
                             permTobeSaved.tenants[0].affiliates[1].affiliateId === "fakeAffId2";
+
+                    },
+                    assertFulfilled
+                );
+            });
+        });
+
+        describe("Editing Existing Permissions", function(){
+            var
+                assertWithError = function(promise, updateAdminPermissionsSpy, satisfyFuc, errorCode){
+                    return promise.should.eventually.be.rejected.and.eql(new InfluenceError(errorCode));
+                },
+                assertFulfilled = function(promise, updateAdminPermissionsSpy, satisfyFuc, errorCode){
+                    return Q.when(promise).then(function(){
+                        var args = updateAdminPermissionsSpy.getCall(0).args;
+                        args.should.have.deep.that.is.satisfy(satisfyFuc);
+                    });
+                },
+                setupFuc = function(perms, existingPerms, admin, currentAdmin, satisfyFuc, assertFuc, errorCode){
+                    var
+                        accountBusiness = {
+                            getAdminAccountById: function(){}
+                        },
+                        authDataHandler = {
+                            updateAdminPermissions : function(){},
+                            findAdminAuthorizationsByAdminId : function(){}
+                        },
+                        getAdminAccountByIdStub = sinon.stub(accountBusiness, "getAdminAccountById"),
+                        updateAdminPermissionsSpy = sinon.spy(authDataHandler, "updateAdminPermissions"),
+                        findAdminAuthorizationsByAdminIdSub = sinon.stub(authDataHandler, "findAdminAuthorizationsByAdminId"),
+
+                        df = Q.defer(),
+                        df2 = Q.defer();
+
+                    df.resolve(admin);
+                    df2.resolve(existingPerms);
+                    getAdminAccountByIdStub.withArgs(admin._id).returns(df.promise);
+                    findAdminAuthorizationsByAdminIdSub.returns(df2.promise);
+
+                    var authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountBusiness, authDataHandler),
+                        promise = authBusiness.createOrUpdateAdminPermissions(admin._id, perms, currentAdmin.id);
+
+                    return assertFuc(promise, updateAdminPermissionsSpy, satisfyFuc, errorCode);
+                },
+                currentAdmin = {
+                    id: "currentAdminId"
+                },
+                admin = {
+                    _id : "123456"
+                };
+
+            it('Edit Existing permission, Simple case only add app level permission and should FULFILLED!', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","Action_2"]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : [
+                            "READ_ACTIONS"
+                        ],
+                        "roles" : [ ],
+                        "tenants" : [ ]
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 2 &&
+                            updateObj.roles.length === 0 &&
+                            updateObj.tenants.length === 0;
+
+                    },
+                    assertFulfilled
+                );
+            });
+            it('Edit Existing permission, When pass empty array it should remove the actions, when pass not pass anything, it should remain the same', function(){
+                return setupFuc(
+                    {
+                        actions : [],
+                        tenants : [
+                            {
+                                tenantId : "fakeTenantId1",
+                                actions : [],
+                                affiliates : [
+                                    {
+                                        affiliateId : "fakeAffilaiteId1",
+                                        actions : []
+                                    },
+                                    {
+                                        affiliateId : "fakeAffilaiteId2",
+                                        roles : []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        actions : ["ACTION_1"],
+                        roles : ["Role_1"],
+                        tenants : [
+                            {
+                                tenantId : "fakeTenantId1",
+                                actions : ["ACTION_2"],
+                                roles : ["Role_2"],
+                                affiliates : [
+                                    {
+                                        affiliateId : "fakeAffilaiteId1",
+                                        actions : ["ACTION_3"],
+                                        roles : ["Role_3"]
+                                    },
+                                    {
+                                        affiliateId : "fakeAffilaiteId2",
+                                        actions : ["ACTION_4"],
+                                        roles : ["Role_4"]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 0 &&
+                            updateObj.roles.length === 1 &&
+                            updateObj.tenants.length === 1 &&
+                            updateObj.tenants[0].actions.length === 0 &&
+                            updateObj.tenants[0].roles.length === 1 &&
+                            updateObj.tenants[0].affiliates.length === 2 &&
+                            updateObj.tenants[0].affiliates[0].actions.length === 0 &&
+                            updateObj.tenants[0].affiliates[0].roles.length === 1 &&
+                            updateObj.tenants[0].affiliates[1].actions.length === 1 &&
+                            updateObj.tenants[0].affiliates[1].roles.length === 0;
+
+                    },
+                    assertFulfilled
+                );
+            });
+            it('Edit Existing permission, Existing actions are not array.', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","Action_2"]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : "*",
+                        "roles" : [ ],
+                        "tenants" : [ ]
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 2 &&
+                            updateObj.roles.length === 0 &&
+                            updateObj.tenants.length === 0;
+
+                    },
+                    assertFulfilled
+                );
+            });
+            it('Edit Existing permission, Existing roles/tenants are not array, new permissions don\'t specify roles/tenants, they should remain the same', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","Action_2"]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : "*",
+                        "roles" : "*",
+                        "tenants" : "*"
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 2 &&
+                            updateObj.roles  === "*" &&
+                            updateObj.tenants === "*";
+
+                    },
+                    assertFulfilled
+                );
+            });
+            it('Edit Existing permission, Duplicated actions, should be dedupped.', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","READ_ACTIONS","Action_2"]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : [
+                            "EDIT_ACTIONS"
+                        ],
+                        "roles" : [ ],
+                        "tenants" : [ ]
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 2 &&
+                            updateObj.roles.length === 0 &&
+                            updateObj.tenants.length === 0;
+
+                    },
+                    assertFulfilled
+                );
+            });
+            it('Edit Existing permission, _id, adminId, createdBy, createdOn props should be removed when update', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","READ_ACTIONS","Action_2"]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : [
+                            "EDIT_ACTIONS"
+                        ],
+                        "roles" : [ ],
+                        "tenants" : [ ]
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 2 &&
+                            updateObj.roles.length === 0 &&
+                            updateObj.tenants.length === 0 &&
+                            !updateObj._id &&
+                            !updateObj.adminId &&
+                            !updateObj.createdOn &&
+                            !updateObj.createdBy;
+
+                    },
+                    assertFulfilled
+                );
+            });
+            it('Edit Existing permission, Multiple tenants can be added', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","READ_ACTIONS","Action_2"],
+                        tenants : [
+                            {
+                                tenantId : "fakeTenantId_1",
+                                actions : ["ACTION_1", "ACTION_2"]
+                            },
+                            {
+                                tenantId : "fakeTenantId_2",
+                                actions : ["ACTION_1", "ACTION_3"]
+                            }
+                        ]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : [
+                            "EDIT_ACTIONS"
+                        ],
+                        "roles" : [ ],
+                        "tenants" : [ ]
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 2 &&
+                            updateObj.roles.length === 0 &&
+                            updateObj.tenants.length === 2 &&
+                            updateObj.tenants[0].tenantId === "fakeTenantId_1" &&
+                            updateObj.tenants[1].tenantId === "fakeTenantId_2";
+                    },
+                    assertFulfilled
+                );
+            });
+            it('Edit Existing permission, duplicated tenants IDs, should rejected with ERROR: C_400_023_008', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","READ_ACTIONS","Action_2"],
+                        tenants : [
+                            {
+                                tenantId : "fakeTenantId_1",
+                                actions : ["ACTION_1", "ACTION_2"]
+                            },
+                            {
+                                tenantId : "fakeTenantId_1",
+                                actions : ["ACTION_1", "ACTION_3"],
+                                roles : ["Role_1"]
+                            }
+                        ]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : [
+                            "EDIT_ACTIONS"
+                        ],
+                        "roles" : [ ],
+                        "tenants" : [ ]
+                    },
+                    admin,
+                    currentAdmin,
+                    null,
+                    assertWithError,
+                    errorCodes.C_400_023_008.code
+                );
+            });
+            it('Edit Existing permission, duplicated affiliate IDs, should rejected with ERROR: C_400_023_009', function(){
+                return setupFuc(
+                    {
+                        actions : ["READ_ACTIONS","READ_ACTIONS","Action_2"],
+                        tenants : [
+                            {
+                                tenantId : "fakeTenantId_1",
+                                actions : ["ACTION_1", "ACTION_2"],
+                                affiliates : [
+                                    {
+                                        affiliateId : "fakeAffilaiteId_1",
+                                        actions : ["ACTION_1", "ACTION_2"]
+                                    },
+                                    {
+                                        affiliateId : "fakeAffilaiteId_1",
+                                        actions : ["ACTION_1", "ACTION_3"]
+                                    }
+                                ]
+                            },
+                            {
+                                tenantId : "fakeTenantId_2",
+                                actions : ["ACTION_4", "ACTION_3"],
+                                roles : ["Role_1"]
+                            }
+                        ]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : [
+                            "EDIT_ACTIONS"
+                        ],
+                        "roles" : [ ],
+                        tenants : [
+                            {
+                                tenantId : "fakeTenantId_1",
+                                actions : ["ACTION_1", "ACTION_3"]
+                            },
+                            {
+                                tenantId : "fakeTenantId_2",
+                                actions : ["ACTION_5"],
+                                roles : ["Role_1"]
+                            }
+                        ]
+                    },
+                    admin,
+                    currentAdmin,
+                    null,
+                    assertWithError,
+                    errorCodes.C_400_023_009.code
+                );
+            });
+            it('Edit Existing permission, Only Edit partial of existing permission', function(){
+                return setupFuc(
+                    {
+                        tenants : [
+                            {
+                                tenantId : "fakeTenantId_1",
+                                affiliates : [
+                                    {
+                                        affiliateId: "fakeAffID_1",
+                                        actions : ["ACTION_1"]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "_id" : "53c58dcf6f530b325c38d33e",
+                        "adminId" : "53bc05cd7f7847e21faab5d2",
+                        "createdBy" : "53bc05cd7f7847e21faab5d2",
+                        "createdOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "updatedBy" : "53bc05cd7f7847e21faab5d2",
+                        "updatedOn" : new Date("2014-07-15T20:23:43.982Z"),
+                        "actions" : [
+                            "EDIT_ACTIONS"
+                        ],
+                        "roles" : ["Role_1","Role_2","Role_3"],
+                        "tenants" : [
+                            {
+                                tenantId : "fakeTenantId_1",
+                                actions : ["ACTION_3", "ACTION_4"],
+                                affiliates : [
+                                    {
+                                        affiliateId: "fakeAffID_1",
+                                        actions : ["ACTION_4", "ACTION_6"],
+                                        roles : ["Role_1"]
+                                    },
+                                    {
+                                        affiliateId: "fakeAffID_2",
+                                        actions : ["ACTION_4", "ACTION_5"],
+                                        roles : ["Role_2"]
+                                    }
+                                ]
+                            },
+                            {
+                                tenantId : "fakeTenantId_2",
+                                actions : ["ACTION_1", "ACTION_3"],
+                                roles : ["Role_1"]
+                            }
+                        ]
+                    },
+                    admin,
+                    currentAdmin,
+                    function(args){
+                        var adminId = args[0],
+                            updateObj = args[1];
+
+                        //Todo, Add check for admin created on date time should be within the range of few million secs.
+                        return adminId === admin._id &&
+                            updateObj.updatedBy === currentAdmin.id &&
+                            updateObj.actions.length === 1 &&
+                            updateObj.roles.length === 3 &&
+                            updateObj.tenants.length === 2 &&
+                            updateObj.tenants[0].tenantId === "fakeTenantId_1" &&
+                            updateObj.tenants[0].affiliates.length === 2 &&
+                            updateObj.tenants[0].affiliates[0].affiliateId === "fakeAffID_1" &&
+                            updateObj.tenants[0].affiliates[0].actions.length === 1 &&
+                            updateObj.tenants[0].affiliates[0].actions.indexOf("ACTION_1") > -1 &&
+                            updateObj.tenants[0].affiliates[1].affiliateId === "fakeAffID_2" &&
+                            updateObj.tenants[0].affiliates[1].actions.length === 2 &&
+                            updateObj.tenants[1].tenantId === "fakeTenantId_2" &&
+                            !updateObj.tenants[1].affiliates;
 
                     },
                     assertFulfilled

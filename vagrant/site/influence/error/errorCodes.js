@@ -113,8 +113,11 @@ module.exports = function(){
         C_400_023_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023002, desc : "Invalid Affiliates Permission" },
         C_400_023_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023003, desc : "Invalid Tenants Permission" },
         C_400_023_004       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023004, desc : "Invalid Admin ID" },
-        C_400_023_005       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023005, desc : "Missing valid permissions." },
+        C_400_023_005       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023005, desc : "Missing valid permissions when creating new permissions." },
         C_400_023_006       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023006, desc : "Invalid permissions when editing." },
+        C_400_023_007       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023007, desc : "Missing valid permissions when editing permissions." },
+        C_400_023_008       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023008, desc : "Duplicated TenantIDs were passed in." },
+        C_400_023_009       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023009, desc : "Duplicated AffiliateIDs were passed in." },
 
         //accountBusiness.js  findAdminAccountByTenantAndUsername
         C_400_024_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400024001, desc : "Missing required parameters" },

@@ -20,6 +20,9 @@ module.exports = function(dbProvider){
         createAdminPermissions = function(permission){
             return dbProvider.createAdminPermissions(permission);
         },
+        updateAdminPermissionsById = function(id, updateDo){
+            return dbProvider.updateAdminPermissionsById(id, updateDo);
+        },
         updateAdminPermissions = function(adminId, updateDo){
             return dbProvider.updateAdminPermissions(adminId, updateDo);
         },
@@ -52,6 +55,7 @@ module.exports = function(dbProvider){
         //Admin Authorizations
         findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
         createAdminPermissions              : createAdminPermissions,
+        updateAdminPermissionsById          : updateAdminPermissionsById,
         updateAdminPermissions              : updateAdminPermissions,
 
 

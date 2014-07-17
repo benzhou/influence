@@ -3,13 +3,15 @@ var
 
 module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogMiddleware, apiController){
 
-    var _hookUpRoutes = function(router, verb, route, ctrlAction){
+    var _hookUpRoutes = function(router, verb, route, ctrlAction, authorizationRequirements){
         var
             self = this;
 
         router[verb](
             route,
-            adminAuthenticationMiddleware.adminTokenAuth,
+            function(req, res, next){
+                adminAuthenticationMiddleware.adminTokenAuth(req, res, next, authorizationRequirements);
+            },
             function(req, res, next){
                 try{
                     ctrlAction.apply(self, [req, res, next]);
@@ -64,135 +66,14 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     _hookUpRoutes(router, 'post', '/account/admin/:adminId?', apiController.postAdminAccount);
 
     //App
-    router.get(
-        '/account/app/:appKey',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next) {
-            try{
-                apiController.getAppAccount(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-    router.post(
-        '/account/app',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next) {
-            try{
-                apiController.postAppAccount(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-
+    _hookUpRoutes(router, 'get',  '/account/app/:appKey', apiController.getAppAccount);
+    _hookUpRoutes(router, 'post',  '/account/app:appKey?', apiController.postAppAccount);
 
     //Auth
-    router.get(
-        '/auth/appToken',
-        function(req, res, next) {
-            try{
-                apiController.getAppAccount(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-    router.get(
-        '/auth/adminToken',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next) {
-            try{
-                apiController.getAdminAuthToken(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-    router.get(
-        '/auth/adminToken/invalidate',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next) {
-            try{
-                apiController.deleteAdminAuthToken(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-    router.delete(
-        '/auth/adminToken',
-        adminAuthenticationMiddleware.adminTokenAuth,
-        function(req, res, next) {
-            try{
-                apiController.deleteAdminAuthToken(req,res,next);
-            }catch(e){
-                logger.log(e);
-                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
-                res.json(
-                    resObj.httpStatus,
-                    {
-                        code : resObj.code,
-                        message : resObj.message
-                    }
-                );
-                next();
-            }
-        },
-        apiLogMiddleware.apiLogger
-    );
-
+    _hookUpRoutes(router, 'get', '/auth/appToken', apiController.getAppAccount);
+    _hookUpRoutes(router, 'get', '/auth/adminToken', apiController.getAdminAuthToken);
+    _hookUpRoutes(router, 'get', '/auth/adminToken/invalidate', apiController.deleteAdminAuthToken);
+    _hookUpRoutes(router, 'delete', '/auth/adminToken', apiController.deleteAdminAuthToken);
     router.get(
         '/auth/admin/login/:tenantId/:username/:password',
         function(req, res, next) {

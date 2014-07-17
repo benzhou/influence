@@ -43,6 +43,70 @@ module.exports = function(plain){
             return bContainAll;
         },
 
+        equals = function(o1, o2) {
+            if (o1 === o2) return true;
+            if (o1 === null || o2 === null) return false;
+            if (o1 !== o1 && o2 !== o2) return true; // NaN === NaN
+            var t1 = typeof o1, t2 = typeof o2, length, key, keySet;
+            if (t1 == t2) {
+                if (t1 == 'object') {
+                    if (isArray(o1)) {
+                        if (!isArray(o2)) return false;
+                        if ((length = o1.length) == o2.length) {
+                            for(key=0; key<length; key++) {
+                                if (!equals(o1[key], o2[key])) return false;
+                            }
+                            return true;
+                        }
+                    } else if (isDate(o1)) {
+                        return isDate(o2) && o1.getTime() == o2.getTime();
+                    } else if (isRegExp(o1) && isRegExp(o2)) {
+                        return o1.toString() == o2.toString();
+                    } else {
+                        if (isScope(o1) || isScope(o2) || isWindow(o1) || isWindow(o2) || isArray(o2)) return false;
+                        keySet = {};
+                        for(key in o1) {
+                            if (key.charAt(0) === '$' || isFunction(o1[key])) continue;
+                            if (!equals(o1[key], o2[key])) return false;
+                            keySet[key] = true;
+                        }
+                        for(key in o2) {
+                            if (!keySet.hasOwnProperty(key) &&
+                                key.charAt(0) !== '$' &&
+                                o2[key] !== undefined &&
+                                !isFunction(o2[key])) return false;
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        },
+
+        isFunction = function(value){return typeof value === 'function';},
+
+        array_indexOfObject = function(array, obj, compareFuc){
+            if(!array || !obj || !util.isArray(array)) return -1;
+            if(_.isString(obj)){
+                return [].prototype.indexOf.apply(array, obj);
+            }
+
+            var ret = -1;
+            for(var i= 0,l=array.length;i<l;i++){
+                if(compareFuc && isFunction(compareFuc)){
+                    if(compareFuc(array[i], obj)){
+                        ret = i;
+                    }
+                }else{
+                    if(equals(array[i], obj)){
+                        ret = i;
+                    }
+                }
+            }
+
+            return ret;
+        },
+
         dedupArray = function(inputArray){
             if(!util.isArray(inputArray)) return inputArray;
 
@@ -160,6 +224,128 @@ module.exports = function(plain){
             return target;
         },
 
+        deepEqual = function(){
+            var i, l, leftChain, rightChain;
+
+            function compare2Objects (x, y) {
+                var p;
+
+                // remember that NaN === NaN returns false
+                // and isNaN(undefined) returns true
+                if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+                    return true;
+                }
+
+                // Compare primitives and functions.
+                // Check if both arguments link to the same object.
+                // Especially useful on step when comparing prototypes
+                if (x === y) {
+                    return true;
+                }
+
+                // Works in case when functions are created in constructor.
+                // Comparing dates is a common scenario. Another built-ins?
+                // We can even handle functions passed across iframes
+                if ((typeof x === 'function' && typeof y === 'function') ||
+                    (x instanceof Date && y instanceof Date) ||
+                    (x instanceof RegExp && y instanceof RegExp) ||
+                    (x instanceof String && y instanceof String) ||
+                    (x instanceof Number && y instanceof Number)) {
+                    return x.toString() === y.toString();
+                }
+
+                // At last checking prototypes as good a we can
+                if (!(x instanceof Object && y instanceof Object)) {
+                    return false;
+                }
+
+                if (x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
+                    return false;
+                }
+
+                if (x.constructor !== y.constructor) {
+                    return false;
+                }
+
+                if (x.prototype !== y.prototype) {
+                    return false;
+                }
+
+                // check for infinitive linking loops
+                if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
+                    return false;
+                }
+
+                // Quick checking of one object beeing a subset of another.
+                // todo: cache the structure of arguments[0] for performance
+                for (p in y) {
+                    if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                        return false;
+                    }
+                    else if (typeof y[p] !== typeof x[p]) {
+                        return false;
+                    }
+                }
+
+                for (p in x) {
+                    if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+                        return false;
+                    }
+                    else if (typeof y[p] !== typeof x[p]) {
+                        return false;
+                    }
+
+                    switch (typeof (x[p])) {
+                        case 'object':
+                        case 'function':
+
+                            leftChain.push(x);
+                            rightChain.push(y);
+
+                            if (!compare2Objects (x[p], y[p])) {
+                                return false;
+                            }
+
+                            leftChain.pop();
+                            rightChain.pop();
+                            break;
+
+                        default:
+                            if (x[p] !== y[p]) {
+                                return false;
+                            }
+                            break;
+                    }
+                }
+
+                return true;
+            }
+
+            if (arguments.length < 1) {
+                return true; //Die silently? Don't know how to handle such case, please help...
+                // throw "Need two or more arguments to compare";
+            }
+
+            for (i = 1, l = arguments.length; i < l; i++) {
+
+                leftChain = []; //todo: this can be cached
+                rightChain = [];
+
+                if (!compare2Objects(arguments[0], arguments[i])) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        deepEqualFast = function(obj1, obj2){
+            return JSON.stringify(obj1) === JSON.stringify(obj2);
+        },
+
+        clone =function(a) {
+            return JSON.parse(JSON.stringify(a));
+        },
 
         cleanSearchFilter = function(allowedFilters, passedInFilter){
             var cleanedFilter = {};
@@ -171,7 +357,7 @@ module.exports = function(plain){
                 }
             }
 
-            return cleanedFilter
+            return cleanedFilter;
         },
 
         cleanSort = function(allowedSortFiles, passedInSort){
@@ -196,7 +382,12 @@ module.exports = function(plain){
         cleanSort                       : cleanSort,
         dedupArray                      : dedupArray,
         containsArray                   : containsArray,
-        extend                          : extend
+        extend                          : extend,
+        array_indexOfObject             : array_indexOfObject,
+        deepEqual                       : deepEqual,
+        deepEqualFast                   : deepEqualFast,
+        clone                           : clone,
+        isFunction                      : isFunction
     }
 }();
 

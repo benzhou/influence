@@ -59,7 +59,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                 pageNumber = 1;
             }
 
-            cleanedFilter = helpers.cleanSearchFilter({isActive : 1}, filter);
+            cleanedFilter = helpers.cleanSearchFilter({isActive : 1, tenantIds : 1}, filter);
             logger.log("tenantsBusiness.js getTenants");
             logger.log("cleanedFilter:");
             logger.log(cleanedFilter);

@@ -95,6 +95,9 @@ module.exports = function(config, MongoDb, logger){
             return  _find(collections.AdminAccount, {tenantId : new MongoDb.ObjectID(tenantId)}, opts);
         },
         findAdminAccountById = function(adminId){
+            if(!(adminId instanceof MongoDb.ObjectID)){
+                adminId = new MongoDb.ObjectID(adminId);
+            }
             return  _findOneBy(collections.AdminAccount, {_id : adminId});
         },
         findAdminAccountByEmail = function(email){
@@ -152,12 +155,54 @@ module.exports = function(config, MongoDb, logger){
 
             return _insertNew(collections.AdminAuthorizations, permission);
         },
+        updateAdminPermissionsById = function(id, updateDo){
+            if(!(id instanceof MongoDb.ObjectID)){
+                id = new MongoDb.ObjectID(id);
+            }
+            if(permission.tenants && util.isArray(permission.tenants)){
+                for(var tenant in permission.tenants){
+                    if(!(tenant.tenantId instanceof MongoDb.ObjectID)){
+                        tenant.tenantId = new MongoDb.ObjectID(tenant.tenantId);
+                    }
+
+                    if(tenant.affiliates && util.isArray(tenant.affiliates)){
+                        for(var affiliate in tenant.affiliates){
+                            if(!(affiliate.affiliateId  instanceof MongoDb.ObjectID)){
+                                affiliate.affiliateId  = new MongoDb.ObjectID(affiliate.affiliateId );
+                            }
+                        }
+                    }
+                }
+            }
+            return _upsertByMatch(collections.AdminAuthorizations, {}, {_id : id}, {$set: updateDo});
+        },
         updateAdminPermissions = function(adminId, updateDo){
+            if(!(adminId instanceof MongoDb.ObjectID)){
+                adminId = new MongoDb.ObjectID(adminId);
+            }
+            if(updateDo.tenants && util.isArray(updateDo.tenants)){
+                for(var tenant in updateDo.tenants){
+                    if(!(tenant.tenantId instanceof MongoDb.ObjectID)){
+                        tenant.tenantId = new MongoDb.ObjectID(tenant.tenantId);
+                    }
+
+                    if(tenant.affiliates && util.isArray(tenant.affiliates)){
+                        for(var affiliate in tenant.affiliates){
+                            if(!(affiliate.affiliateId  instanceof MongoDb.ObjectID)){
+                                affiliate.affiliateId  = new MongoDb.ObjectID(affiliate.affiliateId );
+                            }
+                        }
+                    }
+                }
+            }
             return _upsertByMatch(collections.AdminAuthorizations, {}, {adminId : new MongoDb.ObjectID(adminId)}, {$set: updateDo});
         },
 
         //Tenants
         findTenantById = function(tenantId){
+            if(!(tenantId instanceof MongoDb.ObjectID)){
+                tenantId = new MongoDb.ObjectID(tenantId);
+            }
             return  _findOneBy(collections.Tenants, {_id : tenantId});
         },
         upsertTenant = function(tenant){
@@ -179,6 +224,23 @@ module.exports = function(config, MongoDb, logger){
                 };
 
             filter = filter || {};
+
+            if(filter.tenantIds && util.isArray(filter.tenantIds)){
+                var tenantIds = [];
+                filter.tenantIds.forEach(function(tenantId){
+                    if(!(tenantId instanceof MongoDb.ObjectID)){
+                        tenantId = new MongoDb.ObjectID(tenantId);
+                    }
+                    tenantIds.push(tenantId);
+                })
+
+                filter._id = { $in : tenantIds};
+
+                delete filter.tenantIds;
+            }
+            logger.log("MongoDBProvider.js loadTenants, filer:");
+            logger.log(filter);
+
             return  _find(collections.Tenants, filter, opts);
         },
 
@@ -195,6 +257,9 @@ module.exports = function(config, MongoDb, logger){
             return _upsertByMatch(collections.Affiliates, {}, {_id : new MongoDb.ObjectID(affiliateId)}, {$set: updateDo});
         },
         findAffiliateById = function(affiliateId){
+            if(!(affiliateId instanceof MongoDb.ObjectID)){
+                affiliateId = new MongoDb.ObjectID(affiliateId);
+            }
             return  _findOneBy(collections.Affiliates, {_id : affiliateId});
         },
         loadAffiliates = function(filter, numberOfPage, pageNumber, sort){
@@ -237,6 +302,9 @@ module.exports = function(config, MongoDb, logger){
             return _upsertByMatch(collections.Actions, {}, {key : actionKey}, {$set: updateDo});
         },
         findActionById = function(actionId){
+            if(!(actionId instanceof MongoDb.ObjectID)){
+                actionId = new MongoDb.ObjectID(actionId);
+            }
             return  _findOneBy(collections.Actions, {_id : actionId});
         },
         findActionByKey = function(actionKey){
@@ -266,6 +334,9 @@ module.exports = function(config, MongoDb, logger){
             return _upsertByMatch(collections.Posts, {}, {_id : new MongoDb.ObjectID(postId)}, {$set: updateDo});
         },
         findPostById = function(postId){
+            if(!(postId instanceof MongoDb.ObjectID)){
+                postId = new MongoDb.ObjectID(postId);
+            }
             return  _findOneBy(collections.Posts, {_id : postId});
         },
         loadPosts = function(filter, numberOfPage, pageNumber, sort) {
@@ -313,10 +384,6 @@ module.exports = function(config, MongoDb, logger){
                         var collection = db.collection(collectionName);
                         logger.log('mongoDbProvider.js _findOneBy - ' + collectionName +': querying');
 
-                        if(match.hasOwnProperty("_id")){
-                            match._id = new MongoDb.ObjectID(match._id);
-                        }
-
                         collection.findOne(
                             match,
                             function(err, result){
@@ -348,10 +415,6 @@ module.exports = function(config, MongoDb, logger){
                     try{
                         var collection = db.collection(collectionName);
                         logger.log('mongoDbProvider.js _find - ' + collectionName +': querying');
-
-                        if(match.hasOwnProperty("_id")){
-                            match._id = new MongoDb.ObjectID(match._id);
-                        }
 
                         collection.find(
                             match,
@@ -465,6 +528,7 @@ module.exports = function(config, MongoDb, logger){
         //Admin Authorizations
         findAdminAuthorizationsByAdminId    : findAdminAuthorizationsByAdminId,
         createAdminPermissions              : createAdminPermissions,
+        updateAdminPermissionsById          : updateAdminPermissionsById,
         updateAdminPermissions              : updateAdminPermissions,
 
         //App Account

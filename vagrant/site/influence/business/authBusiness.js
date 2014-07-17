@@ -219,7 +219,7 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                 }
             ).catch(function(err){
                     logger.log("authBusiness.js validateAdminAuthToken caught an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
 
                     df.reject(err);
                 }).done(function(){
@@ -335,19 +335,25 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
 
                     //If permissions exist, then we need to update them
                     if(existingPermission){
-                        var updatedPermission = {
-                            updatedBy : createdOrUpdatedBy,
-                            updatedOn : new Date()
-                        },
-                            mergingAttrs = function(orginalAttr, newAttr){
+                        var
+                            clonedExistingPerms = helpers.clone(existingPermission),
+                            mergingAttrs = function(existingObj, existingAttr, newAttr){
                                 if(newAttr){
                                     if(util.isArray(newAttr)){
-                                        orginalAttr = helper.dedupArray(orginalAttr.concat(newAttr));
-                                    }else{
-                                        if(newAttr === "*"){
-                                            if(orginalAttr !== newAttr){
-                                                orginalAttr = newAttr;
+                                        var clonedArray = helpers.clone(existingObj[existingAttr] || []),
+                                        //concatDeduped = util.isArray(existingObj[existingAttr]) ? helpers.dedupArray(clonedArray.concat(newAttr)) : helpers.dedupArray(newAttr);
+                                            concatDeduped = helpers.dedupArray(newAttr);
+
+                                        if(!helpers.deepEqual(concatDeduped, existingObj[existingAttr])) {
+                                            existingObj[existingAttr] = util.isArray(existingObj[existingAttr]) ?  existingObj[existingAttr] : [];
+                                            while(existingObj[existingAttr].length > 0) {
+                                                existingObj[existingAttr].pop();
                                             }
+                                            existingObj[existingAttr].push.apply(existingObj[existingAttr],concatDeduped);
+                                        }
+                                    }else{
+                                        if(newAttr === "*" && existingObj[existingAttr] !== newAttr){
+                                            existingObj[existingAttr] = newAttr;
                                         }else{
                                             throw new InfluenceError(errorCodes.C_400_023_006.code);
                                         }
@@ -355,63 +361,94 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                                 }
                             };
 
-                        mergingAttrs(updatedPermission.actions, permission.actions);
-                        mergingAttrs(updatedPermission.roles, permission.roles);
+                        mergingAttrs(existingPermission, "actions", permission.actions);
+                        mergingAttrs(existingPermission, "roles", permission.roles);
                         if(permission.tenants){
                             if(!util.isArray(permission.tenants)){
                                 if(permission.tenants !== "*"){
                                     throw new InfluenceError(errorCodes.C_400_023_003.code);
                                 }
 
-                                if(updatedPermission.tenants !== permission.tenants){
-                                    updatedPermission.tenants = permission.tenants;
+                                if(helpers.deepEqual(existingPermission.tenants, permission.tenants)){
+                                    existingPermission.tenants = permission.tenants;
                                 }
                             }else{
-                                updatedPermission.tenants = [];
+                                //To prevent collied tenantIds
+                                var tenantsUpdatedCache = {};
                                 permission.tenants.forEach(function(tenant){
                                     if(tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
-                                        var tenantUpdate = {
-                                            tenantId : tenant.tenantId
-                                        };
-                                        if(tenant.actions && util.isArray(tenant.actions)){
-                                            tenantUpdate.actions = tenant.actions;
-                                        }
-                                        if(tenant.roles && util.isArray(tenant.roles)){
-                                            tenantUpdate.roles = tenant.roles;
+                                        if(tenantsUpdatedCache["TENANT_ID_" + tenant.tenantId]){
+                                            throw new InfluenceError(errorCodes.C_400_023_008.code);
                                         }
 
-                                        if(!util.isArray(tenant.affiliates)){
-                                            if(tenant.affiliates !== "*"){
-                                                throw new InfluenceError(errorCodes.C_400_023_002.code);
-                                            }
+                                        var existingTenantIndex = helpers.array_indexOfObject(existingPermission.tenants, tenant, function(o1,o2){ return o1.tenantId === o2.tenantId});
 
-                                            tenantUpdate.affiliates === "*";
-                                        }else{
-                                            tenantUpdate.affiliates = [];
-                                            tenant.affiliates.forEach(function(affiliate){
-                                                if(!affiliate.affiliateId && (affiliate.actions || affiliate.roles)){
-                                                    var affiliateToUpdate = {
-                                                        affiliateId : affiliate.affiliateId
-                                                    };
-                                                    if(affiliate.actions && util.isArray(affiliate.actions)){
-                                                        affiliateToUpdate.actions = affiliate.actions;
-                                                    }
-                                                    if(affiliate.roles && util.isArray(affiliate.roles)){
-                                                        affiliateToUpdate.roles = affiliate.roles;
-                                                    }
-                                                    tenantUpdate.affiliates.push(affiliateToUpdate);
-                                                }
+                                        if(existingTenantIndex === -1){
+                                            existingPermission.tenants = existingPermission.tenants || [];
+                                            existingPermission.tenants.push({
+                                                tenantId : tenant.tenantId
                                             });
+                                            existingTenantIndex = existingPermission.tenants.length - 1;
                                         }
-                                        updatedPermission.tenants.push(tenantUpdate);
+                                        mergingAttrs(existingPermission.tenants[existingTenantIndex], "actions", tenant.actions);
+                                        mergingAttrs(existingPermission.tenants[existingTenantIndex], "roles", tenant.roles);
+                                        if(tenant.affiliates){
+                                            if(!util.isArray(tenant.affiliates)){
+                                                if(tenant.affiliates !== "*"){
+                                                    throw new InfluenceError(errorCodes.C_400_023_002.code);
+                                                }
+
+                                                if(!helpers.deepEqual(existingPermission.tenants[existingTenantIndex].affiliates, tenant.affiliates)) {
+                                                    existingPermission.tenants[existingTenantIndex].affiliates = tenant.affiliates;
+                                                }
+                                            }else{
+                                                //To prevent collied affiliateIds
+                                                var affiliatesUpdatedCache = {};
+                                                tenant.affiliates.forEach(function(affiliate){
+                                                    if(affiliate.affiliateId && (affiliate.actions || affiliate.roles)){
+                                                        if(affiliatesUpdatedCache["TENANT_ID_" + tenant.tenantId + "_AFFILIATE_ID_" + affiliate.affiliateId]){
+                                                            throw new InfluenceError(errorCodes.C_400_023_009.code);
+                                                        }
+                                                        var existingAffiliateIndex = helpers.array_indexOfObject(existingPermission.tenants[existingTenantIndex].affiliates, affiliate, function(o1,o2){ return o1.affiliateId === o2.affiliateId});
+
+                                                        if(existingAffiliateIndex === -1){
+                                                            existingPermission.tenants[existingTenantIndex].affiliates = existingPermission.tenants[existingTenantIndex].affiliates || [];
+                                                            existingPermission.tenants[existingTenantIndex].affiliates.push({
+                                                                affiliateId : affiliate.affiliateId
+                                                            });
+                                                            existingAffiliateIndex = existingPermission.tenants[existingTenantIndex].affiliates.length - 1;
+                                                        }
+
+                                                        mergingAttrs(existingPermission.tenants[existingTenantIndex].affiliates[existingAffiliateIndex], "actions", affiliate.actions);
+                                                        mergingAttrs(existingPermission.tenants[existingTenantIndex].affiliates[existingAffiliateIndex], "roles", affiliate.roles);
+
+                                                        affiliatesUpdatedCache["TENANT_ID_" + tenant.tenantId + "_AFFILIATE_ID_" + affiliate.affiliateId] = true;
+                                                    }
+                                                });
+                                            }
+                                        }
+
+                                        tenantsUpdatedCache["TENANT_ID_" + tenant.tenantId] = true;
                                     }
                                 });
                             }
                         }
 
-                        logger.log("====> updatedPermission");
-                        logger.log(updatedPermission);
-                        return authDataHandler.updateAdminPermissions(adminId, updatedPermission);
+                        //Compare if anything changed
+                        if(helpers.deepEqual(existingPermission, clonedExistingPerms)){
+                            return existingPermission;
+                        }
+
+                        existingPermission.updatedBy = createdOrUpdatedBy;
+                        existingPermission.updatedOn = new Date();
+                        delete existingPermission._id;
+                        delete existingPermission.adminId;
+                        delete existingPermission.createdBy;
+                        delete existingPermission.createdOn;
+
+                        logger.log("====> existingPermission");
+                        logger.log(existingPermission);
+                        return authDataHandler.updateAdminPermissions(adminId, existingPermission);
                     }else{
                         //If no existing permissions, we need to create them
                         var newPerm = new permissionDataObjects.AppPerm(adminId, createdOrUpdatedBy, helpers.dedupArray(permission.actions), helpers.dedupArray(permission.roles));

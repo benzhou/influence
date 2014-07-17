@@ -366,12 +366,22 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         //Tenants
         getTenants = function(req,res,next){
             var filter = {},
-                activeOnly = req.query[constants.QUERY_STRING_PARAM.GET_TENANTS.ACTIVE_ONLY] || "1";
+                activeOnly = req.query[constants.QUERY_STRING_PARAM.GET_TENANTS.ACTIVE_ONLY] || "1",
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE];
 
 
             //We only add filter when request asked for only show active tenants, the opposite is include all, therefore, no filter needed.
             if(activeOnly == "1"){
                 filter.isActive = true;
+            }
+
+            if(!permTable.all.tenants){
+                filter.tenantIds = [];
+                for(var prop in permTable.tenants){
+                    if(permTable.tenants.hasOwnProperty(prop)){
+                        filter.tenantIds.push(permTable.tenants[prop].tenantId);
+                    }
+                }
             }
 
             Q.when(tenantsBusiness.getTenants(req.params.numberOfPage, req.params.pageNumber, filter)).then(
@@ -385,7 +395,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js getTenants: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
