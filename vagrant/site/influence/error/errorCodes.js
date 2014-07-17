@@ -114,6 +114,7 @@ module.exports = function(){
         C_400_023_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023003, desc : "Invalid Tenants Permission" },
         C_400_023_004       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023004, desc : "Invalid Admin ID" },
         C_400_023_005       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023005, desc : "Missing valid permissions." },
+        C_400_023_006       : { type : CLIENT_ERROR, httpStatus: 400, code : 400023006, desc : "Invalid permissions when editing." },
 
         //accountBusiness.js  findAdminAccountByTenantAndUsername
         C_400_024_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400024001, desc : "Missing required parameters" },

@@ -338,25 +338,38 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                         var updatedPermission = {
                             updatedBy : createdOrUpdatedBy,
                             updatedOn : new Date()
-                        };
+                        },
+                            mergingAttrs = function(orginalAttr, newAttr){
+                                if(newAttr){
+                                    if(util.isArray(newAttr)){
+                                        orginalAttr = helper.dedupArray(orginalAttr.concat(newAttr));
+                                    }else{
+                                        if(newAttr === "*"){
+                                            if(orginalAttr !== newAttr){
+                                                orginalAttr = newAttr;
+                                            }
+                                        }else{
+                                            throw new InfluenceError(errorCodes.C_400_023_006.code);
+                                        }
+                                    }
+                                }
+                            };
 
-                        if(permission.actions){
-                            updatedPermission.actions = permission.actions;
-                        }
-                        if(permission.roles){
-                            updatedPermission.roles = permission.roles;
-                        }
+                        mergingAttrs(updatedPermission.actions, permission.actions);
+                        mergingAttrs(updatedPermission.roles, permission.roles);
                         if(permission.tenants){
                             if(!util.isArray(permission.tenants)){
-                                if(permission.tanants !== "*"){
+                                if(permission.tenants !== "*"){
                                     throw new InfluenceError(errorCodes.C_400_023_003.code);
                                 }
 
-                                updatedPermission.tenants = "*";
+                                if(updatedPermission.tenants !== permission.tenants){
+                                    updatedPermission.tenants = permission.tenants;
+                                }
                             }else{
                                 updatedPermission.tenants = [];
                                 permission.tenants.forEach(function(tenant){
-                                    if(!tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
+                                    if(tenant.tenantId && (tenant.actions || tenant.roles || tenant.affiliates)){
                                         var tenantUpdate = {
                                             tenantId : tenant.tenantId
                                         };

@@ -19,6 +19,15 @@ var
 
 describe('AuthBusiness', function(){
     describe('Method: createOrUpdateAdminPermissions', function(){
+        it("Test Extend", function(){
+            var orgiArray = ["1","2"],
+                newArray = ["2", "3"];
+
+            var result = helpers.dedupArray(orgiArray.concat(newArray));
+
+            expect(result).to.have.length(3);
+        });
+
         it('Missing required parameter: no params passed in, should be REJECTED', function(){
             var
                 accountBusiness = {};
