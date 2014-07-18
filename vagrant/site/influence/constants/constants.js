@@ -12,8 +12,14 @@ module.exports = function(){
             }
         },
         ACTIONS : {
-            VIEW : "VIEW_ACTION",
-            EDIT : "EDIT_ACTION"
+            VIEW_ADMIN      : "VIEW_ADMIN",
+            EDIT_ADMIN      : "EDIT_ADMIN",
+            VIEW_TENANT     : "VIEW_TENANT",
+            EDIT_TENANT     : "EDIT_TENANT",
+            VIEW_AFFILIATE  : "VIEW_AFFILIATE",
+            EDIT_AFFILIATE  : "EDIT_AFFILIATE",
+            VIEW_ACTIONS    : "VIEW_ACTIONS",
+            EDIT_ACTIONS    : "EDIT_ACTIONS"
         }
     };
 }();

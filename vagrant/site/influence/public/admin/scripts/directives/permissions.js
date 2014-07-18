@@ -156,7 +156,7 @@
                     }
                 ).catch(
                     function(err){
-                        $log.log("adminPermissions controller: $watch permissionLevel loadTenants promise caught an error!");
+                        $log.log("permission directive loadTenants promise caught an error!");
                         $log.log(err);
 
                         $scope.onError(err);

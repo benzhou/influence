@@ -2,7 +2,8 @@ var
     Q               = require('q'),
     InfluenceError  = require('../error/influenceError'),
     errorCodes      = require('../error/errorCodes'),
-    constants       = require('../constants/constants');
+    constants       = require('../constants/constants'),
+    authorizationHelper = require("../business/authorizationHelper");
 
 module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness){
 
@@ -375,6 +376,12 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 filter.isActive = true;
             }
 
+            var tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.VIEW_TENANT);
+            if(tenantsAuthorized !== true){
+                filter.tenantIds = tenantsAuthorized;
+            }
+/*
+
             if(!permTable.all.tenants){
                 filter.tenantIds = [];
                 for(var prop in permTable.tenants){
@@ -383,6 +390,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     }
                 }
             }
+*/
 
             Q.when(tenantsBusiness.getTenants(req.params.numberOfPage, req.params.pageNumber, filter)).then(
                 function(tenants){

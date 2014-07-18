@@ -225,12 +225,7 @@
                     $log.log('influenceAdminAccountsCtrl initial Load fulfiled!');
 
                     if(result.data.tenants.length === 0){
-                        throw {
-                            data : {
-                                code : 500,
-                                message : "No tenants"
-                            }
-                        }
+                        return;
                     }
 
                     $scope.selectedTenant = result.data.tenants[0];
@@ -756,12 +751,7 @@
                     $log.log(result);
 
                     if(result.data.tenants.length === 0){
-                        throw {
-                            data : {
-                                code : 500,
-                                message : "No tenants"
-                            }
-                        }
+                        return;
                     }
 
                     $scope.selectedTenant = result.data.tenants[0];
