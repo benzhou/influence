@@ -280,7 +280,18 @@ module.exports = function(config, MongoDb, logger){
             }
 
             if(filter.tenantId){
-                filter.tenantId = new MongoDb.ObjectID(filter.tenantId);
+                if(util.isArray(filter.tenantId)){
+                    var tenantIds = [];
+                    filter.tenantId.forEach(function(tenantId){
+                        if(!(tenantId instanceof MongoDb.ObjectID)){
+                            tenantId = new MongoDb.ObjectID(tenantId);
+                        }
+                        tenantIds.push(tenantId);
+                    });
+                    filter.tenantId = { $in : tenantIds};
+                }else{
+                    filter.tenantId = new MongoDb.ObjectID(filter.tenantId);
+                }
             }
 
             logger.log("MongoDbProvider.js loadAffiliates");

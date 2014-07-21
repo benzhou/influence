@@ -100,7 +100,7 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     _hookUpRoutes(router, 'post', '/permissions/admin/:adminId?', apiController.postAdminPermissions);
 
     //Tenants
-    _hookUpRoutes(router, 'get', '/tenants/:numberOfPage?/:pageNumber?', apiController.getTenants);
+    _hookUpRoutes(router, 'get', '/tenants', apiController.getTenants);
     _hookUpRoutes(router, 'get', '/tenant/:tenantId?', apiController.getTenant);
     _hookUpRoutes(router, 'put', '/tenant/:tenantId?', apiController.putTenant);
     _hookUpRoutes(router, 'post', '/tenant/:tenantId?', apiController.postTenant);
@@ -112,11 +112,12 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     _hookUpRoutes(router, 'post', '/action/:actionId?', apiController.postAction);
 
     //Affiliates
-    _hookUpRoutes(router, 'get', '/affiliates/:tenantId/:numberOfPage?/:pageNumber?', apiController.getAffiliates);
+    _hookUpRoutes(router, 'get', '/affiliates', apiController.getAffiliates);
     _hookUpRoutes(router, 'get', '/affiliate/:affiliateId?', apiController.getAffiliate);
     _hookUpRoutes(router, 'post', '/affiliate/:affiliateId?', apiController.postAffiliate);
 
-
+    //Config
+    _hookUpRoutes(router, 'get', '/config/tenants/:configOptions', apiController.getTenants);
 
     return router;
 };

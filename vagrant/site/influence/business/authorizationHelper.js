@@ -92,8 +92,9 @@ var util = require("util");
                     return tenantIds;
                 }
             },
-            getTenantAffiliatesWithActions = function(permTable, tenantId, actionKeys){
+            getAffiliatesWithActions = function(permTable, actionKeys, tenantId, anyActionKeys){
                 if(!permTable || !tenantId || !actionKeys) return [];
+                anyActionKeys = anyActionKeys || false;
 
                 if(permTable.all.tenants){
                     if(permTable.all.actions){
@@ -110,9 +111,11 @@ var util = require("util");
                         }
                     }
                 }else{
-                    var tenant = permTable.tenants["TENANT_ID_" + tenantId];
+                    var findAffiliateOfTenant = function(tenant, actionKeys, anyActionKeys){
+                        if(!tenant || !actionKeys) return [];
 
-                    if(!tenant){
+                        anyActionKeys = anyActionKeys || false;
+
                         if(tenant.all.affiliates){
                             if(tenant.all.actions){
                                 return true;
@@ -132,20 +135,22 @@ var util = require("util");
 
                             for(var prop in tenant.affiliates){
                                 if(tenant.affiliates.hasOwnProperty(prop)){
-                                    if(tenant.affiliates.all.actions){
-                                        affiliateIds.push(tenant.affiliates[prop].affiliateId);
+                                    var affiliate = tenant.affiliates[prop];
+
+                                    if(affiliate.all.actions){
+                                        affiliateIds.push(affiliate.affiliateId);
                                     }else{
                                         if(util.isArray(actionKeys)){
                                             var notContainAllAction = actionKeys.some(function(actionKey){
-                                                return tenant.affiliates[prop].actions[actionKey] ? false : true;
+                                                return affiliate.actions[actionKey] ? false : true;
                                             });
 
                                             if(!notContainAllAction){
-                                                affiliateIds.push(tenant.affiliates[prop].affiliateId);
+                                                affiliateIds.push(affiliate.affiliateId);
                                             }
                                         }else{
-                                            if(tenant.affiliates[prop].actions[actionKeys]){
-                                                affiliateIds.push(tenant.affiliates[prop].affiliateId);
+                                            if(affiliate.actions[actionKeys]){
+                                                affiliateIds.push(affiliate.affiliateId);
                                             }
                                         }
                                     }
@@ -154,7 +159,130 @@ var util = require("util");
 
                             return affiliateIds;
                         }
+                    };
+
+                    var tenant = permTable.tenants["TENANT_ID_" + tenantId];
+
+                    if(!tenant){ return []; }
+
+                    return findAffiliateOfTenant(tenant, actionKeys, anyActionKeys);
+                }
+            },
+            getTenantsIfHasAffiliateAction = function(permTable, actionKeys, anyActionKeys){
+                if(!permTable || !actionKeys) return [];
+
+                anyActionKeys = anyActionKeys || false;
+
+                if(permTable.all.tenants){
+                    if(permTable.all.actions){
+                        return true;
+                    }else{
+                        if(util.isArray(actionKeys)){
+                            if(anyActionKeys){
+                                var containAnyAction = actionKeys.some(function(actionKey){
+                                    return permTable.actions[actionKey] ? true : false;
+                                });
+
+                                return containAnyAction ? true : [];
+                            }else{
+                                var notContainAllAction = actionKeys.some(function(actionKey){
+                                    return permTable.actions[actionKey] ? false : true;
+                                });
+
+                                return !notContainAllAction ? true : [];
+                            }
+                        }else{
+                            return  permTable.actions[actionKeys] ? true : [];
+                        }
                     }
+                }else{
+                    if(permTable.tenants) return [];
+
+                    var tenantsArray = [];
+
+                    for(var prop in permTable.tenants){
+                        if(permTable.tenants.hasOwnProperty(prop)){
+                            var tenant = permTable.tenants[prop];
+
+                            if(tenantsArray.indexOf(tenant.tenantId) > -1){
+                                break;
+                            }
+
+                            if(tenant.all.affiliates){
+                                if(tenant.all.actions){
+                                    tenantsArray.push(tenant.tenantId);
+                                }else{
+                                    if(util.isArray(actionKeys)){
+                                        if(anyActionKeys){
+                                            var containAnyAction = actionKeys.some(function(actionKey){
+                                                return tenant.actions[actionKey] ? true : false;
+                                            });
+
+                                            if(containAnyAction){
+                                                tenantsArray.push(tenant.tenantId);
+                                            }
+                                        }else{
+                                            var notContainAllAction = actionKeys.some(function(actionKey){
+                                                return tenant.actions[actionKey] ? false : true;
+                                            });
+
+                                            if(!notContainAllAction){
+                                                tenantsArray.push(tenant.tenantId);
+                                            }
+                                        }
+                                    }else{
+                                        if(tenant.actions[actionKeys]){
+                                            tenantsArray.push(tenant.tenantId);
+                                        }
+                                    }
+                                }
+                            }else{
+                                if(tenant.affiliates){
+                                    for(var prop in tenant.affiliates){
+                                        if(tenant.affiliates.hasOwnProperty(prop)){
+                                            var affiliate = tenant.affiliates[prop];
+
+                                            if(tenantsArray.indexOf(tenant.tenantId) > -1){
+                                                break;
+                                            }
+
+                                            if(affiliate.all.actions){
+                                                tenantsArray.push(tenant.tenantId);
+                                            }else{
+                                                if(util.isArray(actionKeys)){
+                                                    if(anyActionKeys){
+                                                        var containAnyAction = actionKeys.some(function(actionKey){
+                                                            return affiliate.actions[actionKey] ? true : false;
+                                                        });
+
+                                                        if(containAnyAction){
+                                                            tenantsArray.push(tenant.tenantId);
+                                                        }
+                                                    }else{
+                                                        var notContainAllAction = actionKeys.some(function(actionKey){
+                                                            return affiliate.actions[actionKey] ? false : true;
+                                                        });
+
+                                                        if(!notContainAllAction){
+                                                            tenantsArray.push(tenant.tenantId);
+                                                        }
+                                                    }
+                                                }else{
+                                                    if(affiliate.actions[actionKeys]){
+                                                        tenantsArray.push(tenant.tenantId);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+
+                        }
+                    }
+
+                    return tenantsArray;
                 }
             };
 
@@ -164,7 +292,8 @@ var util = require("util");
             hasPermissionForTenant          : hasPermissionForTenant,
             hasPermissionForTenantAffiliate : hasPermissionForTenantAffiliate,
             getTenantsWithActions           : getTenantsWithActions,
-            getTenantAffiliatesWithActions  : getTenantAffiliatesWithActions
+            getAffiliatesWithActions        : getAffiliatesWithActions,
+            getTenantsIfHasAffiliateAction  : getTenantsIfHasAffiliateAction
         };
     }();
 })();

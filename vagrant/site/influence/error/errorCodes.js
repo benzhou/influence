@@ -16,6 +16,9 @@ module.exports = function(){
         C_401_001_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001001, desc : "Unauthorized" },
         C_401_001_002       : { type : CLIENT_ERROR, httpStatus: 401, code : 401001002, desc : "Unauthorized" },
 
+        //apiController.js getAffiliates
+        C_401_002_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002001, desc : "Unauthorized" },
+
         C_404_001_001       : { type : CLIENT_ERROR, httpStatus: 404, code : 404001001, desc : "End Point not found" },
 
         //accountBusiness.js createAdminAccount

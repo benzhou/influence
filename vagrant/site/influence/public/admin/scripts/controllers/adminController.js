@@ -659,7 +659,7 @@
                 loadTenants = function(){
                     var df = $q.defer();
 
-                    tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                    tenantsService.queryConfigurable({configOptions: "affiliates",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                         function(docs){
                             $log.log('influenceAdminAffiliatesCtrl loadTenants fulfilled');
 
@@ -755,7 +755,7 @@
                     }
 
                     $scope.selectedTenant = result.data.tenants[0];
-                    return loadAffiliates($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc);
+                    return loadAffiliates($scope.selectedTenant.id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc);
                 }
             ).catch(
                 function(err){
@@ -795,7 +795,7 @@
                 $scope.affiliate = {};
 
                 $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                tenantsService.queryConfigurable({configOptions: "affiliate",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminAffiliateCtrl tenantsService.query fulfilled');
                         $log.log(docs);

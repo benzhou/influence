@@ -216,7 +216,16 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                         throw new InfluenceError(errorCodes.C_400_018_002.code);
                     }
 
-                    df.resolve(affiliate);
+                    return getTenantById(affiliate.tenantId).then(
+                        function(tenant){
+                            affiliate.tenant = {
+                                id : affiliate.tenantId,
+                                name : tenant? tenant.name : affiliate.tenantId
+                            };
+
+                            df.resolve(affiliate);
+                        }
+                    );
                 }
             ).catch(function(err){
                     logger.log("tenantsBusiness.js findAffiliateById caught an error!");
@@ -357,7 +366,38 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                     logger.log("here is the affiliates object");
                     logger.log(affiliates);
 
-                    df.resolve(affiliates);
+                    //Load Tenants names
+                    var tenantIds = [];
+                    affiliates.forEach(function(affiliate){
+                        if(tenantIds.indexOf(affiliate.tenantId) === -1){
+                            tenantIds.push(affiliate.tenantId);
+                        }
+                    });
+                    return getTenants(numberOfPage, pageNumber, {tenantIds : tenantIds}).then(
+                        function(tenants){
+                            logger.log("tenantsBusiness.js loadAffiliates : getTenants promise resolved");
+                            logger.log(tenants);
+
+                            var tenantsObj = {};
+                            tenants.forEach(function(tenant){
+                                if(!tenantsObj["TENANT_ID_" + tenant._id]){
+                                    tenantsObj["TENANT_ID_" + tenant._id] = tenant;
+                                }
+                            });
+
+                            affiliates.forEach(function(affiliate){
+                                if(tenantsObj["TENANT_ID_" + affiliate.tenantId]){
+                                    affiliate.tenant = tenantsObj["TENANT_ID_" + affiliate.tenantId];
+                                }else{
+                                    affiliate.tenant = {
+                                        tenantId : affiliate.tenantId,
+                                        name : affiliate.tenantId
+                                    };
+                                }
+                            });
+
+                            df.resolve(affiliates);
+                    });
                 }
             ).catch(function(err){
                     logger.log("tenantsBusiness.js loadAffiliates caught an error!");

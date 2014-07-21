@@ -42,7 +42,8 @@
                 [apiConfig.URL, "/tenant/:tenantId"].join(''), //endpoint
                 {},
                 {
-                    query     : { method: "GET", url : [apiConfig.URL, "/tenants/:numberOfPage/:pageNumber"].join('')},
+                    query                   : { method: "GET", url : [apiConfig.URL, "/tenants/:numberOfPage/:pageNumber"].join('')},
+                    queryConfigurable       : { method: "GET", url : [apiConfig.URL, "/config/tenants/:configOptions"].join('')}
                 }
             );
         }
@@ -56,7 +57,7 @@
                 [apiConfig.URL, "/affiliate/:affiliateId"].join(''), //endpoint
                 {},
                 {
-                    query     : { method: "GET", url : [apiConfig.URL, "/affiliates/:tenantId/:numberOfPage/:pageNumber"].join('')}
+                    query     : { method: "GET", url : [apiConfig.URL, "/affiliates"].join('')}
                 }
             );
         }

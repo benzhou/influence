@@ -368,18 +368,40 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         getTenants = function(req,res,next){
             var filter = {},
                 activeOnly = req.query[constants.QUERY_STRING_PARAM.GET_TENANTS.ACTIVE_ONLY] || "1",
-                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE];
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
+                configOptions = req.params.configOptions,
+                tenantsAuthorized;
 
+            //When list limited access tenants, configOption should be passed in.
+            if(configOptions){
+                switch(configOptions.toLowerCase()){
+                    case "affiliate":
+                        tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_AFFILIATE);
+                        break;
+                    case "admin":
+                        tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_ADMIN);
+                        break;
+                    case "tenant":
+                        tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_TENANT);
+                        break;
+                    default:
+                        tenantsAuthorized = [];
+                        break;
+                }
+            }else{
+                tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.VIEW_TENANT);
+            }
+
+            if(tenantsAuthorized !== true){
+                filter.tenantIds = tenantsAuthorized;
+            }
 
             //We only add filter when request asked for only show active tenants, the opposite is include all, therefore, no filter needed.
             if(activeOnly == "1"){
                 filter.isActive = true;
             }
 
-            var tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.VIEW_TENANT);
-            if(tenantsAuthorized !== true){
-                filter.tenantIds = tenantsAuthorized;
-            }
+
 /*
 
             if(!permTable.all.tenants){
@@ -392,14 +414,37 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             }
 */
 
-            Q.when(tenantsBusiness.getTenants(req.params.numberOfPage, req.params.pageNumber, filter)).then(
+            Q.when(tenantsBusiness.getTenants(req.query.numberOfPage, req.query.pageNumber, filter)).then(
                 function(tenants){
-                    res.json({
-                        code : errorCodes.SU_200.code,
-                        data : {
-                            tenants : tenants
+                    logger.log("apiController.js getTenants: tenantsBusiness.getTenants promise resolved.");
+                    logger.log(tenants);
+
+                    if(configOptions){
+                        var tenantRet = [];
+
+                        if(tenants && util.isArray(tenants)){
+                            tenants.forEach(function(tenant){
+                                tenantRet.push({
+                                    id: tenant._id,
+                                    name : tenant.name
+                                });
+                            });
                         }
-                    });
+
+                        res.json({
+                            code : errorCodes.SU_200.code,
+                            data : {
+                                tenants : tenantRet
+                            }
+                        });
+                    }else{
+                        res.json({
+                            code : errorCodes.SU_200.code,
+                            data : {
+                                tenants : tenants
+                            }
+                        });
+                    }
                 }
             ).catch(function(err){
                     logger.log("apiController.js getTenants: catch an error!");
@@ -727,9 +772,12 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             //TODO: Added selected fields
 
-            var tenantId  = req.params.tenantId,
+            var tenantId  = req.query.tenantId,
                 sortFieldName    = req.query.sfn,
-                sortFieldAscOrDesc = req.query.sad
+                sortFieldAscOrDesc = req.query.sad,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
+                configOptions = req.params.configOptions,
+                affiliatesAuthorized,
                 filter = { tenantId : tenantId},
                 sort = {};
 
@@ -738,7 +786,23 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 sort[sortFieldName] = sortFieldAscOrDesc;
             }
 
-            Q.when(tenantsBusiness.loadAffiliates(filter, req.params.numberOfPage, req.params.pageNumber, sort)).then(
+            if(configOptions){
+
+            }else{
+                tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_AFFILIATE);
+            }
+
+            if(tenantsAuthorized !== true){
+                if(tenantId){
+                    if(!authorizationHelper.hasPermissionForTenant(permTable, tenantId, constants.ACTIONS.VIEW_AFFILIATE)){
+                        throw new InfluenceError(errorCodes.C_401_002_001.code);
+                    }
+                }else{
+                    filter.tenantId = tenantsAuthorized;
+                }
+            }
+
+            Q.when(tenantsBusiness.loadAffiliates(filter, req.query.numberOfPage, req.query.pageNumber, sort)).then(
                 function(affiliates){
                     logger.log("apiController.js getAffiliates tenantsBusiness.loadAffiliates fulfilled.");
                     logger.log(affiliates);
@@ -751,6 +815,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                                 id          : item._id,
                                 name        : item.name,
                                 tenantId    : item.tenantId,
+                                tenantName  : item.tenant.name,
                                 location    : item.location
                             }
                         );
@@ -798,7 +863,11 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         data    : {
                             affiliate : {
                                 id          : affiliate._id,
-                                name        : affiliate.name
+                                name        : affiliate.name,
+                                tenant      : {
+                                    id      : affiliate.tenant.id,
+                                    name    : affiliate.tenant.name
+                                }
                             }
                         }
                     });
