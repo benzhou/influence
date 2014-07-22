@@ -13,14 +13,12 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Tenant ID</th>
                         <th>Name</th>
                         <th>Active</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="tenant in tenants" ng-click="editTenant(tenant)">
-                        <td>{{tenant._id}}</td>
                         <td>{{tenant.name}}</td>
                         <td><input type="checkbox" ng-checked="tenant.isActive" /></td>
                     </tr>

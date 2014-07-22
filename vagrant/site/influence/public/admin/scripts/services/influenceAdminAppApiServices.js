@@ -57,7 +57,8 @@
                 [apiConfig.URL, "/affiliate/:affiliateId"].join(''), //endpoint
                 {},
                 {
-                    query     : { method: "GET", url : [apiConfig.URL, "/affiliates"].join('')}
+                    query               : { method: "GET", url : [apiConfig.URL, "/affiliates/:tenantId"].join('')},
+                    queryConfigurable   : { method: "GET", url : [apiConfig.URL, "/config/affiliates/:tenantId"].join('')}
                 }
             );
         }

@@ -225,19 +225,8 @@ module.exports = function(config, MongoDb, logger){
 
             filter = filter || {};
 
-            if(filter.tenantIds && util.isArray(filter.tenantIds)){
-                var tenantIds = [];
-                filter.tenantIds.forEach(function(tenantId){
-                    if(!(tenantId instanceof MongoDb.ObjectID)){
-                        tenantId = new MongoDb.ObjectID(tenantId);
-                    }
-                    tenantIds.push(tenantId);
-                })
+            _convertFilterObjectId(filter, "tenantIds", "_id");
 
-                filter._id = { $in : tenantIds};
-
-                delete filter.tenantIds;
-            }
             logger.log("MongoDBProvider.js loadTenants, filer:");
             logger.log(filter);
 
@@ -279,20 +268,8 @@ module.exports = function(config, MongoDb, logger){
                 opts.sort = sort;
             }
 
-            if(filter.tenantId){
-                if(util.isArray(filter.tenantId)){
-                    var tenantIds = [];
-                    filter.tenantId.forEach(function(tenantId){
-                        if(!(tenantId instanceof MongoDb.ObjectID)){
-                            tenantId = new MongoDb.ObjectID(tenantId);
-                        }
-                        tenantIds.push(tenantId);
-                    });
-                    filter.tenantId = { $in : tenantIds};
-                }else{
-                    filter.tenantId = new MongoDb.ObjectID(filter.tenantId);
-                }
-            }
+            _convertFilterObjectId(filter, "tenantId");
+            _convertFilterObjectId(filter, "affiliateId");
 
             logger.log("MongoDbProvider.js loadAffiliates");
             logger.log(filter);
@@ -380,6 +357,29 @@ module.exports = function(config, MongoDb, logger){
         },
 
         //Private Helper methods
+        _convertFilterObjectId = function(filter, idFieldName, dbFieldName){
+            dbFieldName = dbFieldName || idFieldName;
+            var needToDeleteOriginalFilterField = dbFieldName !== idFieldName;
+
+            if(filter[idFieldName]){
+                if(util.isArray(filter[idFieldName])){
+                    var ids = [];
+                    filter[idFieldName].forEach(function(id){
+                        if(!(id instanceof MongoDb.ObjectID)){
+                            id = new MongoDb.ObjectID(id);
+                        }
+                        ids.push(id);
+                    });
+                    filter[dbFieldName] = { $in : ids};
+                }else{
+                    filter[dbFieldName] = new MongoDb.ObjectID(filter[idFieldName]);
+                }
+
+                if(needToDeleteOriginalFilterField){
+                    delete filter[idFieldName];
+                }
+            }
+        },
         _findById = function(collectionName, id){
             return _findOneBy(collectionName, {_id : id});
         },

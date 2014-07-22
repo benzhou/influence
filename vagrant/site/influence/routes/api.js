@@ -112,12 +112,16 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     _hookUpRoutes(router, 'post', '/action/:actionId?', apiController.postAction);
 
     //Affiliates
-    _hookUpRoutes(router, 'get', '/affiliates', apiController.getAffiliates);
+    _hookUpRoutes(router, 'get', '/affiliates/:tenantId', apiController.getAffiliates);
     _hookUpRoutes(router, 'get', '/affiliate/:affiliateId?', apiController.getAffiliate);
     _hookUpRoutes(router, 'post', '/affiliate/:affiliateId?', apiController.postAffiliate);
 
     //Config
     _hookUpRoutes(router, 'get', '/config/tenants/:configOptions', apiController.getTenants);
+    _hookUpRoutes(router, 'get', '/config/affiliates/:tenantId/:configOptions?', function(req, res, next){
+        req.configOptions = req.configOptions || "affiliate";
+        return apiController.getAffiliates(req, res, next);
+    });
 
     return router;
 };

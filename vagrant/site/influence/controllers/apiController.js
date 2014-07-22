@@ -1,5 +1,6 @@
 var
     Q               = require('q'),
+    util            = require('util'),
     InfluenceError  = require('../error/influenceError'),
     errorCodes      = require('../error/errorCodes'),
     constants       = require('../constants/constants'),
@@ -772,13 +773,13 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             //TODO: Added selected fields
 
-            var tenantId  = req.query.tenantId,
+            var tenantId  = req.params.tenantId,
                 sortFieldName    = req.query.sfn,
                 sortFieldAscOrDesc = req.query.sad,
                 permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
                 configOptions = req.params.configOptions,
                 affiliatesAuthorized,
-                filter = { tenantId : tenantId},
+                filter = {},
                 sort = {};
 
             if(sortFieldName){
@@ -787,19 +788,22 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             }
 
             if(configOptions){
-
+                switch(configOptions.toLowerCase()){
+                    case "affiliate":
+                        affiliatesAuthorized = authorizationHelper.getAffiliatesWithActions(permTable, constants.ACTIONS.EDIT_AFFILIATE, tenantId);
+                        break;
+                    default:
+                        affiliatesAuthorized = [];
+                        break;
+                }
             }else{
-                tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_AFFILIATE);
+                affiliatesAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable,  constants.ACTIONS.VIEW_AFFILIATE, tenantId);
             }
 
-            if(tenantsAuthorized !== true){
-                if(tenantId){
-                    if(!authorizationHelper.hasPermissionForTenant(permTable, tenantId, constants.ACTIONS.VIEW_AFFILIATE)){
-                        throw new InfluenceError(errorCodes.C_401_002_001.code);
-                    }
-                }else{
-                    filter.tenantId = tenantsAuthorized;
-                }
+            if(affiliatesAuthorized !== true){
+                filter.affiliateId = affiliatesAuthorized;
+            }else{
+                filter.tenantId = tenantId;
             }
 
             Q.when(tenantsBusiness.loadAffiliates(filter, req.query.numberOfPage, req.query.pageNumber, sort)).then(

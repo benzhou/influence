@@ -456,7 +456,7 @@
 
             var loadTenants = function(numberOfPage, pageNumber){
                 $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                tenantsService.query({ao:0,numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
+                tenantsService.queryConfigurable({configOptions:"tenant", ao:0,numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminTenantsCtrl');
                         $scope.tenants = docs.data.tenants;
@@ -486,7 +486,7 @@
                 $log.log("Editing tenant:");
                 $log.log(tenant);
 
-                $location.path(['/home/config/tenant/', tenant._id].join(''));
+                $location.path(['/home/config/tenant/', tenant.id].join(''));
             };
 
             $scope.createTenant = function(){
@@ -659,7 +659,7 @@
                 loadTenants = function(){
                     var df = $q.defer();
 
-                    tenantsService.queryConfigurable({configOptions: "affiliates",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                    tenantsService.queryConfigurable({configOptions: "affiliate",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                         function(docs){
                             $log.log('influenceAdminAffiliatesCtrl loadTenants fulfilled');
 
@@ -681,7 +681,7 @@
                 loadAffiliates = function(tenantId, numberOfPage, pageNumber, sortFieldName, sortFieldAscOrDesc){
                     var df = $q.defer();
 
-                    affiliatesService.query(
+                    affiliatesService.queryConfigurable(
                         {
                             numberOfPage:numberOfPage,
                             pageNumber:pageNumber,
@@ -710,7 +710,7 @@
                 },
                 refresh = function(){
                     $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                    loadAffiliates($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc)
+                    loadAffiliates($scope.selectedTenant.id, $scope.numberOfPage, $scope.pageNumber, $scope.sortFieldName, $scope.sortFieldAscOrDesc)
                         .finally(function(){
                             $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
                         });
@@ -802,7 +802,7 @@
                         $scope.tenants = docs.data.tenants;
 
                         //$scope.selectedTenant.tenant = $scope.tenants[0];
-                        $scope.affiliate.tenantId = $scope.tenants[0]._id;
+                        $scope.affiliate.tenantId = $scope.tenants[0].id;
                     }
                 ).catch(
                     function(err){
