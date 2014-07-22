@@ -70,7 +70,7 @@ var util = require("util");
                     for(var prop in permTable.tenants){
                         if(permTable.tenants.hasOwnProperty(prop)){
                             if(permTable.tenants[prop].all.actions){
-                                tenantIds.push(permTable.tenant[prop].tenantId);
+                                tenantIds.push(permTable.tenants[prop].tenantId);
                             }else{
                                 if(util.isArray(actionKeys)){
                                     var notContainAllAction = actionKeys.some(function(actionKey){
@@ -78,11 +78,11 @@ var util = require("util");
                                     });
 
                                     if(!notContainAllAction){
-                                        tenantIds.push(permTable.tenant[prop].tenantId);
+                                        tenantIds.push(permTable.tenants[prop].tenantId);
                                     }
                                 }else{
                                     if(permTable.tenants[prop].actions[actionKeys]){
-                                        tenantIds.push(permTable.tenant[prop].tenantId);
+                                        tenantIds.push(permTable.tenants[prop].tenantId);
                                     }
                                 }
                             }
@@ -196,7 +196,7 @@ var util = require("util");
                         }
                     }
                 }else{
-                    if(permTable.tenants) return [];
+                    if(!permTable.tenants) return [];
 
                     var tenantsArray = [];
 

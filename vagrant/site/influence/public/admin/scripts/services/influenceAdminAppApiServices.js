@@ -28,7 +28,8 @@
                 [apiConfig.URL, "/account/admin/:adminId"].join(''), //endpoint
                 {},
                 {
-                    query     : { method: "GET", url : [apiConfig.URL, "/account/admins/:tenantId/:numberOfPage/:pageNumber"].join('')},
+                    query               : { method: "GET", url : [apiConfig.URL, "/account/admins/:tenantId"].join('')},
+                    queryConfigurable   : { method: "GET", url : [apiConfig.URL, "/config/admins/:tenantId"].join('')}
                 }
             );
         }

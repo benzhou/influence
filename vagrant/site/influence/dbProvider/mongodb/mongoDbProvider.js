@@ -80,7 +80,7 @@ module.exports = function(config, MongoDb, logger){
         },
 
         //Admin Account CURD
-        loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
+        loadAdminAccounts = function(filter, numberOfPage, pageNumber, sort){
             numberOfPage = numberOfPage || 10;
             pageNumber = pageNumber || 1;
 
@@ -92,7 +92,19 @@ module.exports = function(config, MongoDb, logger){
                     limits : limits
                 };
 
-            return  _find(collections.AdminAccount, {tenantId : new MongoDb.ObjectID(tenantId)}, opts);
+            filter = filter || {};
+            if(sort){
+                opts.sort = sort;
+            }
+
+            _convertFilterObjectId(filter, "tenantId");
+
+            logger.log("MongoDbProvider.js loadAdminAccounts");
+            logger.log(filter);
+            logger.log(sort);
+            logger.log("skip %s, limits:%s", skip, limits);
+
+            return  _find(collections.AdminAccount, filter, opts);
         },
         findAdminAccountById = function(adminId){
             if(!(adminId instanceof MongoDb.ObjectID)){
@@ -104,10 +116,18 @@ module.exports = function(config, MongoDb, logger){
             return  _findOneBy(collections.AdminAccount, {email : email});
         },
         findAdminAccountByTenantAndEmail = function(tenantId, email){
-            return  _findOneBy(collections.AdminAccount, {tenantId: new MongoDb.ObjectID(tenantId), email : email});
+            if(!(tenantId instanceof MongoDb.ObjectID)){
+                tenantId = new MongoDb.ObjectID(tenantId);
+            }
+
+            return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, email : email});
         },
         findAdminAccountByTenantAndUsername = function(tenantId, username){
-            return  _findOneBy(collections.AdminAccount, {tenantId: new MongoDb.ObjectID(tenantId), username : username});
+            if(!(tenantId instanceof MongoDb.ObjectID)){
+                tenantId = new MongoDb.ObjectID(tenantId);
+            }
+
+            return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, username : username});
         },
         upsertAdminAccount = function(adminDo){
             adminDo.tenantId = new MongoDb.ObjectID(adminDo.tenantId);

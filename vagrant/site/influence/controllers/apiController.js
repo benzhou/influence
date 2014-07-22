@@ -21,12 +21,29 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         getAdminAccounts = function(req,res,next){
             //TODO request validation
 
-            var tenantId = req.params.tenantId;
+            var tenantId = req.params.tenantId,
+                sortFieldName    = req.query.sfn,
+                sortFieldAscOrDesc = req.query.sad,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
+                configOptions = req.params.configOptions,
+                tenantAuthorized,
+                filter = {},
+                sort = {};
+
+            if(sortFieldName){
+                sortFieldAscOrDesc =  sortFieldAscOrDesc == "1"? 1 : -1;
+                sort[sortFieldName] = sortFieldAscOrDesc;
+            }
+
+            if(!authorizationHelper.hasPermissionForTenant(permTable, tenantId, configOptions? constants.ACTIONS.EDIT_ADMIN : constants.ACTIONS.VIEW_ADMIN)){
+                throw new InfluenceError(errorCodes.C_401_002_002.code);
+            }
+
+            filter.tenantId = tenantId;
 
             //TODO: Added selected fields
 
-            Q.when(accountBusiness.loadAdminAccounts(tenantId)).then(
-
+            Q.when(accountBusiness.loadAdminAccounts(filter, req.query.numberOfPage, req.query.pageNumber, sort)).then(
                 function(admins){
                     logger.log("apiController.js getAdminAccounts accountBusiness.loadAdminAccounts fulfilled.");
                     logger.log(admins);
@@ -380,10 +397,10 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_AFFILIATE);
                         break;
                     case "admin":
-                        tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_ADMIN);
+                        tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.EDIT_ADMIN);
                         break;
                     case "tenant":
-                        tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_TENANT);
+                        tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.EDIT_TENANT);
                         break;
                     default:
                         tenantsAuthorized = [];
@@ -802,9 +819,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             if(affiliatesAuthorized !== true){
                 filter.affiliateId = affiliatesAuthorized;
-            }else{
-                filter.tenantId = tenantId;
             }
+            filter.tenantId = tenantId;
 
             Q.when(tenantsBusiness.loadAffiliates(filter, req.query.numberOfPage, req.query.pageNumber, sort)).then(
                 function(affiliates){

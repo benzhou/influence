@@ -60,7 +60,7 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
 
     //Account
     //Admin
-    _hookUpRoutes(router, 'get', '/account/admins/:tenantId?/:numberOfPage?/:pageNumber?', apiController.getAdminAccounts);
+    _hookUpRoutes(router, 'get', '/account/admins/:tenantId', apiController.getAdminAccounts);
     _hookUpRoutes(router, 'get', '/account/admin/:adminId?', apiController.getAdminAccount);
     //_hookUpRoutes(router, 'put', '/account/admin/:adminId?', apiController.putAdminAccount);
     _hookUpRoutes(router, 'post', '/account/admin/:adminId?', apiController.postAdminAccount);
@@ -119,8 +119,12 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
     //Config
     _hookUpRoutes(router, 'get', '/config/tenants/:configOptions', apiController.getTenants);
     _hookUpRoutes(router, 'get', '/config/affiliates/:tenantId/:configOptions?', function(req, res, next){
-        req.configOptions = req.configOptions || "affiliate";
+        req.params.configOptions = req.params.configOptions || "affiliate";
         return apiController.getAffiliates(req, res, next);
+    });
+    _hookUpRoutes(router, 'get', '/config/admins/:tenantId/:configOptions?', function(req, res, next){
+        req.params.configOptions = req.params.configOptions || "admin";
+        return apiController.getAdminAccounts(req, res, next);
     });
 
     return router;

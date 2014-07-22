@@ -136,7 +136,7 @@
                 loadTenants = function(){
                     var df = $q.defer();
 
-                    tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                    tenantsService.queryConfigurable({configOptions:"admin",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                         function(docs){
                             $log.log('influenceAdminAccountsCtrl loadTenants fulfilled');
 
@@ -157,7 +157,7 @@
                 loadAdmins = function(tenantId, numberOfPage, pageNumber){
                     var df = $q.defer();
 
-                    adminService.query({tenantId: tenantId, numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
+                    adminService.queryConfigurable({tenantId: tenantId, numberOfPage:numberOfPage,pageNumber:pageNumber,token: influenceAdminAppSession.token.token}).$promise.then(
                         function(docs){
                             $log.log('influenceAdminAccountsCtrl query fullfilled.');
                             $scope.admins = docs.data.admins;
@@ -181,7 +181,7 @@
                 },
                 refresh = function(){
                     $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
-                    loadAdmins($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber)
+                    loadAdmins($scope.selectedTenant.id, $scope.numberOfPage, $scope.pageNumber)
                         .finally(function(){
                             $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
                         });
@@ -230,7 +230,7 @@
 
                     $scope.selectedTenant = result.data.tenants[0];
 
-                    return loadAdmins($scope.selectedTenant._id, $scope.numberOfPage, $scope.pageNumber);
+                    return loadAdmins($scope.selectedTenant.id, $scope.numberOfPage, $scope.pageNumber);
                 }
             ).catch(
                 function(err){
@@ -264,13 +264,13 @@
                 //When no passed-in adminId, assume this is an create
                 $scope.admin = {};
 
-                tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                tenantsService.queryConfigurable({configOptions:"admin",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminAccountCtrl tenantsService.query fulfilled');
                         $log.log(docs);
 
                         $scope.tenants = docs.data.tenants;
-                        $scope.admin.tenantId = $scope.tenants[0]._id;
+                        $scope.admin.tenantId = $scope.tenants[0].id;
                     }
                 ).catch(
                     function(err){
@@ -318,7 +318,7 @@
                         username    : $scope.admin.username,
                         firstName   : $scope.admin.firstName,
                         lastName    : $scope.admin.lastName,
-                        displayName : $scope.admin.displayName,
+                        displayName : $scope.admin.displayName
                     };
 
                 if($scope.admin && $scope.admin.id){
@@ -412,8 +412,8 @@
                         name : $scope.tenant.name
                     };
 
-                if($scope.tenant && $scope.tenant._id){
-                    params.tenantId = $scope.tenant._id;
+                if($scope.tenant && $scope.tenant.id){
+                    params.tenantId = $scope.tenant.id;
                     postData.isActive = $scope.tenant.isActive;
                 }
 
@@ -912,7 +912,7 @@
             $scope.loadTenants = function(){
                 var df = $q.defer();
 
-                tenantsService.query({numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                tenantsService.queryConfigurable({configOptions:"admin_permission", numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminAdminPermissionsCtrl loadTenants promise fulfilled!');
 
@@ -937,7 +937,7 @@
             $scope.loadAffiliates = function(tenant){
                 var df = $q.defer();
 
-                affiliatesService.query({tenantId:tenant._id, numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                affiliatesService.query({tenantId:tenant.id, numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
                     function(docs){
                         $log.log('influenceAdminAdminPermissionsCtrl loadAffiliates promise fulfilled!');
 

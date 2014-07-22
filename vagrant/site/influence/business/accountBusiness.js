@@ -8,12 +8,12 @@ module.exports = function(helpers, util, logger, accountDataHandler){
 
     var
         //Admin Accounts
-        loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
+        loadAdminAccounts = function(filter, numberOfPage, pageNumber, sort){
             var df = Q.defer();
 
             //validation
             //required fields
-            if(!tenantId){
+            if(!filter){
                 df.reject(
                     new InfluenceError(errorCodes.C_400_014_001.code)
                 );
@@ -36,7 +36,10 @@ module.exports = function(helpers, util, logger, accountDataHandler){
                 pageNumber = 1;
             }
 
-            Q.when(accountDataHandler.loadAdminAccounts(tenantId, numberOfPage, pageNumber)).then(
+            var cleanedFilter = helpers.cleanSearchFilter({tenantId : 1}, filter),
+                cleanedSort     = helpers.cleanSort({tenantId : 1}, sort);
+
+            Q.when(accountDataHandler.loadAdminAccounts(cleanedFilter, numberOfPage, pageNumber, cleanedSort)).then(
                 function(admins){
 
                     df.resolve(admins);

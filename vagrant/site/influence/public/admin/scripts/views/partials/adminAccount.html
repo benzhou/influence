@@ -12,7 +12,7 @@
                     </div>
                     <div lass="checkbox" ng-if='!admin || !admin.id'>
                         <label for="tenantId">Tenant ID</label>
-                        <select id="tenantId" ng-model="admin.tenantId" ng-options="tenant._id as tenant.name for tenant in tenants"></select>
+                        <select id="tenantId" ng-model="admin.tenantId" ng-options="tenant.id as tenant.name for tenant in tenants"></select>
                     </div>
                     <div class="form-group">
                         <label for="email">Email:</label>

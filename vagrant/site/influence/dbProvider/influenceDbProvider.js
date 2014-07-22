@@ -7,8 +7,8 @@ module.exports = function(dbProvider){
         },
 
         //Admin Account
-        loadAdminAccounts = function(tenantId, numberOfPage, pageNumber){
-            return dbProvider.loadAdminAccounts(tenantId, numberOfPage, pageNumber);
+        loadAdminAccounts = function(filter, numberOfPage, pageNumber, sort){
+            return dbProvider.loadAdminAccounts(filter, numberOfPage, pageNumber, sort);
         },
         findAdminAccountById = function(adminId){
             return dbProvider.findAdminAccountById(adminId);
