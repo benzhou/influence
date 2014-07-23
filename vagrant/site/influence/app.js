@@ -56,12 +56,14 @@ var routes              = {},
     tenantsDataHandler  = require('./dataHandler/tenantsDataHandler')(influenceDbProvider),
     apiLogDataHandler   = require('./dataHandler/apiLogDataHandler')(influenceDbProvider),
 
+    authorizationHelper = require("./business/authorizationHelper"),
     tenantsBusiness     = require('./business/tenantsBusiness')(helpers, influenceLogger, tenantsDataHandler),
     accountBusiness     = require('./business/accountBusiness')(helpers, util, influenceLogger, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(helpers, util, influenceLogger, appConfig.app, accountBusiness, authDataHandler),
     apiLogBusiness      = require('./business/apiLogBusiness')(influenceLogger, apiLogDataHandler),
 
-    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness),
+
+    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper),
 
     adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(influenceLogger, authBusiness),
     apiLogMiddleware                = require('./middleware/apiLogMiddleware')(influenceLogger, apiLogBusiness),

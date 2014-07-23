@@ -202,9 +202,9 @@
                         $scope.permissions.tenants = [];
                     }
 
-                    if(indexOfArray($scope.permissions.tenants, tenant, function(o1,o2){ return o1.tenantId === o2._id;}) === -1){
+                    if(indexOfArray($scope.permissions.tenants, tenant, function(o1,o2){ return o1.tenantId === o2.id;}) === -1){
                         $scope.permissions.tenants.push({
-                            tenantId : tenant._id
+                            tenantId : tenant.id
                         });
                         permViewModel = permParser($scope.permissions);
                     }
@@ -230,7 +230,7 @@
                     var df = $q.defer();
 
                     $scope.loadingStart();
-                    $scope.loadAffiliates({tenant: {_id:tenant.tenantId}}).then(
+                    $scope.loadAffiliates({tenant: {id:tenant.tenantId}}).then(
                         function(result){
                             $scope.metaData.tenantAffiliate["ID_" + tenant.tenantId] = result.data.affiliates || [];
 

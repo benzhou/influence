@@ -16,6 +16,9 @@ module.exports = function(dbProvider){
         findAdminAccountByEmail = function(email){
             return dbProvider.findAdminAccountByEmail(email);
         },
+        findAdminAccountByUsername = function(username){
+            return dbProvider.findAdminAccountByUsername(username);
+        },
         findAdminAccountByTenantAndEmail = function(tenantId, email){
             return dbProvider.findAdminAccountByTenantAndEmail(tenantId, email);
         },
@@ -130,6 +133,7 @@ module.exports = function(dbProvider){
         loadAdminAccounts                   : loadAdminAccounts,
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,
+        findAdminAccountByUsername          : findAdminAccountByUsername,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,

@@ -45,11 +45,14 @@
                 return;
             }
 
+            $scope.credential = {
+                tenantId : influenceAdminAppConfig.API.TENANT_ID
+            };
             $scope.adminLogin = function(username, password, rememberMe){
                 $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
 
                 authService.adminLogin({
-                    tenantId:influenceAdminAppConfig.API.TENANT_ID,
+                    tenantId:$scope.credential.tenantId,
                     username:$scope.credential.username,
                     password:$scope.credential.password
                 }).$promise.then(

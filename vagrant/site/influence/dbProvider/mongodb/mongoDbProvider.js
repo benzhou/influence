@@ -115,6 +115,9 @@ module.exports = function(config, MongoDb, logger){
         findAdminAccountByEmail = function(email){
             return  _findOneBy(collections.AdminAccount, {email : email});
         },
+        findAdminAccountByUsername = function(username){
+            return  _findOneBy(collections.AdminAccount, {username : username});
+        },
         findAdminAccountByTenantAndEmail = function(tenantId, email){
             if(!(tenantId instanceof MongoDb.ObjectID)){
                 tenantId = new MongoDb.ObjectID(tenantId);
@@ -551,6 +554,7 @@ module.exports = function(config, MongoDb, logger){
         loadAdminAccounts                   : loadAdminAccounts,
         findAdminAccountById                : findAdminAccountById,
         findAdminAccountByEmail             : findAdminAccountByEmail,
+        findAdminAccountByUsername          : findAdminAccountByUsername,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         upsertAdminAccount                  : upsertAdminAccount,

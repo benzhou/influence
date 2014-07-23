@@ -20,6 +20,38 @@ module.exports = function(){
         C_401_002_001       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002001, desc : "Unauthorized" },
         //apiController.js getAdminAccounts
         C_401_002_002       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002002, desc : "Unauthorized" },
+        //apiController.js getAdminPermissions
+        C_401_002_003       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002003, desc : "Unauthorized" },
+        //apiController.js postAdminPermissions
+        C_401_002_004       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002004, desc : "Unauthorized" },
+        //apiController.js getTenant
+        C_401_002_005       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002005, desc : "Unauthorized" },
+        //apiController.js postTenant
+        C_401_002_006       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002006, desc : "Unauthorized" },
+        C_401_002_007       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002007, desc : "Unauthorized" },
+        //apiController.js postAdminAccount
+        C_401_002_008       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002008, desc : "Unauthorized" },
+        C_401_002_009       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002009, desc : "Unauthorized" },
+        //apiController.js getAdminAccount
+        C_401_002_010       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002010, desc : "Unauthorized" },
+        //apiController.js putTenant
+        C_401_002_011       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002011, desc : "Unauthorized" },
+        //apiController.js getActions
+        C_401_002_012       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002012, desc : "Unauthorized" },
+        //apiController.js getActionByKey
+        C_401_002_013       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002013, desc : "Unauthorized" },
+        //apiController.js getAction
+        C_401_002_014       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002014, desc : "Unauthorized" },
+        //apiController.js postActions
+        C_401_002_015       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002015, desc : "Unauthorized" },
+        //apiController.js getAffiliate
+        C_401_002_016       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002016, desc : "Unauthorized" },
+        //apiController.js postAffiliate
+        C_401_002_017       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002017, desc : "Unauthorized" },
+        C_401_002_018       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002018, desc : "Unauthorized" },
+
+
+
 
         C_404_001_001       : { type : CLIENT_ERROR, httpStatus: 404, code : 404001001, desc : "End Point not found" },
 
@@ -130,8 +162,10 @@ module.exports = function(){
 
         //accountBusiness.js  findAdminAccountByTenantAndEmail
         C_400_025_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400025001, desc : "Missing required parameters" },
-        C_400_025_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400025002, desc : "Email doesn't exist in Tenant" }
+        C_400_025_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400025002, desc : "Email doesn't exist in Tenant" },
 
+        //accountBusiness.js  findAdminAccountByUsername
+        C_400_026_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400026001, desc : "Missing required parameters" }
 
     };
 }();

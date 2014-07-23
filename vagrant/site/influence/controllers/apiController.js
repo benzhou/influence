@@ -3,10 +3,9 @@ var
     util            = require('util'),
     InfluenceError  = require('../error/influenceError'),
     errorCodes      = require('../error/errorCodes'),
-    constants       = require('../constants/constants'),
-    authorizationHelper = require("../business/authorizationHelper");
+    constants       = require('../constants/constants');
 
-module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness){
+module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper){
 
     var test = function(req,res,next){
             logger.log("================");
@@ -26,24 +25,23 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 sortFieldAscOrDesc = req.query.sad,
                 permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
                 configOptions = req.params.configOptions,
-                tenantAuthorized,
                 filter = {},
                 sort = {};
 
-            if(sortFieldName){
-                sortFieldAscOrDesc =  sortFieldAscOrDesc == "1"? 1 : -1;
-                sort[sortFieldName] = sortFieldAscOrDesc;
-            }
+            Q.when((function(){
+                if(sortFieldName){
+                    sortFieldAscOrDesc =  sortFieldAscOrDesc == "1"? 1 : -1;
+                    sort[sortFieldName] = sortFieldAscOrDesc;
+                }
 
-            if(!authorizationHelper.hasPermissionForTenant(permTable, tenantId, configOptions? constants.ACTIONS.EDIT_ADMIN : constants.ACTIONS.VIEW_ADMIN)){
-                throw new InfluenceError(errorCodes.C_401_002_002.code);
-            }
+                if(!authorizationHelper.hasPermissionForTenant(permTable, tenantId, configOptions? constants.ACTIONS.EDIT_ADMIN : constants.ACTIONS.VIEW_ADMIN)){
+                    throw new InfluenceError(errorCodes.C_401_002_002.code);
+                }
 
-            filter.tenantId = tenantId;
+                filter.tenantId = tenantId;
 
-            //TODO: Added selected fields
-
-            Q.when(accountBusiness.loadAdminAccounts(filter, req.query.numberOfPage, req.query.pageNumber, sort)).then(
+                return accountBusiness.loadAdminAccounts(filter, req.query.numberOfPage, req.query.pageNumber, sort);
+            })()).then(
                 function(admins){
                     logger.log("apiController.js getAdminAccounts accountBusiness.loadAdminAccounts fulfilled.");
                     logger.log(admins);
@@ -94,13 +92,17 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         getAdminAccount = function(req,res,next){
             //TODO request validation
 
-            var adminId = req.params.adminId || req[constants.reqParams.PROP_AUTHTOKEN].adminId;
+            var adminId = req.params.adminId || req[constants.reqParams.PROP_AUTHTOKEN].adminId,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE];
 
             Q.when(accountBusiness.getAdminAccountById(adminId)).then(
-
                 function(admin){
                     logger.log("Success when call accountBusiness.getAdminAccountById in getAdminAccount");
                     logger.log(admin);
+
+                    if(!admin || !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId, constants.ACTIONS.VIEW_ADMIN)){
+                        throw new InfluenceError(errorCodes.C_401_002_010.code);
+                    }
 
                     res.json({
                         code    : errorCodes.SU_200.code,
@@ -143,35 +145,46 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             var reqAdmin = req.body,
                 authToken = req[constants.reqParams.PROP_AUTHTOKEN],
                 adminId = req.params.adminId,
-                promise,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
                 currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
-            if(adminId){
-                promise = accountBusiness.updateAdminAccount(
-                    adminId,
-                    reqAdmin.username,
-                    reqAdmin.email,
-                    reqAdmin.firstName,
-                    reqAdmin.lastName,
-                    reqAdmin.displayName,
-                    currentAdminId
-                );
-            }else{
-                promise =
-                    accountBusiness
-                    .createAdminAccount(
-                        reqAdmin.tenantId,
-                        reqAdmin.username,
-                        reqAdmin.email,
-                        reqAdmin.password,
-                        reqAdmin.firstName,
-                        reqAdmin.lastName,
-                        reqAdmin.displayName,
-                        currentAdminId
-                    )
-            }
+            Q.when((function(){
+                if(adminId){
+                    return accountBusiness.getAdminAccountById(adminId).then(function(admin){
+                        logger.log("postAdminAccount update: accountBusiness.getAdminAccountById promise is fulfilled!");
+                        logger.log(admin);
 
-            Q.when(promise).then(
+                        if(!admin || !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId, constants.ACTIONS.EDIT_ADMIN)){
+                            throw new InfluenceError(errorCodes.C_401_002_009.code);
+                        }
+
+                        return accountBusiness.updateAdminAccount(
+                            adminId,
+                            reqAdmin.username,
+                            reqAdmin.email,
+                            reqAdmin.firstName,
+                            reqAdmin.lastName,
+                            reqAdmin.displayName,
+                            currentAdminId
+                        );
+                    });
+                }else{
+                    if(!authorizationHelper.hasPermissionForTenant(permTable, reqAdmin.tenantId, constants.ACTIONS.EDIT_ADMIN)){
+                        throw new InfluenceError(errorCodes.C_401_002_009.code);
+                    }
+
+                    return accountBusiness.createAdminAccount(
+                            reqAdmin.tenantId,
+                            reqAdmin.username,
+                            reqAdmin.email,
+                            reqAdmin.password,
+                            reqAdmin.firstName,
+                            reqAdmin.lastName,
+                            reqAdmin.displayName,
+                            currentAdminId
+                        )
+                }
+            })()).then(
                 function(admin){
                     logger.log("postAdminAccount create or update promise is fulfilled!");
                     logger.log(admin);
@@ -205,11 +218,12 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                             message : resObj.message
                         }
                     );
-                }).done(
-                    function(){
-                        logger.log("apiController.js postAdminAccount: done");
-                        next();
-                    }
+                }
+            ).done(
+                function(){
+                    logger.log("apiController.js postAdminAccount: done");
+                    next();
+                }
             );
         },
 
@@ -325,7 +339,17 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
         //Admin Permissions
         getAdminPermissions = function(req,res,next){
-            Q.when(authBusiness.findAdminAuthorizationsByAdminId(req.params.adminId)).then(
+            var adminId = req.params.adminId,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
+
+            Q.when(accountBusiness.getAdminAccountById(req.params.adminId)).then(function(admin){
+                if(!admin || !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId.toString(), constants.ACTIONS.EDIT_PERMISSION_ADMIN)){
+                    throw new InfluenceError(errorCodes.C_401_002_003.code);
+                }
+
+                return authBusiness.findAdminAuthorizationsByAdminId(req.params.adminId);
+            }).then(
                 function(perms){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -353,9 +377,18 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         postAdminPermissions = function(req,res,next){
             var adminIdToCreateOrUpdate = req.params.adminId,
                 permissions = req.body,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
                 currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
-            Q.when(authBusiness.createOrUpdateAdminPermissions(adminIdToCreateOrUpdate, permissions, currentAdminId)).then(
+            Q.when(accountBusiness.getAdminAccountById(adminIdToCreateOrUpdate)).then(
+                function(admin){
+                    if(!admin || !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId.toString(), constants.ACTIONS.EDIT_PERMISSION_ADMIN)){
+                        throw new InfluenceError(errorCodes.C_401_002_004.code);
+                    }
+
+                    return authBusiness.createOrUpdateAdminPermissions(adminIdToCreateOrUpdate, permissions, currentAdminId);
+                }
+            ).then(
                 function(perms){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -398,6 +431,9 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                         break;
                     case "admin":
                         tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.EDIT_ADMIN);
+                        break;
+                    case "admin_permission":
+                        tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.EDIT_PERMISSION_ADMIN);
                         break;
                     case "tenant":
                         tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.EDIT_TENANT);
@@ -481,8 +517,15 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 });
         },
         getTenant = function(req,res,next){
+            var permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE];
 
-            Q.when(tenantsBusiness.getTenantById(req.params.tenantId)).then(
+            Q.when((function(){
+                if(!authorizationHelper.hasPermissionForTenant(permTable, req.params.tenantId, constants.ACTIONS.VIEW_TENANT)){
+                    throw new InfluenceError(errorCodes.C_401_002_005.code);
+                }
+
+                return tenantsBusiness.getTenantById(req.params.tenantId);
+            })()).then(
                 function(tenant){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -510,24 +553,31 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         postTenant = function(req,res,next){
             var tenantDo = req.body,
                 currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"],
-                tenantId = req.params.tenantId,
-                promise;
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
+                tenantId = req.params.tenantId;
 
-            if(tenantId){
-                promise = tenantsBusiness.updateTenant(
-                    req.params.tenantId,
-                    currentAdminId,
-                    tenantDo.name,
-                    tenantDo.isActive);
-            }else{
-                promise = tenantsBusiness.createTenant(
-                    tenantDo.name,
-                    currentAdminId
-                )
-            }
+            Q.when((function(){
+                if(tenantId){
+                    if(!authorizationHelper.hasPermissionForTenant(permTable, req.params.tenantId, constants.ACTIONS.EDIT_TENANT)){
+                        throw new InfluenceError(errorCodes.C_401_002_006.code);
+                    }
 
+                    return tenantsBusiness.updateTenant(
+                        req.params.tenantId,
+                        currentAdminId,
+                        tenantDo.name,
+                        tenantDo.isActive);
+                }else{
+                    if(!authorizationHelper.hasPermissionForApp(permTable, constants.ACTIONS.EDIT_TENANT)){
+                        throw new InfluenceError(errorCodes.C_401_002_007.code);
+                    }
 
-            Q.when(promise).then(
+                    return tenantsBusiness.createTenant(
+                        tenantDo.name,
+                        currentAdminId
+                    )
+                }
+            })()).then(
                 function(tenant){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -554,14 +604,20 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         },
         putTenant = function(req,res,next){
             var tenantUpdateDo = req.body,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
                 currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];;
 
-            Q.when(tenantsBusiness.updateTenant(
-                req.params.tenantId,
-                currentAdminId,
-                tenantUpdateDo.name,
-                tenantUpdateDo.isActive)
-            ).then(
+            Q.when((function(){
+                if(!authorizationHelper.hasPermissionForTenant(permTable, req.params.tenantId, constants.ACTIONS.EDIT_TENANT)){
+                    throw new InfluenceError(errorCodes.C_401_002_011.code);
+                }
+
+                return tenantsBusiness.updateTenant(
+                        req.params.tenantId,
+                        currentAdminId,
+                        tenantUpdateDo.name,
+                        tenantUpdateDo.isActive);
+            })()).then(
                 function(tenant){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -593,9 +649,16 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             //TODO: Added selected fields
 
-            var filter = {};
+            var filter = {},
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE];
 
-            Q.when(authBusiness.loadActions(filter, req.params.numberOfPage, req.params.pageNumber)).then(
+            Q.when((function(){
+                if(!authorizationHelper.hasPermissionForApp(permTable, constants.ACTIONS.VIEW_ACTIONS)){
+                    throw new InfluenceError(errorCodes.C_401_002_012.code);
+                }
+
+                return authBusiness.loadActions(filter, req.params.numberOfPage, req.params.pageNumber);
+            })()).then(
                 function(actions){
                     logger.log("apiController.js getActions authBusiness.loadActions fulfilled.");
                     logger.log(actions);
@@ -641,6 +704,9 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         },
         getAction = function(req,res,next){
             //TODO request validation
+            if(!authorizationHelper.hasPermissionForApp(permTable, constants.ACTIONS.VIEW_ACTIONS)){
+                throw new InfluenceError(errorCodes.C_401_002_014.code);
+            }
 
             Q.when(authBusiness.findActionById(req.params.actionId)).then(
 
@@ -681,7 +747,9 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         },
         getActionByKey = function(req,res,next){
             //TODO request validation
-
+            if(!authorizationHelper.hasPermissionForApp(permTable, constants.ACTIONS.VIEW_ACTIONS)){
+                throw new InfluenceError(errorCodes.C_401_002_013.code);
+            }
             Q.when(authBusiness.findActionByKey(req.params.actionKey)).then(
 
                 function(action){
@@ -725,26 +793,29 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             var action = req.body,
                 actionId = req.params.actionId,
                 promise,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
                 currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
-            if(actionId){
-                promise = authBusiness.updateAction(
-                    actionId,
-                    currentAdminId,
-                    action.name,
-                    action.key
-                );
-            }else{
-                promise =
-                    authBusiness
-                        .createAction(
+            Q.when((function(){
+                if(!authorizationHelper.hasPermissionForApp(permTable, constants.ACTIONS.EDIT_ACTIONS)){
+                    throw new InfluenceError(errorCodes.C_401_002_015.code);
+                }
+
+                if(actionId){
+                    return authBusiness.updateAction(
+                        actionId,
+                        currentAdminId,
+                        action.name,
+                        action.key
+                    );
+                }else{
+                    return authBusiness.createAction(
                             action.name,
                             action.key,
                             currentAdminId
-                        );
-            }
-
-            Q.when(promise).then(
+                    );
+                }
+            })()).then(
                 function(newAction){
                     logger.log("apiController.js postAction create or update promise is fulfilled!");
                     logger.log(newAction);
@@ -870,12 +941,19 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         },
         getAffiliate = function(req,res,next){
             //TODO request validation
+            var permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE];
 
-            Q.when(tenantsBusiness.findAffiliateById(req.params.affiliateId)).then(
+            Q.when((function(){
+                return tenantsBusiness.findAffiliateById(req.params.affiliateId);
+            })()).then(
 
                 function(affiliate){
                     logger.log("apiController.js getAffiliate tenantsBusiness.findAffiliateById fulfilled.");
                     logger.log(affiliate);
+
+                    if(!authorizationHelper.hasPermissionForTenantAffiliate(permTable, affiliate.tenantId.toString(), affiliate._id.toString(), constants.ACTIONS.VIEW_AFFILIATE)){
+                        throw new InfluenceError(errorCodes.C_401_002_016.code);
+                    }
 
                     res.json({
                         code    : errorCodes.SU_200.code,
@@ -918,25 +996,34 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             var affiliate = req.body,
                 affiliateId = req.params.affiliateId,
-                promise,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
                 currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
 
-            if(affiliateId){
-                promise = tenantsBusiness.updateAffiliate(
-                    affiliateId,
-                    currentAdminId,
-                    affiliate.name
-                );
-            }else{
-                promise =
-                    tenantsBusiness.createAffiliate(
-                        affiliate.name,
-                        affiliate.tenantId,
-                        currentAdminId
-                    );
-            }
+            Q.when((function(){
+                if(affiliateId){
+                    return tenantsBusiness.findAffiliateById(affiliateId).then(function(existingAffiliate){
+                        if(!existingAffiliate || !authorizationHelper.hasPermissionForTenantAffiliate(permTable, existingAffiliate.tenantId.toString(), affiliateId, constants.ACTIONS.EDIT_AFFILIATE)){
+                            throw new InfluenceError(errorCodes.C_401_002_017.code);
+                        }
 
-            Q.when(promise).then(
+                        return tenantsBusiness.updateAffiliate(
+                            affiliateId,
+                            currentAdminId,
+                            affiliate.name
+                        );
+                    });
+                }else{
+                    if(!authorizationHelper.hasPermissionForTenant(permTable, affiliate.tenantId.toString(), constants.ACTIONS.EDIT_AFFILIATE)){
+                        throw new InfluenceError(errorCodes.C_401_002_018.code);
+                    }
+
+                    return tenantsBusiness.createAffiliate(
+                            affiliate.name,
+                            affiliate.tenantId,
+                            currentAdminId
+                    );
+                }
+            })()).then(
                 function(newAffiliate){
                     logger.log("apiController.js postAffiliate create or update promise is fulfilled!");
                     logger.log(newAffiliate);
@@ -1017,7 +1104,6 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             );
         },
-
         postAppAccount = function(req,res,next){
             //TODO request validation
 

@@ -97,6 +97,43 @@ module.exports = function(helpers, util, logger, accountDataHandler){
             return df.promise;
         },
 
+        findAdminAccountByUsername = function(username){
+            var df = Q.defer();
+            logger.log("accountBusiness.findAdminAccountByUsername username:%s", username);
+
+            //validation
+            //required fields
+            if(!username){
+                df.reject(
+                    new InfluenceError(errorCodes.C_400_026_001.code)
+                );
+
+                return df.promise;
+            }
+
+            Q.when(accountDataHandler.findAdminAccountByUsername(username)).then(
+                function(admin){
+                    logger.log('accountBusiness.findAdminAccountByUsername accountDataHandler.findAdminAccountByUsername promise fulfilled:');
+                    logger.log(admin);
+
+                    df.resolve(admin);
+                }
+            ).catch(
+                function(err){
+                    logger.log('accountBusiness.findAdminAccountByUsername catch block got an err:');
+                    logger.log(err);
+
+                    df.reject(err);
+                }
+            ).done(
+                function(){
+                    logger.log('accountBusiness.findAdminAccountByUsername done block was called');
+                }
+            );
+
+            return df.promise;
+        },
+
         findAdminAccountByTenantAndUsername = function(tenantId, username){
             var df = Q.defer();
             logger.log("accountBusiness.findAdminAccountByTenantAndUsername tenantId:%s, username:%s", tenantId, username);
@@ -213,7 +250,7 @@ module.exports = function(helpers, util, logger, accountDataHandler){
             //TODO:validate createdBy AdminId has rights to create a new admin account for passed in tenant
 
             //Ensure per tenant Email/Username uniqueness
-            Q.when(accountDataHandler.findAdminAccountByTenantAndEmail(tenantId, email)).then(
+            Q.when(accountDataHandler.findAdminAccountByEmail(email)).then(
 
                 function(admin){
                     logger.log('accountBusiness.createAdminAccount findAdminAccountByEmail is resolved');
@@ -229,21 +266,21 @@ module.exports = function(helpers, util, logger, accountDataHandler){
 
                     logger.log("Cannnot find admin by their email, email === username? %s", email === username);
                     if(email !== username){
-                        logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername going to fire');
-                        return accountDataHandler.findAdminAccountByTenantAndUsername(tenantId, username);
+                        logger.log('accountBusiness.createAdminAccount findAdminAccountByUsername going to fire');
+                        return accountDataHandler.findAdminAccountByUsername(username);
                     }
 
-                    //otherwise the orginal promise from findAdminAccountByTenantAndEmail will pass to the next then
+                    //otherwise the orginal promise from findAdminAccountByEmail will pass to the next then
                 }
             ).then(
                 function(admin){
-                    logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername is resolved');
+                    logger.log('accountBusiness.createAdminAccount findAdminAccountByUsername is resolved');
                     logger.log(admin);
 
                     //If admin had value, then it should be already rejected from previous code when we try to check the first promise from
                     //findAdminAccountByEmail, if it is true again, means it has to from findAdminAccountByTenantAndUsername call
                     if(admin){
-                        logger.log('accountBusiness.createAdminAccount findAdminAccountByTenantAndUsername found an admin with the same username : ', username);
+                        logger.log('accountBusiness.createAdminAccount findAdminAccountByUsername found an admin with the same username : ', username);
                         throw new InfluenceError(
                             errorCodes.C_400_001_003.code,
                             util.format(errorCodes.C_400_001_003.desc, email)
@@ -332,10 +369,10 @@ module.exports = function(helpers, util, logger, accountDataHandler){
 
                     //Check if email or username is changed
                     if(admin.email !== email){
-                        return accountDataHandler.findAdminAccountByTenantAndEmail(admin.tenantId, email);
+                        return accountDataHandler.findAdminAccountByEmail(email);
                     }else{
                         if(email !== username && admin.username != username){
-                            return accountDataHandler.findAdminAccountByTenantAndUsername(admin.tenantId, username);
+                            return accountDataHandler.findAdminAccountByUsername(username);
                         }
                     }
                 }
@@ -344,8 +381,8 @@ module.exports = function(helpers, util, logger, accountDataHandler){
                     logger.log('===> Matched Admin Document: ');
                     logger.log(adminMatch);
 
-                    if(adminMatch && adminMatch._id === adminId){
-                        //If admin exists, means findAdminAccountByTenantAndEmail or findAdminAccountByTenantAndUsername
+                    if(adminMatch && adminMatch._id.toString() !== adminId){
+                        //If admin exists, means findAdminAccountByEmail or findAdminAccountByUsername
                         //found an existing admin in the tenant with the same email or username
                         throw new InfluenceError(errorCodes.C_400_013_003.code);
                     }
