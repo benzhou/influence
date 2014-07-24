@@ -292,7 +292,7 @@ module.exports = function(config, MongoDb, logger){
             }
 
             _convertFilterObjectId(filter, "tenantId");
-            _convertFilterObjectId(filter, "affiliateId");
+            _convertFilterObjectId(filter, "affiliateId", "_id");
 
             logger.log("MongoDbProvider.js loadAffiliates");
             logger.log(filter);

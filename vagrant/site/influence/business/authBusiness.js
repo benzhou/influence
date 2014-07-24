@@ -7,14 +7,14 @@ var  Q = require("q"),
 module.exports = function(helpers, util, logger, config, accountBusiness, authDataHandler){
 
     var
-        adminAccountLogin = function(appKey, tenantId, username, password){
+        adminAccountLogin = function(appKey, username, password){
             var df = Q.defer();
 
-            logger.log("adminAccountLogin, appKey: %s tenantId: %s, username %s, password %s", appKey, tenantId, username, password);
+            logger.log("adminAccountLogin, appKey: %s, username %s, password %s", appKey, username, password);
 
             //validation
             //required fields
-            if(!appKey || !tenantId || !username || !password){
+            if(!appKey || !username || !password){
                 df.reject(
                     new InfluenceError(
                         errorCodes.C_400_002_001.code,
@@ -24,11 +24,10 @@ module.exports = function(helpers, util, logger, config, accountBusiness, authDa
                 return df.promise;
             }
 
-            logger.log("adminAccountLogin, tenantId: %s, username %s, password %s", tenantId, username, password);
+            logger.log("adminAccountLogin, username %s, password %s", username, password);
 
             //TODO: Validates AppKey is authorized for this method
-
-            Q.when(accountBusiness.findAdminAccountByTenantAndUsername(tenantId, username)).then(
+            Q.when(accountBusiness.findAdminAccountByUsername(username)).then(
                 //
                 function(admin){
                     logger.log("authBusiness.js adminAccountLogin: findAdminAccountByTenantAndUsername promise resolved");

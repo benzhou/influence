@@ -10,6 +10,7 @@ print('Creating Actions:');
 db.Actions.drop();
 db.Actions.insert({name : "View Admin",                 key:"VIEW_ADMIN",                   createdOn: new Date()});
 db.Actions.insert({name : "Edit Admin",                 key:"EDIT_ADMIN",                   createdOn: new Date()});
+db.Actions.insert({name : "View Admin Permission",      key:"VIEW_PERMISSION_ADMIN",        createdOn: new Date()});
 db.Actions.insert({name : "Edit Admin Permission",      key:"EDIT_PERMISSION_ADMIN",        createdOn: new Date()});
 db.Actions.insert({name : "View Tenant",                key:"VIEW_TENANT",                  createdOn: new Date()});
 db.Actions.insert({name : "Edit Tenant",                key:"EDIT_TENANT",                  createdOn: new Date()});

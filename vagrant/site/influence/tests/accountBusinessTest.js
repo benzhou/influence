@@ -32,7 +32,7 @@ describe('AccountBusiness.js Test', function() {
         *
         * Email/Username same, Updated                  1                                   2 (Email Already Exists) 3(Username already exists)
         * Email/Username different, Update Email        4                                   5 (Email Already Exists) 6(Username already exists)
-        * Email/Username different, Update Username     5                                   6
+        * Email/Username different, Update Username     7                                   8
         *
         *
         * */
@@ -130,8 +130,8 @@ describe('AccountBusiness.js Test', function() {
                 updatedByAdminId = "fakeUpdatedByAdminId",
                 newAdminData = {
                     adminId : "fakeAdminId",
-                    username : "test1@email.com",
-                    email:"test1@email.com",
+                    username : "test2@email.com",
+                    email:"test2@email.com",
                     firstName : "newFirstName",
                     lastName: "newLastName",
                     displayName : "newDisplayName"
@@ -169,7 +169,51 @@ describe('AccountBusiness.js Test', function() {
 
             return result.should.eventually.be.rejected.and.eql(new InfluenceError(errorCodes.C_400_013_003.code));
         });
-        it("Case 4: Update Admin's email that is already exists", function () {
+        it("Case 4: Update Admin's email, Email/Username different when update, but they are same on profile, Email already exists", function () {
+            var
+                updatedByAdminId = "fakeUpdatedByAdminId",
+                newAdminData = {
+                    adminId : "fakeAdminId",
+                    username : "test2@email.com",
+                    email:"test1@email.com",
+                    firstName : "newFirstName",
+                    lastName: "newLastName",
+                    displayName : "newDisplayName"
+                },
+                adminFromDB = {
+                    _id : "fakeAdminId",
+                    username : "test@email.com",
+                    email:"test@email.com",
+                    firstName : "existingFirstName",
+                    lastName: "existingLastName",
+                    displayName : "existingDisplayName"
+                },
+                accountDataHandler = {
+                    findAdminAccountByEmail : function(){},
+                    findAdminAccountByUsername : function(){},
+                    updateAdminAccount : function(){},
+                    getAdminAccountById : function(){}
+                },
+                updateAdminAccountSpy = sinon.spy(accountDataHandler, "updateAdminAccount"),
+                accountBusiness = require('../business/accountBusiness')(helpers, util, console, accountDataHandler);
+
+            stubMethodWithPromiseReturn(accountDataHandler, "getAdminAccountById", adminFromDB);
+            stubMethodWithPromiseReturn(accountDataHandler, "findAdminAccountByEmail", {_id : "anotherAdmin"});
+            stubMethodWithPromiseReturn(accountDataHandler, "findAdminAccountByUsername", {_id : "anotherAdmin"});
+
+            var result = accountBusiness.updateAdminAccount(
+                newAdminData.adminId,
+                newAdminData.username,
+                newAdminData.email,
+                newAdminData.firstName,
+                newAdminData.lastName,
+                newAdminData.displayName,
+                updatedByAdminId
+            );
+
+            return result.should.eventually.be.rejected.and.eql(new InfluenceError(errorCodes.C_400_013_003.code));
+        });
+        it("Case 4: Update Admin's email, Email/Username different when update, but they are same on profile, Email already exists", function () {
             var
                 updatedByAdminId = "fakeUpdatedByAdminId",
                 newAdminData = {
@@ -213,7 +257,7 @@ describe('AccountBusiness.js Test', function() {
 
             return result.should.eventually.be.rejected.and.eql(new InfluenceError(errorCodes.C_400_013_003.code));
         });
-        it("Case 5: Update Admin's email that is already exists", function () {
+        it("Case 5: Update Admin's email, Email/Username different when update as well as on profile, Username already exists", function () {
             var
                 updatedByAdminId = "fakeUpdatedByAdminId",
                 newAdminData = {
@@ -257,12 +301,12 @@ describe('AccountBusiness.js Test', function() {
 
             return result.should.eventually.be.rejected.and.eql(new InfluenceError(errorCodes.C_400_013_003.code));
         });
-        it("Case 6: Update Admin's email that is already exists", function () {
+        it("Case 6: Update Admin's email, Email/Username different when update as well as on profile, Username already exists", function () {
             var
                 updatedByAdminId = "fakeUpdatedByAdminId",
                 newAdminData = {
                     adminId : "fakeAdminId",
-                    username : "test@email.com",
+                    username : "test3@email.com",
                     email:"test1@email.com",
                     firstName : "newFirstName",
                     lastName: "newLastName",

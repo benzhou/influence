@@ -73,7 +73,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getAdminAccounts caught an error!.");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -123,7 +123,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("Failed when call accountBusiness.getAdminAccountById in getAdminAccount");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -207,9 +207,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("postAdminAccount create or update caught an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
-                    logger.log(err);
 
                     res.json(
                         resObj.httpStatus,
@@ -230,7 +229,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         //Admin Auth Token
         getAdminAccountLogin = function(req,res,next){
 
-            Q.when(authBusiness.adminAccountLogin(req.query.appKey, req.params.tenantId,req.params.username,req.params.password)).then(
+            Q.when(authBusiness.adminAccountLogin(req.query.appKey, req.params.username,req.params.password)).then(
                 function(admin){
                     res.json({
                         code : errorCodes.SU_200.code,
@@ -253,7 +252,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js getAdminAccountLogin: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -283,7 +282,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js deleteAdminAuthToken: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -322,7 +321,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js getAdminAuthToken: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -339,16 +338,23 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
         //Admin Permissions
         getAdminPermissions = function(req,res,next){
-            var adminId = req.params.adminId,
+            var
                 permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
-                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"];
+                currentAdminId  = req[constants.reqParams.PROP_AUTHTOKEN]["adminId"].toString(),
+                adminId = req.params.adminId || currentAdminId;
 
-            Q.when(accountBusiness.getAdminAccountById(req.params.adminId)).then(function(admin){
-                if(!admin || !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId.toString(), constants.ACTIONS.EDIT_PERMISSION_ADMIN)){
-                    throw new InfluenceError(errorCodes.C_401_002_003.code);
+            logger.log('apiController.js getAdminPermissions');
+            logger.log(adminId);
+            logger.log(currentAdminId);
+
+            Q.when(accountBusiness.getAdminAccountById(adminId)).then(function(admin){
+                if(adminId !== currentAdminId){
+                    if(admin && !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId.toString(), constants.ACTIONS.VIEW_PERMISSION_ADMIN)){
+                        throw new InfluenceError(errorCodes.C_401_002_003.code);
+                    }
                 }
 
-                return authBusiness.findAdminAuthorizationsByAdminId(req.params.adminId);
+                return authBusiness.findAdminAuthorizationsByAdminId(adminId);
             }).then(
                 function(perms){
                     res.json({
@@ -360,7 +366,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js getAdminPermissions: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -382,7 +388,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             Q.when(accountBusiness.getAdminAccountById(adminIdToCreateOrUpdate)).then(
                 function(admin){
-                    if(!admin || !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId.toString(), constants.ACTIONS.EDIT_PERMISSION_ADMIN)){
+                    if(admin && !authorizationHelper.hasPermissionForTenant(permTable, admin.tenantId.toString(), constants.ACTIONS.EDIT_PERMISSION_ADMIN)){
                         throw new InfluenceError(errorCodes.C_401_002_004.code);
                     }
 
@@ -399,7 +405,6 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js postAdminPermissions: catch an error!");
-                    logger.log(err);
                     logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
@@ -424,6 +429,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 tenantsAuthorized;
 
             //When list limited access tenants, configOption should be passed in.
+            logger.log('apiController.js getTenants, configOptions:');
+            logger.log(configOptions);
             if(configOptions){
                 switch(configOptions.toLowerCase()){
                     case "affiliate":
@@ -446,6 +453,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.VIEW_TENANT);
             }
 
+            logger.log('apiController.js getTenants, tenantsAuthorized:');
+            logger.log(tenantsAuthorized);
             if(tenantsAuthorized !== true){
                 filter.tenantIds = tenantsAuthorized;
             }
@@ -536,7 +545,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js getTenantById: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -588,7 +597,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js postTenant: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -628,7 +637,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 }
             ).catch(function(err){
                     logger.log("apiController.js putTenant: catch an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -686,7 +695,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getActions caught an error!.");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -729,7 +738,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getAction caught an error!.");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -771,7 +780,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getActionByKey caught an error!.");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -835,7 +844,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js postAction create or update caught an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     logger.log(err.stack);
 
@@ -923,7 +932,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getAffiliates caught an error!.");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,
@@ -973,7 +982,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getAffiliate caught an error!.");
-                    logger.log(err);
+                    logger.log(err.stack);
                     logger.log(err.stack);
 
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
@@ -1042,9 +1051,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js postAffiliate create or update caught an error!");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
-                    logger.log(err);
 
                     res.json(
                         resObj.httpStatus,
@@ -1087,7 +1095,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("apiController.js getAppAccount: Failed when call accountBusiness.getAppAccountByAppKey in getAppAccount");
-                    logger.log(err);
+                    logger.log(err.stack);
 
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
@@ -1137,7 +1145,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             ).catch(
                 function(err){
                     logger.log("Failed when call accountBusiness.createAppAccount in postAppAccount");
-                    logger.log(err);
+                    logger.log(err.stack);
                     var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
                     res.json(
                         resObj.httpStatus,

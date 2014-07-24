@@ -369,7 +369,17 @@ module.exports = function(helpers, util, logger, accountDataHandler){
 
                     //Check if email or username is changed
                     if(admin.email !== email){
-                        return accountDataHandler.findAdminAccountByEmail(email);
+                        return accountDataHandler.findAdminAccountByEmail(email).then(function(adminWithSameEmail){
+                            if(adminWithSameEmail && adminWithSameEmail._id.toString() !== adminId){
+                                //If admin exists, means findAdminAccountByEmail or findAdminAccountByUsername
+                                //found an existing admin in the tenant with the same email or username
+                                throw new InfluenceError(errorCodes.C_400_013_003.code);
+                            }
+
+                            if(email !== username && admin.username != username){
+                                return accountDataHandler.findAdminAccountByUsername(username);
+                            }
+                        });
                     }else{
                         if(email !== username && admin.username != username){
                             return accountDataHandler.findAdminAccountByUsername(username);
@@ -531,6 +541,7 @@ module.exports = function(helpers, util, logger, accountDataHandler){
         loadAdminAccounts                   : loadAdminAccounts,
         createAdminAccount                  : createAdminAccount,
         getAdminAccountById                 : getAdminAccountById,
+        findAdminAccountByUsername          : findAdminAccountByUsername,
         findAdminAccountByTenantAndUsername : findAdminAccountByTenantAndUsername,
         findAdminAccountByTenantAndEmail    : findAdminAccountByTenantAndEmail,
         updateAdminAccount                  : updateAdminAccount,

@@ -21,7 +21,7 @@ module.exports = function(logger, authBusiness){
                 }
             }
         },
-        _convertPermsTable = function(perms){
+        convertPermsTable = function(perms){
             var table = {
                 all : {},
                 actions : {},
@@ -52,8 +52,8 @@ module.exports = function(logger, authBusiness){
                                 if(tenant.affiliates === "*"){
                                     tenantTable.all.affiliates = true;
                                 }else{
-                                    if(util.isArray(tenant.affiliatess)){
-                                        tenant.affiliatess.forEach(function(affiliate){
+                                    if(util.isArray(tenant.affiliates)){
+                                        tenant.affiliates.forEach(function(affiliate){
                                             var affiliateTable = {
                                                 affiliateId : affiliate.affiliateId,
                                                 all : {},
@@ -109,7 +109,7 @@ module.exports = function(logger, authBusiness){
                     logger.log(permissions);
                     permissions = permissions || {};
                     req[constants.reqParams.PROP_AUTHORIZATION] = permissions;
-                    req[constants.reqParams.PROP_AUTHORIZATION_TABLE] = _convertPermsTable(permissions);
+                    req[constants.reqParams.PROP_AUTHORIZATION_TABLE] = convertPermsTable(permissions);
 
                     next();
                 }
@@ -131,6 +131,8 @@ module.exports = function(logger, authBusiness){
         };
 
     return {
-        adminTokenAuth : adminTokenAuth
+        adminTokenAuth : adminTokenAuth,
+        convertPermsTable   : convertPermsTable
+
     }
 };

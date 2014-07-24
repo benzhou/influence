@@ -22,21 +22,21 @@ describe('AuthBusiness', function(){
         it('Admin login pass no password, should be rejected', function(){
             var
                 accountBusiness = {
-                    findAdminAccountByTenantAndUsername: function(){}
+                    findAdminAccountByUsername: function(){}
                 },
                 authDataHandler = {
                     createAdminAuthToken : function () {}
                 },
-                findAdminAccountByTenantAndUsernameStub = sinon.stub(accountBusiness, "findAdminAccountByTenantAndUsername"),
+                findAdminAccountByUsernameStub = sinon.stub(accountBusiness, "findAdminAccountByUsername"),
                 createAdminLoginTokenStub = sinon.stub(authDataHandler, "createAdminAuthToken");
 
-            findAdminAccountByTenantAndUsernameStub.withArgs(1, 'fakeUsername').returns(true);
+            findAdminAccountByUsernameStub.returns(true);
             createAdminLoginTokenStub.returns({
                 token : 'test'
             });
 
             var authBusiness = require('../business/authBusiness')(helpers, util, console, appConfig.app, accountBusiness, authDataHandler);
-            var promise = authBusiness.adminAccountLogin('fakeAppKey', 1, 'fakeUsername');
+            var promise = authBusiness.adminAccountLogin('fakeAppKey', 'fakeUsername');
 
             return promise.should.eventually.be.rejected;
         }),
@@ -44,7 +44,7 @@ describe('AuthBusiness', function(){
         it('Admin login do not pass required parameters, should be rejected', function(){
             var
                 accountBusiness = {
-                    findAdminAccountByTenantAndUsername: function(){}
+                    findAdminAccountByUsername: function(){}
                 },
                 authDataHandler = {
                     createAdminAuthToken : function () {}
@@ -58,12 +58,12 @@ describe('AuthBusiness', function(){
         it('Admin login pass case: ', function(done){
             var
                 accountBusiness = {
-                    findAdminAccountByTenantAndUsername: function(){}
+                    findAdminAccountByUsername: function(){}
                 },
                 authDataHandler = {
                     createAdminAuthToken : function () {}
                 },
-                findAdminAccountByTenantAndUsernameStub = sinon.stub(accountBusiness, "findAdminAccountByTenantAndUsername"),
+                findAdminAccountByUsernameStub = sinon.stub(accountBusiness, "findAdminAccountByUsername"),
                 createAdminAuthTokenStub = sinon.stub(authDataHandler, "createAdminAuthToken"),
                 df1 = Q.defer(),
                 df2 = Q.defer(),
@@ -85,11 +85,11 @@ describe('AuthBusiness', function(){
                 token : 'test'
             });
 
-            findAdminAccountByTenantAndUsernameStub.returns(df1.promise);
+            findAdminAccountByUsernameStub.returns(df1.promise);
             createAdminAuthTokenStub.returns(df2.promise);
 
             var authBusiness = require('../business/authBusiness')( helpers, util, console, appConfig.app, accountBusiness, authDataHandler);
-            var promise = authBusiness.adminAccountLogin(appKey, tenantId, username, password);
+            var promise = authBusiness.adminAccountLogin(appKey, username, password);
 
             Q.all([
                 promise.should.eventually.have.property('token')
