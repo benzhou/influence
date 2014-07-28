@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="influenceApp">
 <head>
     <meta charset="utf-8" />
     <title>Influence - Give your feedback to any Business</title>
@@ -11,9 +11,38 @@
     <link rel="stylesheet" href="stylesheets/style.css">
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.js"></script>
-    <script type="application/javascript" src="javascripts/controllers/mainController.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-resource.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-cookies.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-route.min.js"></script>
+
+    <script type="application/javascript" src="/scripts/common/configGen.js"></script>
+
+    <script type="application/javascript" src="/scripts/controllers/mainController.js"></script>
+    <script type="application/javascript" src="/scripts/app.js"></script>
+
+    <script type="application/javascript">
+        configGen(
+                'influenceApp.config',
+                'influenceAppConfig',
+                {
+                    DEBUG: false,
+                    API : {
+                        locationApi : {
+                            cId             : "{{config.locationApi.clientId}}",
+                            authTokenUrl    : "{{config.locationApi.authTokenUrl}}",
+                            authorizeUrl    : "{{config.locationApi.authorizeUrl}}"
+                        },
+                        URL : "http://127.0.0.1:8888/api",
+                        METHODS : {
+
+                        },
+                        KEY : '{{config.app.key}}'
+                    }
+                }
+        );
+    </script>
 </head>
-<body ng-controller="influenceController">
+<body>
     <div class="site-wrapper">
         <div class="site-wrapper-inner">
             <div class="cover-container">
@@ -27,24 +56,7 @@
                         </ul>
                     </div>
                 </div>
-
-                <div class="inner cover">
-                    <form class="form-horizontal" role="form">
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <label>
-                                    What's in your mind?
-                                </label>
-                                <textarea class="form-control input-lg" rows="6"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <a href="#" class="btn btn-lg btn-default btn-block">Send In</a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                <content ng-view></content>
 
                 <div class="mastfoot">
                     <div class="inner">

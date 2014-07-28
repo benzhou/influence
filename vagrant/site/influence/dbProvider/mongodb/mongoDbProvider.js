@@ -367,16 +367,14 @@ module.exports = function(config, MongoDb, logger){
                 opts.sort = sort;
             }
 
-            if(filter.affiliateId){
-                filter.affiliateId = new MongoDb.ObjectID(filter.affiliateId);
-            }
+            _convertFilterObjectId(filter, "affiliateId");
 
             logger.log("MongoDbProvider.js loadPosts");
             logger.log(filter);
             logger.log(sort);
             logger.log("skip %s, limits:%s", skip, limits);
 
-            return  _find(collections.Affiliates, filter, opts);
+            return  _find(collections.Posts, filter, opts);
         },
 
         //Private Helper methods

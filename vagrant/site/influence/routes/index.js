@@ -1,16 +1,10 @@
-module.exports = function(router){
+module.exports = function(router, logger, clientController){
 
-    router.get('/', function(req, res) {
-        res.render('index', {
-            showTitle: true,
-
-            helpers: {
-                foo: function(){
-                    return 'Hello Ben';
-                }
-            }
-        });
-    });
+    router.get('/',
+        function(req, res, next) {
+            clientController.getIndexAction(req, res, next);
+        }
+    );
 
     return router;
 };

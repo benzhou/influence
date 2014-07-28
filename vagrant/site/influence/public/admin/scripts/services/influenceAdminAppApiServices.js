@@ -63,6 +63,20 @@
                 }
             );
         }
+    ]).factory('postService', [
+        '$resource',
+        'influenceAdminAppConfig'
+        ,
+        function($resource, influenceAdminAppConfig){
+            var apiConfig = influenceAdminAppConfig.API;
+            return $resource(
+                [apiConfig.URL, "/post/:postId"].join(''), //endpoint
+                {},
+                {
+                    query               : { method: "GET", url : [apiConfig.URL, "/posts/:affiliateId"].join('')}
+                }
+            );
+        }
     ]).factory('actionsService', [
         '$resource',
         'influenceAdminAppConfig'

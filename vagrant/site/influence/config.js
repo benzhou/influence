@@ -10,6 +10,18 @@ module.exports = function(){
                 tokenExpirationAddOn : 86400 //in seconds, 24hrs
             }
         },
+        client : {
+            locationApi:{
+                clientId        : "CR2OVYGBBKADU1OXVMWSXKNYKDICACCE0KCY2QWJXSFRWSPZ",
+                authTokenUrl    : "https://foursquare.com/oauth2/access_token",
+                authorizeUrl    : "https://foursquare.com/oauth2/authorize"
+            },
+            app : {
+                //Office
+                key      : "NTlmMTdhOGUtNTEyNS00NTMxLWE3MTYtY2NjNjVjZmYzMjRkOjcyYWMxMDg0LTljNTItNDAwMi04NWM0LWVlZmEyYTYyMzNhMw,,",
+                secret   : "ZWNkMjhjMzctYTRkYi00YmE3LWJhYmUtZjUwN2Q0ZTA1Y2Q4OjY2MGMxNTA3LWQxYjEtNDYxYi05ZTAyLTUxMTkwMTA3MTg1Ng",
+            }
+        },
         admin : {
             app : {
                 //Office

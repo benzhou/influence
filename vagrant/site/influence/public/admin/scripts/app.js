@@ -30,7 +30,7 @@
                 }).
                 when('/home/posts', {
                     templateUrl: '/admin/scripts/views/partials/posts.html',
-                    controller: 'influenceAdminHomeCtrl'
+                    controller: 'influenceAdminPostsCtrl'
                 }).
                 when('/home/config/admins', {
                     templateUrl: '/admin/scripts/views/partials/adminAccounts.html',

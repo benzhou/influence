@@ -4,6 +4,26 @@
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <h1 class="page-header">Posts</h1>
 
+        <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <label for="tenant">Tenant:</label>
+                <select id="tenant" ng-model="selectedTenant" ng-change="onChangeTenant()" ng-options="tenant.name for tenant in tenants"></select>
+            </div>
+        </div>
 
+        <div class="row placeholders">
+            <div class="col-xs-6 col-sm-3 placeholder">
+                <label for="affiliate">Affiliate:</label>
+                <select id="affiliate" ng-model="selectedAffiliate" ng-change="onChangeAffiliate()" ng-options="affiliate.name for affiliate in affiliates"></select>
+            </div>
+        </div>
+
+        <div class="row placeholders">
+            <ul>
+                <li ng-repeat="post in posts">
+                    <div>{{post.content}}</div>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

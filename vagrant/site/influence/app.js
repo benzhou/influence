@@ -55,25 +55,30 @@ var routes              = {},
     authDataHandler     = require('./dataHandler/authDataHandler')(influenceDbProvider),
     tenantsDataHandler  = require('./dataHandler/tenantsDataHandler')(influenceDbProvider),
     apiLogDataHandler   = require('./dataHandler/apiLogDataHandler')(influenceDbProvider),
+    postDataHandler     = require('./dataHandler/postDataHandler')(influenceDbProvider),
 
     authorizationHelper = require("./business/authorizationHelper"),
     tenantsBusiness     = require('./business/tenantsBusiness')(helpers, influenceLogger, tenantsDataHandler),
     accountBusiness     = require('./business/accountBusiness')(helpers, util, influenceLogger, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(helpers, util, influenceLogger, appConfig.app, accountBusiness, authDataHandler),
     apiLogBusiness      = require('./business/apiLogBusiness')(influenceLogger, apiLogDataHandler),
+    postBusiness        = require('./business/postBusiness')(helpers, influenceLogger, postDataHandler),
 
 
-    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper),
+    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness),
 
     adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(influenceLogger, authBusiness),
     apiLogMiddleware                = require('./middleware/apiLogMiddleware')(influenceLogger, apiLogBusiness),
 
     //Admins
-    adminController       =  require('./controllers/admin/adminController')(influenceLogger, appConfig.admin);
+    adminController       = require('./controllers/admin/adminController')(influenceLogger, appConfig.admin),
+    //Client
+    clientController      = require('./controllers/indexController')(influenceLogger, appConfig.client);
 
 //Setup routes
-routes.site = require('./routes/index')(express.Router());
+routes.site = require('./routes/index')(express.Router,influenceLogger, clientController);
 routes.api = require('./routes/api')(express.Router(), influenceLogger, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
+routes.apiAdmin = require('./routes/apiAdmin')(express.Router(), influenceLogger, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
 routes.admin = require('./routes/admin')(express.Router(), influenceLogger, adminController);
 
 
@@ -81,6 +86,7 @@ app.use('/', routes.site);
 app.use('/admin', routes.admin);
 
 app.use('/api', routes.api);
+app.use('/api/admin', routes.apiAdmin);
 
 //catch any 404 routes for api only
 app.use('/api', function(req, res, next){

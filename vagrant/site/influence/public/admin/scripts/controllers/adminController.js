@@ -1035,6 +1035,319 @@
 
         })
 
+        //Affiliates
+        .controller('influenceAdminPostsCtrl', function(
+            $scope, $rootScope, $location, $log, $q,
+            influenceAdminAppConstants, influenceAdminAppSession,
+            tenantsService, affiliatesService, postService){
+            $log.log("influenceAdminPostsCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var
+                loadTenants = function(){
+                    var df = $q.defer();
+
+                    tenantsService.queryConfigurable({configOptions: "post",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                        function(result){
+                            $log.log('influenceAdminPostsCtrl loadTenants fulfilled');
+
+                            $scope.tenants = result.data.tenants;
+
+                            $scope.selectedAffiliate = null;
+                            if(result.data.tenants.length > 0){
+                                $scope.selectedTenant = result.data.tenants[0];
+                            }
+
+                            df.resolve(result);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminPostsCtrl loadTenants rejected');
+                            $log.log(err);
+                            df.reject(err);
+                        }
+                    );
+
+                    return df.promise;
+                },
+
+                loadAffiliates = function(tenantId){
+                    var df = $q.defer();
+
+                    affiliatesService.queryConfigurable(
+                        {
+                            configOptions: "post",
+                            numberOfPage:1000,
+                            pageNumber:1,
+                            tenantId : tenantId,
+                            token: influenceAdminAppSession.token.token
+                        }
+                    ).$promise.then(function(result){
+                            $log.log('influenceAdminPostsCtrl loadAffiliates fulfilled!');
+                            $log.log(result);
+
+                            $scope.affiliates = result.data.affiliates;
+
+                            if(result.data.affiliates.length > 0){
+                                $scope.selectedAffiliate = result.data.affiliates[0];
+                            }
+
+                            df.resolve(result);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminPostsCtrl loadAffiliates rejected!');
+                            $log.log(err);
+
+                            df.reject(err);
+                        }
+                    ).finally();
+
+                    return df.promise;
+                },
+
+                loadPosts = function(affiliateId, numberOfPage, pageNumber){
+                    var df = $q.defer();
+
+                    postService.query(
+                        {
+                            numberOfPage:numberOfPage,
+                            pageNumber:pageNumber,
+                            affiliateId : affiliateId,
+                            token: influenceAdminAppSession.token.token
+                        }
+                    ).$promise.then(function(result){
+                            $log.log('influenceAdminPostsCtrl loadPosts fulfilled!');
+                            $log.log(result);
+
+                            $scope.posts = result.data.posts;
+                            df.resolve(result);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminPostsCtrl loadPosts rejected!');
+                            $log.log(err);
+
+                            df.reject(err);
+                        }
+                    ).finally();
+
+                    return df.promise;
+                },
+
+                refreshTenant = function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                    loadTenants().then(
+                        function(result){
+                            //$log.log('influenceAdminPostsCtrl refreshTenant : loadTenants fulfilled!');
+                            //.log(result);
+                            if(result.data.tenants.length === 0)return;
+
+                            return loadAffiliates($scope.selectedTenant.id);
+                        }
+                    ).then(
+                        function(result){
+                            //$log.log('influenceAdminPostsCtrl refreshTenant : loadAffiliates fulfilled!');
+                            //$log.log(result);
+                            if(result.data.affiliates.length === 0)return;
+
+                            return loadPosts($scope.selectedAffiliate.id, $scope.numberOfPage,$scope.pageNumber);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminPostsCtrl refreshTenant caught an error!');
+
+                            $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                        }
+                    ).finally(
+                        function(){
+                            $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                        });
+                },
+
+                refreshAffiliate = function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                    loadAffiliates($scope.selectedTenant.id).then(
+                        function(result){
+                            if(result.data.affiliates.length === 0)return;
+
+                            return loadPosts($scope.selectedAffiliate.id, $scope.numberOfPage,$scope.pageNumber);
+                        }
+                    ).catch(
+                        function(err){
+                            $log.log('influenceAdminPostsCtrl refreshAffiliate caught an error!');
+
+                            $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                        }
+                    ).finally(
+                        function(){
+                            $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                        });
+                },
+
+                refreshPosts = function(){
+                    $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                    loadPosts($scope.selectedAffiliate.id, $scope.numberOfPage,$scope.pageNumber).catch(
+                        function(err){
+                            $log.log('influenceAdminPostsCtrl refreshPosts caught an error!');
+
+                            $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                        }
+                    ).finally(
+                        function(){
+                            $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                        });
+                };
+
+            $scope.numberOfPage = 10;
+            $scope.pageNumber = 1;
+
+            $scope.nextPage = function(){
+                refreshPosts();
+            };
+
+            $scope.onChangeTenant = function(){
+                $log.log("changed tenant:");
+                $log.log($scope.selectedTenant);
+                refreshTenant();
+            };
+
+            $scope.onChangeAffiliate = function(){
+                $log.log("changed tenant:");
+                $log.log($scope.selectedTenant);
+                $log.log($scope.selectedAffiliate);
+                refreshAffiliate();
+            }
+
+            //initial load
+            refreshTenant();
+
+        })
+        .controller('influenceAdminPostCtrl', function(
+            $scope, $rootScope, $location, $log, $routeParams,
+            influenceAdminAppConstants, influenceAdminAppSession, dirtyCheckerService,
+            tenantsService, affiliatesService){
+            $log.log("influenceAdminAffiliateCtrl called!");
+
+            //If user not authenticated, then go to home/index view directly
+            if(!influenceAdminAppSession.isAuthenticated()){
+                $location.path('/');
+                return;
+            }
+
+            var affiliateId = $routeParams.affiliateId,
+                originalAffiliate;
+            $log.log('influenceAdminAffiliateCtrl $routeParams');
+            $log.log($routeParams);
+
+            //$scope.selectedTenant = {};
+
+            //Code for when load the affiliate view
+            if(!affiliateId){
+                //When no passed-in affiliateId, assume this is an create
+                $scope.affiliate = {};
+
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                tenantsService.queryConfigurable({configOptions: "affiliate",numberOfPage:1000,pageNumber:1,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(docs){
+                        $log.log('influenceAdminAffiliateCtrl tenantsService.query fulfilled');
+                        $log.log(docs);
+                        $scope.tenants = docs.data.tenants;
+
+                        //$scope.selectedTenant.tenant = $scope.tenants[0];
+                        $scope.affiliate.tenantId = $scope.tenants[0].id;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAffiliateCtrl tenantsService.query rejected');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+
+            }else{
+                //When has passed in affiliateId, assume this is an update
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                affiliatesService.get({affiliateId:affiliateId,token: influenceAdminAppSession.token.token}).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminAffiliateCtrl get fulfilled!');
+                        $log.log(result.data.affiliate);
+                        $scope.affiliate = result.data.affiliate;
+                        originalAffiliate = angular.copy(result.data.affiliate);
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAffiliateCtrl get rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            }
+
+            //Handler when user update or create affiliate
+            $scope.createUpdateAffiliate = function(){
+                $rootScope.$emit(influenceAdminAppConstants.EVENTS.SHOW_LOADING_MODAL);
+                $log.log('influenceAdminAffiliateCtrl createUpdateAffiliate.');
+
+                var params = {
+                        token: influenceAdminAppSession.token.token
+                    },
+                    postData = {};
+
+                //Edit
+                if($scope.affiliate && $scope.affiliate.id){
+                    params.affiliateId = $scope.affiliate.id;
+
+                    //Dirty check
+                    postData = dirtyCheckerService.getDirtyProperties(originalAffiliate, $scope.affiliate);
+
+                }else{
+                    //Create
+                    postData.tenantId = $scope.affiliate.tenantId;
+                    postData.name = $scope.affiliate.name;
+                }
+
+                affiliatesService.save(
+                    //params
+                    params,
+                    //Post data
+                    postData
+                ).$promise.then(
+                    function(result){
+                        $log.log('influenceAdminAffiliateCtrl post fulfilled!');
+                        $log.log(result.data.affiliate);
+                        $scope.affiliate = result.data.affiliate;
+                    }
+                ).catch(
+                    function(err){
+                        $log.log('influenceAdminAffiliateCtrl post rejected!');
+                        $log.log(err);
+
+                        $location.path('/error').search({code:err.data.code, msg:err.data.message});
+                    }
+                ).finally(
+                    function(){
+                        $rootScope.$emit(influenceAdminAppConstants.EVENTS.HIDE_LOADING_MODAL);
+                    }
+                );
+            }
+        })
+
         .controller('influenceAdminContactusCtrl', function($scope, $log){
             $log.log("influenceAdminContactusCtrl called!");
 

@@ -5,7 +5,7 @@ var
     errorCodes      = require('../error/errorCodes'),
     constants       = require('../constants/constants');
 
-module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper){
+module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness){
 
     var test = function(req,res,next){
             logger.log("================");
@@ -435,6 +435,9 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                 switch(configOptions.toLowerCase()){
                     case "affiliate":
                         tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.EDIT_AFFILIATE);
+                        break;
+                    case "post":
+                        tenantsAuthorized = authorizationHelper.getTenantsIfHasAffiliateAction(permTable, constants.ACTIONS.VIEW_POST);
                         break;
                     case "admin":
                         tenantsAuthorized = authorizationHelper.getTenantsWithActions(permTable, constants.ACTIONS.EDIT_ADMIN);
@@ -889,6 +892,9 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     case "affiliate":
                         affiliatesAuthorized = authorizationHelper.getAffiliatesWithActions(permTable, constants.ACTIONS.EDIT_AFFILIATE, tenantId);
                         break;
+                    case "post":
+                        affiliatesAuthorized = authorizationHelper.getAffiliatesWithActions(permTable, constants.ACTIONS.VIEW_POST, tenantId);
+                        break;
                     default:
                         affiliatesAuthorized = [];
                         break;
@@ -1069,6 +1075,199 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             );
         },
 
+        //Posts
+        getPosts = function(req,res,next){
+            //TODO request validation
+            //TODO: Added selected fields
+            var affiliateId  = req.params.affiliateId,
+                sortFieldName    = req.query.sfn,
+                sortFieldAscOrDesc = req.query.sad,
+                permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
+                filter = {},
+                sort = {};
+
+            if(sortFieldName){
+                sortFieldAscOrDesc =  sortFieldAscOrDesc == "1"? 1 : -1;
+                sort[sortFieldName] = sortFieldAscOrDesc;
+            }
+
+            Q.when(tenantsBusiness.findAffiliateById(affiliateId)).then(
+                function(affiliate){
+                    logger.log("apiController.js getPosts -> tenantsBusiness.findAffiliateById promise resolved");
+                    logger.log(affiliate);
+
+                    if(!authorizationHelper.hasPermissionForTenantAffiliate(permTable, affiliate.tenantId, affiliateId, constants.ACTIONS.VIEW_POST)){
+                        throw new InfluenceError(errorCodes.C_401_002_019.code);
+                    }
+
+                    filter.affiliateId = affiliateId;
+
+                    return postBusiness.loadPosts(filter, req.query.numberOfPage, req.query.pageNumber, sort);
+                }
+            ).then(
+                function(posts){
+                    logger.log("apiController.js getPosts -> postBusiness.loadPosts promise resolved");
+                    logger.log(posts);
+
+                    var returnPosts = [];
+
+                    posts.forEach(function(item){
+                        returnPosts.push(
+                            {
+                                id          : item._id,
+                                affiliateId : item.affiliateId,
+                                content     : item.content,
+                                createdOn   : item.createdOn,
+                                createdBy   : item.createdBy,
+                                updatedOn   : item.updatedOn,
+                                updatedBy   : item.updatedBy
+                            }
+                        );
+                    });
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            posts : returnPosts
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getPosts caught an error!.");
+                    logger.log(err.stack);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
+        getPost  = function(req,res,next){
+            //TODO request validation
+            var permTable = req[constants.reqParams.PROP_AUTHORIZATION_TABLE],
+                postId = req.params.postId;
+
+            Q.when(postsBusiness.findPostById(postId)).then(
+
+                function(post){
+                    logger.log("apiController.js getPost postsBusiness.findPostById fulfilled.");
+                    logger.log(post);
+
+                    return tenantsBusiness.findAffiliateById(post.affiliateId).then(function(affiliate){
+                        logger.log("apiController.js getPost tenantsBusiness.findAffiliateById fulfilled.");
+                        logger.log(affiliate);
+
+                        if(!authorizationHelper.hasPermissionForTenantAffiliate(permTable, affiliate.tenantId.toString(), affiliate._id.toString(), constants.ACTIONS.VIEW_POST)){
+                            throw new InfluenceError(errorCodes.C_401_002_020.code);
+                        }
+
+                        res.json({
+                            code    : errorCodes.SU_200.code,
+                            message : errorCodes.SU_200.message,
+                            data    : {
+                                post : {
+                                    id          : post._id,
+                                    affiliateId : post.affiliateId,
+                                    content     : post.content,
+                                    createdOn   : post.createdOn,
+                                    createdBy   : post.createdBy,
+                                    updatedOn   : post.updatedOn,
+                                    updatedBy   : post.updatedBy
+                                }
+                            }
+                        });
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getPost caught an error!.");
+                    logger.log(err.stack);
+                    logger.log(err.stack);
+
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    next();
+                }
+            );
+        },
+        postPostConsumer = function(req,res,next){
+            //TODO request validation
+
+            var post = req.body,
+                postId = req.params.postId,
+                userToken = req.query.token;
+
+            Q.when((function(){
+                if(postId){
+                    if(!userToken){
+                        throw new InfluenceError(errorCodes.C_401_002_021.code);
+                    }
+
+                    return postBusiness.updatePost(postId, post.content, userToken);
+                }else{
+                    return postBusiness.createPost(post.affiliateId, post.content,userToken);
+                }
+            })()).then(
+                function(newPost){
+                    logger.log("apiController.js postPostConsumer create or update promise is fulfilled!");
+                    logger.log(newPost);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            post : {
+                                id          : newPost._id,
+                                affiliateId : newPost.affiliateId,
+                                content     : newPost.content,
+                                createdOn   : newPost.createdOn,
+                                createdBy   : newPost.createdBy,
+                                updatedOn   : newPost.updatedOn,
+                                updatedBy   : newPost.updatedBy
+                            }
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js postPostConsumer create or update caught an error!");
+                    logger.log(err.stack);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }).done(
+                function(){
+                    logger.log("apiController.js postPostConsumer: done");
+                    next();
+                }
+            );
+        },
+
         //App Account
         getAppAccount = function(req,res,next){
             //TODO request validation
@@ -1190,6 +1389,11 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         getAffiliates       : getAffiliates,
         getAffiliate        : getAffiliate,
         postAffiliate       : postAffiliate,
+
+        //Posts
+        getPosts            : getPosts,
+        getPost             : getPost,
+        postPostConsumer    : postPostConsumer,
 
         getAppAccount       : getAppAccount,
         postAppAccount      : postAppAccount

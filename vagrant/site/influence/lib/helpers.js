@@ -371,6 +371,9 @@ module.exports = function(plain){
             }
 
             return cleanedSort
+        },
+        isEmptyObject = function(obj) {
+            return !Object.keys(obj).length;
         };
 
     return {
@@ -387,7 +390,8 @@ module.exports = function(plain){
         deepEqual                       : deepEqual,
         deepEqualFast                   : deepEqualFast,
         clone                           : clone,
-        isFunction                      : isFunction
+        isFunction                      : isFunction,
+        isEmptyObject                   : isEmptyObject
     }
 }();
 

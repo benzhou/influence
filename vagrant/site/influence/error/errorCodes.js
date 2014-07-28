@@ -49,8 +49,12 @@ module.exports = function(){
         //apiController.js postAffiliate
         C_401_002_017       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002017, desc : "Unauthorized" },
         C_401_002_018       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002018, desc : "Unauthorized" },
-
-
+        //apiController.js getPosts
+        C_401_002_019       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002019, desc : "Unauthorized" },
+        //apiController.js getPost
+        C_401_002_020       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002020, desc : "Unauthorized" },
+        //apiController.js postPostConsumer
+        C_401_002_021       : { type : CLIENT_ERROR, httpStatus: 401, code : 401002021, desc : "Unauthorized" },
 
 
         C_404_001_001       : { type : CLIENT_ERROR, httpStatus: 404, code : 404001001, desc : "End Point not found" },
@@ -165,8 +169,18 @@ module.exports = function(){
         C_400_025_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400025002, desc : "Email doesn't exist in Tenant" },
 
         //accountBusiness.js  findAdminAccountByUsername
-        C_400_026_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400026001, desc : "Missing required parameters" }
+        C_400_026_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400026001, desc : "Missing required parameters" },
 
+        //postBusiness.js  findPostById
+        C_400_027_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400027001, desc : "Missing required parameters" },
+        C_400_027_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400027002, desc : "Invalid Post ID!" },
+
+        //postBusiness.js  createPost
+        C_400_028_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400028001, desc : "Missing required parameters" },
+        C_400_028_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400028002, desc : "Invalid Post ID!" },
+
+        //postBusiness.js  updatePost
+        C_400_029_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400029001, desc : "Missing required parameters" },
     };
 }();
 

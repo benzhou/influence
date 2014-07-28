@@ -18,5 +18,6 @@ db.Actions.insert({name : "View Affiliate",             key:"VIEW_AFFILIATE",   
 db.Actions.insert({name : "Edit Affiliate",             key:"EDIT_AFFILIATE",               createdOn: new Date()});
 db.Actions.insert({name : "View ACTIONS",               key:"VIEW_ACTIONS",                 createdOn: new Date()});
 db.Actions.insert({name : "EDIT ACTIONS",               key:"EDIT_ACTIONS",                 createdOn: new Date()});
+db.Actions.insert({name : "View POST",                  key:"VIEW_POST",                 createdOn: new Date()});
 print('Actions all inserted');
 print('==============');
