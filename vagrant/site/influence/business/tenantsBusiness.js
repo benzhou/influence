@@ -357,7 +357,7 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                 pageNumber = 1;
             }
 
-            var cleanedFilter = helpers.cleanSearchFilter({tenantId : 1, affiliateId : 1}, filter),
+            var cleanedFilter = helpers.cleanSearchFilter({tenantId : 1, affiliateId : 1, venueId : 1}, filter),
                 cleanedSort     = helpers.cleanSort({tenantId : 1, name : 1}, sort);
 
             Q.when(tenantsDataHandler.loadAffiliates(cleanedFilter, numberOfPage, pageNumber, cleanedSort)).then(

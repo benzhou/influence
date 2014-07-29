@@ -16,11 +16,38 @@ module.exports = function(){
             authTokenUrl    : "https://foursquare.com/oauth2/access_token",
             authorizeUrl    : "https://foursquare.com/oauth2/authorize",
             URL             : "https://api.foursquare.com/v2",
-            method          : {
-                searchVenue : "/venues/search"
+            methods         : {
+                searchVenue : {
+                    endPoint    : "/venues/search",
+                    limit       : 5,
+                    radius      : 30,
+                    categoryId  : "4d4b7105d754a06374d81259"
+                }
             },
+            version         : "20140701",
             timeoutMS       : 10000
         },
+        client : {
+            locationApi:{
+                clientId        : "CR2OVYGBBKADU1OXVMWSXKNYKDICACCE0KCY2QWJXSFRWSPZ",
+                authTokenUrl    : "https://foursquare.com/oauth2/access_token",
+                authorizeUrl    : "https://foursquare.com/oauth2/authorize"
+            },
+            app : {
+                //Office
+                key      : "NTlmMTdhOGUtNTEyNS00NTMxLWE3MTYtY2NjNjVjZmYzMjRkOjcyYWMxMDg0LTljNTItNDAwMi04NWM0LWVlZmEyYTYyMzNhMw,,",
+                secret   : "ZWNkMjhjMzctYTRkYi00YmE3LWJhYmUtZjUwN2Q0ZTA1Y2Q4OjY2MGMxNTA3LWQxYjEtNDYxYi05ZTAyLTUxMTkwMTA3MTg1Ng",
+            }
+        },
+        admin : {
+            app : {
+                //Office
+                key: "NTlmMTdhOGUtNTEyNS00NTMxLWE3MTYtY2NjNjVjZmYzMjRkOjcyYWMxMDg0LTljNTItNDAwMi04NWM0LWVlZmEyYTYyMzNhMw,,",
+                secret: "ZWNkMjhjMzctYTRkYi00YmE3LWJhYmUtZjUwN2Q0ZTA1Y2Q4OjY2MGMxNTA3LWQxYjEtNDYxYi05ZTAyLTUxMTkwMTA3MTg1Ng",
+
+                tenantId: "53bc05cd7f7847e21faab5d1"
+            }
+        }/*
         client : {
             locationApi:{
                 clientId        : "CR2OVYGBBKADU1OXVMWSXKNYKDICACCE0KCY2QWJXSFRWSPZ",
@@ -42,31 +69,8 @@ module.exports = function(){
                 tenantId : '53b374ba0d45fa990c8dc866'
 
             }
-        }
-/*
+        }*/
 
-        client : {
-            locationApi:{
-                clientId        : "CR2OVYGBBKADU1OXVMWSXKNYKDICACCE0KCY2QWJXSFRWSPZ",
-                authTokenUrl    : "https://foursquare.com/oauth2/access_token",
-                authorizeUrl    : "https://foursquare.com/oauth2/authorize"
-            },
-            app : {
-                //Office
-                key      : "NTlmMTdhOGUtNTEyNS00NTMxLWE3MTYtY2NjNjVjZmYzMjRkOjcyYWMxMDg0LTljNTItNDAwMi04NWM0LWVlZmEyYTYyMzNhMw,,",
-                secret   : "ZWNkMjhjMzctYTRkYi00YmE3LWJhYmUtZjUwN2Q0ZTA1Y2Q4OjY2MGMxNTA3LWQxYjEtNDYxYi05ZTAyLTUxMTkwMTA3MTg1Ng",
-            }
-        },
-        admin : {
-            app : {
-                //Office
-                key: "NTlmMTdhOGUtNTEyNS00NTMxLWE3MTYtY2NjNjVjZmYzMjRkOjcyYWMxMDg0LTljNTItNDAwMi04NWM0LWVlZmEyYTYyMzNhMw,,",
-                secret: "ZWNkMjhjMzctYTRkYi00YmE3LWJhYmUtZjUwN2Q0ZTA1Y2Q4OjY2MGMxNTA3LWQxYjEtNDYxYi05ZTAyLTUxMTkwMTA3MTg1Ng",
-
-                tenantId: "53bc05cd7f7847e21faab5d1"
-            }
-        }
-*/
 
 
     };

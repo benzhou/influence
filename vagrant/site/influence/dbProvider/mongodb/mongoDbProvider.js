@@ -294,6 +294,16 @@ module.exports = function(config, MongoDb, logger){
             _convertFilterObjectId(filter, "tenantId");
             _convertFilterObjectId(filter, "affiliateId", "_id");
 
+            if(filter.venueId){
+                filter["externalLink.venueId"] = {"$in": filter.venueId};
+                delete filter.venueId;
+            }
+
+            if(filter.exLinkType){
+                filter["externalLink.externalLinkType"] = filter.exLinkType.toString();
+                delete filter.exLinkType;
+            }
+
             logger.log("MongoDbProvider.js loadAffiliates");
             logger.log(filter);
             logger.log(sort);
@@ -339,10 +349,20 @@ module.exports = function(config, MongoDb, logger){
 
         //Posts
         createPost = function(postDo){
+            logger.log("mongoDbProvider.js createPost");
+            logger.log(postDo);
+            if(!(postDo.affiliateId instanceof MongoDb.ObjectID)){
+                postDo.affiliateId = new MongoDb.ObjectID(postDo.affiliateId);
+            }
+            logger.log(postDo);
+
             return _insertNew(collections.Posts, postDo);
         },
         updatePost = function(postId, updateDo){
-            return _upsertByMatch(collections.Posts, {}, {_id : new MongoDb.ObjectID(postId)}, {$set: updateDo});
+            if(!(postId instanceof MongoDb.ObjectID)){
+                postId = new MongoDb.ObjectID(postId);
+            }
+            return _upsertByMatch(collections.Posts, {}, {_id : postId}, {$set: updateDo});
         },
         findPostById = function(postId){
             if(!(postId instanceof MongoDb.ObjectID)){

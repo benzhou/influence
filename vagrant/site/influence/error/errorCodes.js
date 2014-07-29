@@ -181,6 +181,11 @@ module.exports = function(){
 
         //postBusiness.js  updatePost
         C_400_029_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400029001, desc : "Missing required parameters" },
+
+        //locationApiBusiness.js  searchLocationByCoordinates
+        C_400_030_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400030001, desc : "Missing required parameters" },
+        C_400_030_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400030002, desc : "Not able to retrieve venue data" },
+        C_400_030_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400030003, desc : "Missing required parameters" }
     };
 }();
 

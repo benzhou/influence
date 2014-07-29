@@ -5,7 +5,7 @@ var
     errorCodes      = require('../error/errorCodes'),
     constants       = require('../constants/constants');
 
-module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness){
+module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness, locationApiBusiness){
 
     var test = function(req,res,next){
             logger.log("================");
@@ -1360,8 +1360,53 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
                     next();
                 }
             );
-        };
+        },
 
+
+        /************************
+         Client API
+        *************************/
+        //location Api
+        getSearchVenue = function(req, res, next){
+            var ll = req.query.ll
+                llArray = ll.split(','),
+                lan = llArray[0] || null,
+                long = llArray[1] || null;
+
+            Q.when(locationApiBusiness.searchLocationByCoordinates(lan, long)).then(
+
+                function(venues){
+                    logger.log("apiController.js getSearchVenue locationApiBusiness.searchVenue fulfilled!");
+                    logger.log(venues);
+
+                    res.json({
+                        code    : errorCodes.SU_200.code,
+                        message : errorCodes.SU_200.message,
+                        data    : {
+                            venues : venues
+                        }
+                    });
+                }
+            ).catch(
+                function(err){
+                    logger.log("apiController.js getSearchVenue locationApiBusiness.searchVenue caught an error!");
+                    logger.log(err.stack);
+                    var resObj = err instanceof InfluenceError ? err : new InfluenceError(err);
+                    res.json(
+                        resObj.httpStatus,
+                        {
+                            code : resObj.code,
+                            message : resObj.message
+                        }
+                    );
+                }
+            ).done(
+                function(){
+                    logger.log("apiController.js getSearchVenue locationApiBusiness.searchVenue done.");
+                    next();
+                }
+            );
+        };
     return {
         test : test,
         getAdminAccounts    : getAdminAccounts,
@@ -1396,7 +1441,10 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
         postPostConsumer    : postPostConsumer,
 
         getAppAccount       : getAppAccount,
-        postAppAccount      : postAppAccount
+        postAppAccount      : postAppAccount,
+
+        //Venue
+        getSearchVenue      : getSearchVenue
     };
 };
 

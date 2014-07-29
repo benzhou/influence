@@ -131,5 +131,47 @@ module.exports = function(router, logger, adminAuthenticationMiddleware, apiLogM
         return apiController.getAdminAccounts(req, res, next);
     });
 
+
+    router.get(
+        '/searchVenue',
+        function(req, res, next) {
+            try{
+                apiController.getSearchVenue(req,res,next);
+            }catch(e){
+                logger.log(e.stack);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
+        },
+        apiLogMiddleware.apiLogger
+    );
+    router.post(
+        '/post/:postId?',
+        function(req, res, next) {
+            try{
+                apiController.postPostConsumer(req,res,next);
+            }catch(e){
+                logger.log(e.stack);
+                var resObj = e instanceof InfluenceError ? e : new InfluenceError(e);
+                res.json(
+                    resObj.httpStatus,
+                    {
+                        code : resObj.code,
+                        message : resObj.message
+                    }
+                );
+                next();
+            }
+        },
+        apiLogMiddleware.apiLogger
+    );
+
     return router;
 };

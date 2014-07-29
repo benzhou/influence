@@ -1214,14 +1214,14 @@
             $scope.onChangeTenant = function(){
                 $log.log("changed tenant:");
                 $log.log($scope.selectedTenant);
-                refreshTenant();
+                refreshAffiliate();
             };
 
             $scope.onChangeAffiliate = function(){
                 $log.log("changed tenant:");
                 $log.log($scope.selectedTenant);
                 $log.log($scope.selectedAffiliate);
-                refreshAffiliate();
+                refreshPosts();
             }
 
             //initial load

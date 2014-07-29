@@ -11,6 +11,9 @@ module.exports = function(){
                 ACTIVE_ONLY : "ao"
             }
         },
+        AFFILIATE_EX_LINK_TYPE : {
+            FOURSQUARE : "FOURSQUARE"
+        },
         ACTIONS : {
             VIEW_ADMIN                  : "VIEW_ADMIN",
             EDIT_ADMIN                  : "EDIT_ADMIN",

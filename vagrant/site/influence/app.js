@@ -8,6 +8,7 @@ var mongoDb = require('mongodb');
 var Q = require("q");
 var util = require("util");
 var crypto = require('crypto');
+var request = require('request');
 
 
 var exphbs  = require('express3-handlebars');
@@ -63,9 +64,10 @@ var routes              = {},
     authBusiness        = require('./business/authBusiness')(helpers, util, influenceLogger, appConfig.app, accountBusiness, authDataHandler),
     apiLogBusiness      = require('./business/apiLogBusiness')(influenceLogger, apiLogDataHandler),
     postBusiness        = require('./business/postBusiness')(helpers, influenceLogger, postDataHandler),
+    locationApiBusiness = require('./business/locationApiBusiness')(helpers, influenceLogger, appConfig.locationApi, tenantsBusiness, request),
 
 
-    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness),
+    apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness, locationApiBusiness),
 
     adminAuthenticationMiddleware   = require('./middleware/adminAuthenticationMiddleware')(influenceLogger, authBusiness),
     apiLogMiddleware                = require('./middleware/apiLogMiddleware')(influenceLogger, apiLogBusiness),
