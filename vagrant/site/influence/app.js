@@ -76,7 +76,7 @@ var routes              = {},
     clientController      = require('./controllers/indexController')(influenceLogger, appConfig.client);
 
 //Setup routes
-routes.site = require('./routes/index')(express.Router,influenceLogger, clientController);
+routes.site = require('./routes/index')(express.Router(),influenceLogger, clientController);
 routes.api = require('./routes/api')(express.Router(), influenceLogger, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
 routes.apiAdmin = require('./routes/apiAdmin')(express.Router(), influenceLogger, adminAuthenticationMiddleware, apiLogMiddleware, apiController);
 routes.admin = require('./routes/admin')(express.Router(), influenceLogger, adminController);

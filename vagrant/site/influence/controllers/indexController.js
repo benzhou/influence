@@ -7,6 +7,11 @@ module.exports = function(logger, config){
                 config: {
                     app : {
                         key : config.app.key
+                    },
+                    locationApi : {
+                        clientId        : config.locationApi.clientId,
+                        authTokenUrl    : config.locationApi.authTokenUrl,
+                        authorizeUrl    : config.locationApi.authorizeUrl
                     }
                 },
                 helpers: {
