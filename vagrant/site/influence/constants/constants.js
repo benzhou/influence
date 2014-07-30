@@ -14,6 +14,9 @@ module.exports = function(){
         AFFILIATE_EX_LINK_TYPE : {
             FOURSQUARE : "FOURSQUARE"
         },
+        SYSTEM_DEFAULTS : {
+          CREATED_BY : "SYSTEM_CREATED_BY"
+        },
         ACTIONS : {
             VIEW_ADMIN                  : "VIEW_ADMIN",
             EDIT_ADMIN                  : "EDIT_ADMIN",

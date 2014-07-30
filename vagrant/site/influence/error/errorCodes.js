@@ -185,7 +185,12 @@ module.exports = function(){
         //locationApiBusiness.js  searchLocationByCoordinates
         C_400_030_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400030001, desc : "Missing required parameters" },
         C_400_030_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400030002, desc : "Not able to retrieve venue data" },
-        C_400_030_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400030003, desc : "Missing required parameters" }
+        C_400_030_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400030003, desc : "Missing required parameters" },
+
+        //locationApiBusiness.js findVenueDetailsById
+        C_400_031_001       : { type : CLIENT_ERROR, httpStatus: 400, code : 400031001, desc : "Missing required parameters" },
+        C_400_031_002       : { type : CLIENT_ERROR, httpStatus: 400, code : 400031002, desc : "Invalid Venue ID" },
+        C_400_031_003       : { type : CLIENT_ERROR, httpStatus: 400, code : 400031003, desc : "Missing required parameters" }
     };
 }();
 

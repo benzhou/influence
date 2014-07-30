@@ -22,6 +22,9 @@ module.exports = function(){
                     limit       : 5,
                     radius      : 30,
                     categoryId  : "4d4b7105d754a06374d81259"
+                },
+                venue       : {
+                    endPoint    : "/venues"
                 }
             },
             version         : "20140701",

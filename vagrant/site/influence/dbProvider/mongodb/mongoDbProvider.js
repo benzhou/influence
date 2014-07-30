@@ -1,7 +1,8 @@
 "use strict";
 
 var Q = require("q"),
-    util = require("util");
+    util = require("util"),
+    constants       = require('../constants/constants');
 
 module.exports = function(config, MongoDb, logger){
 
@@ -133,11 +134,26 @@ module.exports = function(config, MongoDb, logger){
             return  _findOneBy(collections.AdminAccount, {tenantId: tenantId, username : username});
         },
         upsertAdminAccount = function(adminDo){
-            adminDo.tenantId = new MongoDb.ObjectID(adminDo.tenantId);
+            if(adminDo.tenantId && !(adminDo.tenantId instanceof MongoDb.ObjectID)){
+                adminDo.tenantId = new MongoDb.ObjectID(adminDo.tenantId);
+            }
+            if(adminDo.createdBy && !(adminDo.createdBy instanceof MongoDb.ObjectID)){
+                adminDo.createdBy = new MongoDb.ObjectID(adminDo.createdBy);
+            }
+            if(adminDo.updatedBy && !(adminDo.updatedBy instanceof MongoDb.ObjectID)){
+                adminDo.updatedBy = new MongoDb.ObjectID(adminDo.updatedBy);
+            }
+
             return _insertNew(collections.AdminAccount, adminDo);
         },
         updateAdminAccount = function(adminId, updateDo){
-            return _upsertByMatch(collections.AdminAccount, {}, {_id : new MongoDb.ObjectID(adminId)}, {$set: updateDo});
+            if(!(adminId instanceof MongoDb.ObjectID)){
+                adminId = new MongoDb.ObjectID(adminId);
+            }
+            if(updateDo.updatedBy && !(updateDo.updatedBy instanceof MongoDb.ObjectID)){
+                updateDo.updatedBy = new MongoDb.ObjectID(updateDo.updatedBy);
+            }
+            return _upsertByMatch(collections.AdminAccount, {}, {_id : adminId}, {$set: updateDo});
         },
 
         //App Account CURD
@@ -145,6 +161,12 @@ module.exports = function(config, MongoDb, logger){
             return _findOneBy(collections.AppAccount, {appKey : appKey});
         },
         upsertAppAccountByAppkey = function(appDo){
+            if(appDo.createdBy && !(appDo.createdBy instanceof MongoDb.ObjectID)){
+                appDo.createdBy = new MongoDb.ObjectID(appDo.createdBy);
+            }
+            if(appDo.updatedBy && !(appDo.updatedBy instanceof MongoDb.ObjectID)){
+                appDo.updatedBy = new MongoDb.ObjectID(appDo.updatedBy);
+            }
             return _upsertByMatch(collections.AppAccount,{createdOn:1}, {appKey:appDo.appKey}, appDo);
         },
 
@@ -153,6 +175,12 @@ module.exports = function(config, MongoDb, logger){
             return _findOneBy(collections.AdminAuthToken, {token : tokenStr});
         },
         upsertAdminAuthToken = function(token, updateObj){
+            if(updateObj.createdBy && !(updateObj.createdBy instanceof MongoDb.ObjectID)){
+                updateObj.createdBy = new MongoDb.ObjectID(updateObj.createdBy);
+            }
+            if(updateObj.updatedBy && !(updateObj.updatedBy instanceof MongoDb.ObjectID)){
+                updateObj.updatedBy = new MongoDb.ObjectID(updateObj.updatedBy);
+            }
             return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, updateObj || token);
         },
 
@@ -162,15 +190,21 @@ module.exports = function(config, MongoDb, logger){
             return  _findOneBy(collections.AdminAuthorizations, {adminId : adminId});
         },
         createAdminPermissions = function(permission){
-            permission.adminId = new MongoDb.ObjectID(permission.adminId);
+            if(!(permission.adminId instanceof MongoDb.ObjectID)){
+                permission.adminId = new MongoDb.ObjectID(permission.adminId);
+            }
 
             if(permission.tenants && util.isArray(permission.tenants)){
                 for(var tenant in permission.tenants){
-                    tenant.tenantId = new MongoDb.ObjectID(tenant.tenantId);
+                    if(!(tenant.tenantId instanceof MongoDb.ObjectID)){
+                        tenant.tenantId = new MongoDb.ObjectID(tenant.tenantId);
+                    }
 
                     if(tenant.affiliates && util.isArray(tenant.affiliates)){
                         for(var affiliate in tenant.affiliates){
-                            affiliate.affiliateId = new MongoDb.ObjectID(affiliate.affiliateId);
+                            if(!(affiliate.affiliateId instanceof MongoDb.ObjectID)){
+                                affiliate.affiliateId = new MongoDb.ObjectID(affiliate.affiliateId);
+                            }
                         }
                     }
                 }
@@ -229,10 +263,23 @@ module.exports = function(config, MongoDb, logger){
             return  _findOneBy(collections.Tenants, {_id : tenantId});
         },
         upsertTenant = function(tenant){
+            if(tenant.createdBy && !(tenant.createdBy instanceof MongoDb.ObjectID)){
+                tenant.createdBy = new MongoDb.ObjectID(tenant.createdBy);
+            }
+            if(tenant.updatedBy && !(tenant.updatedBy instanceof MongoDb.ObjectID)){
+                tenant.updatedBy = new MongoDb.ObjectID(tenant.updatedBy);
+            }
+
             return _insertNew(collections.Tenants, tenant);
         },
         updateTenant = function(tenantId, updateDo){
-            return _upsertByMatch(collections.Tenants, {}, {_id : new MongoDb.ObjectID(tenantId)}, {$set: updateDo});
+            if(tenantId && !(tenantId instanceof MongoDb.ObjectID)){
+                tenantId = new MongoDb.ObjectID(tenantId);
+            }
+            if(updateDo.updatedBy && !(updateDo.updatedBy instanceof MongoDb.ObjectID)){
+                updateDo.updatedBy = new MongoDb.ObjectID(updateDo.updatedBy);
+            }
+            return _upsertByMatch(collections.Tenants, {}, {_id : tenantId}, {$set: updateDo});
         },
         loadTenants = function(numberOfPage, pageNumber, filter){
             numberOfPage = numberOfPage || 10;
@@ -258,15 +305,31 @@ module.exports = function(config, MongoDb, logger){
 
         //Affiliates
         createAffiliate = function(affiliateDo){
-            affiliateDo.tenantId = new MongoDb.ObjectID(affiliateDo.tenantId);
-            affiliateDo.createdBy = new MongoDb.ObjectID(affiliateDo.createdBy);
-            affiliateDo.updatedBy = new MongoDb.ObjectID(affiliateDo.updatedBy);
+            if(affiliateDo.tenantId && !(affiliateDo.tenantId instanceof MongoDb.ObjectID)){
+                affiliateDo.tenantId = new MongoDb.ObjectID(affiliateDo.tenantId);
+            }
+
+            if(affiliateDo.createdBy && !(affiliateDo.createdBy instanceof MongoDb.ObjectID)){
+                affiliateDo.createdBy = new MongoDb.ObjectID(affiliateDo.createdBy);
+            }
+
+            if(affiliateDo.updatedBy && !(affiliateDo.updatedBy instanceof MongoDb.ObjectID)){
+                affiliateDo.updatedBy = new MongoDb.ObjectID(affiliateDo.updatedBy);
+            }
+
             logger.log("MongoDbProvider.js createAffiliate");
             logger.log(affiliateDo);
             return _insertNew(collections.Affiliates, affiliateDo);
         },
         updateAffiliate = function(affiliateId, updateDo){
-            return _upsertByMatch(collections.Affiliates, {}, {_id : new MongoDb.ObjectID(affiliateId)}, {$set: updateDo});
+            if(affiliateId && !(affiliateId instanceof MongoDb.ObjectID)){
+                affiliateId = new MongoDb.ObjectID(affiliateId);
+            }
+            if(affiliateDo.updatedBy && !(affiliateDo.updatedBy instanceof MongoDb.ObjectID)){
+                affiliateDo.updatedBy = new MongoDb.ObjectID(affiliateDo.updatedBy);
+            }
+
+            return _upsertByMatch(collections.Affiliates, {}, {_id : affiliateId}, {$set: updateDo});
         },
         findAffiliateById = function(affiliateId){
             if(!(affiliateId instanceof MongoDb.ObjectID)){
@@ -314,12 +377,28 @@ module.exports = function(config, MongoDb, logger){
 
         //Actions
         createAction = function(actionDo){
+            if(actionDo.createdBy && !(actionDo.createdBy instanceof MongoDb.ObjectID)){
+                actionDo.createdBy = new MongoDb.ObjectID(actionDo.createdBy);
+            }
+            if(actionDo.updatedBy && !(actionDo.updatedBy instanceof MongoDb.ObjectID)){
+                actionDo.updatedBy = new MongoDb.ObjectID(actionDo.updatedBy);
+            }
+
             return _insertNew(collections.Actions, actionDo);
         },
         updateAction = function(actionId, updateDo){
-            return _upsertByMatch(collections.Actions, {}, {_id : new MongoDb.ObjectID(actionId)}, {$set: updateDo});
+            if(actionId && !(actionId instanceof MongoDb.ObjectID)){
+                actionId = new MongoDb.ObjectID(actionId);
+            }
+            if(updateDo.updatedBy && !(updateDo.updatedBy instanceof MongoDb.ObjectID)){
+                updateDo.updatedBy = new MongoDb.ObjectID(updateDo.updatedBy);
+            }
+            return _upsertByMatch(collections.Actions, {}, {_id : actionId}, {$set: updateDo});
         },
         updateActionByKey = function(actionKey, updateDo){
+            if(updateDo.updatedBy && !(updateDo.updatedBy instanceof MongoDb.ObjectID)){
+                updateDo.updatedBy = new MongoDb.ObjectID(updateDo.updatedBy);
+            }
             return _upsertByMatch(collections.Actions, {}, {key : actionKey}, {$set: updateDo});
         },
         findActionById = function(actionId){
@@ -351,9 +430,18 @@ module.exports = function(config, MongoDb, logger){
         createPost = function(postDo){
             logger.log("mongoDbProvider.js createPost");
             logger.log(postDo);
+            postDo.createdBy = _covertFieldToObjectId(postDo.createdBy);
+            postDo.updatedBy = _covertFieldToObjectId(postDo.updatedBy);
+            postDo.affiliateId = _covertFieldToObjectId(postDo.affiliateId);
+            /*if(postDo.createdBy && !(postDo.createdBy instanceof MongoDb.ObjectID)){
+                postDo.createdBy = new MongoDb.ObjectID(postDo.createdBy);
+            }
+            if(postDo.updatedBy && !(postDo.updatedBy instanceof MongoDb.ObjectID)){
+                postDo.updatedBy = new MongoDb.ObjectID(postDo.updatedBy);
+            }
             if(!(postDo.affiliateId instanceof MongoDb.ObjectID)){
                 postDo.affiliateId = new MongoDb.ObjectID(postDo.affiliateId);
-            }
+            }*/
             logger.log(postDo);
 
             return _insertNew(collections.Posts, postDo);
@@ -361,6 +449,10 @@ module.exports = function(config, MongoDb, logger){
         updatePost = function(postId, updateDo){
             if(!(postId instanceof MongoDb.ObjectID)){
                 postId = new MongoDb.ObjectID(postId);
+            }
+
+            if(updateDo.updatedBy && !(updateDo.updatedBy instanceof MongoDb.ObjectID)){
+                updateDo.updatedBy = new MongoDb.ObjectID(updateDo.updatedBy);
             }
             return _upsertByMatch(collections.Posts, {}, {_id : postId}, {$set: updateDo});
         },
@@ -398,6 +490,12 @@ module.exports = function(config, MongoDb, logger){
         },
 
         //Private Helper methods
+        _covertFieldToObjectId = function(field){
+            if(field && field !== constants.SYSTEM_DEFAULTS.CREATED_BY && !(field instanceof MongoDb.ObjectID)){
+                field = new MongoDb.ObjectID(field);
+            }
+            return field;
+        },
         _convertFilterObjectId = function(filter, idFieldName, dbFieldName){
             dbFieldName = dbFieldName || idFieldName;
             var needToDeleteOriginalFilterField = dbFieldName !== idFieldName;

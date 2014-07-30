@@ -239,14 +239,14 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             return df.promise;
         },
 
-        createAffiliate = function(name, tenantId, createdBy, location){
+        createAffiliate = function(name, tenantId, createdBy, location, optionData){
             var df = Q.defer();
 
             logger.log("createAffiliate, name: %s,tenantId:%s createdBy: %s", name, tenantId, createdBy);
 
             //validation
             //required fields
-            if(!name || !tenantId || !createdBy){
+            if(!name || !createdBy){
                 df.reject(new InfluenceError(errorCodes.C_400_019_001.code));
 
                 return df.promise;
@@ -255,13 +255,14 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
             var
 
                 affiliate = {
-                    name        : name,
-                    tenantId    : tenantId,
-                    location    : location,
-                    createdOn   : new Date(),
-                    createdBy   : createdBy,
-                    updatedOn   : new Date(),
-                    updatedBy   : createdBy
+                    name            : name,
+                    tenantId        : tenantId,
+                    location        : location,
+                    optionData      : optionData,
+                    createdOn       : new Date(),
+                    createdBy       : createdBy,
+                    updatedOn       : new Date(),
+                    updatedBy       : createdBy
                 };
 
             Q.when(tenantsDataHandler.createAffiliate(affiliate)).then(

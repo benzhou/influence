@@ -1214,7 +1214,9 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
             var post = req.body,
                 postId = req.params.postId,
-                userToken = req.query.token;
+                userToken = req.query.token,
+                userAgent = req.headers.userAgent,
+                hash = "";
 
             Q.when((function(){
                 if(postId){
@@ -1224,7 +1226,7 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
                     return postBusiness.updatePost(postId, post.content, userToken);
                 }else{
-                    return postBusiness.createPost(post.affiliateId, post.content,userToken);
+                    return postBusiness.createPost(post.affiliateId, post.venueId, post.content,userToken);
                 }
             })()).then(
                 function(newPost){

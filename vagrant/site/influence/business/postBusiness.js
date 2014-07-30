@@ -1,9 +1,10 @@
 var Q = require("q"),
     util = require("util"),
     errorCodes    = require('../error/errorCodes'),
-    InfluenceError = require('../error/influenceError');
+    InfluenceError = require('../error/influenceError'),
+    constants       = require('../constants/constants');
 
-module.exports = function(helpers, logger, postDataHandler){
+module.exports = function(helpers, logger, postDataHandler, locationApiBusiness, tenantsBusiness){
     //Posts
     var findPostById = function(postId){
         var df = Q.defer();
@@ -39,31 +40,70 @@ module.exports = function(helpers, logger, postDataHandler){
         return df.promise;
     },
 
-        createPost = function(affiliateId, content, createdBy){
+        createPost = function(affiliateId, venueId, content, createdBy){
             var df = Q.defer();
 
             logger.log("createPost, content: %s,affiliateId:%s createdBy: %s", content, affiliateId, createdBy);
 
             //validation
             //required fields
-            if(!content || !affiliateId){
+            if(!content || (!affiliateId && !venueId)){
                 df.reject(new InfluenceError(errorCodes.C_400_028_001.code));
 
                 return df.promise;
             }
 
-            var
+            Q.when((function(){
+                var _createPost = function(c, affId, cb){
+                    var post = {
+                        content     : c,
+                        affiliateId : affId,
+                        createdOn   : new Date(),
+                        createdBy   : cb,
+                        updatedOn   : new Date(),
+                        updatedBy   : cb
+                    };
 
-                post = {
-                    content     : content,
-                    affiliateId : affiliateId,
-                    createdOn   : new Date(),
-                    createdBy   : createdBy,
-                    updatedOn   : new Date(),
-                    updatedBy   : createdBy
+                    return postDataHandler.createPost(post);
                 };
 
-            Q.when(postDataHandler.createPost(post)).then(
+                //we need to create temp affiliate record
+                if(!affiliateId && venueId){
+                    var filter = {
+                        venueId : [venueId],
+                        exLinkType  : constants.AFFILIATE_EX_LINK_TYPE.FOURSQUARE
+                    };
+
+                    return locationApiBusiness.findVenueDetailsById(venueId).then(
+                        function(result){
+                            logger.log("postBusiness.js createPost locationApiBusiness.findVenueDetailsById promise fulfilled!");
+                            logger.log(result);
+
+                            if(result.type == "linked"){
+                                //Found venue already exist in our system
+                                affiliateId = result.affiliate._id;
+
+                                return _createPost(content, affiliateId, createdBy);
+                            }else{
+                                //We don't have an affiliate yet, create it
+                                return tenantsBusiness.createAffiliate(result.venue.name, null, constants.SYSTEM_DEFAULTS.CREATED_BY, {venue : result.venue}).then(
+                                    function(affiliate){
+                                        logger.log("postBusiness.js createPost tenantsBusiness.createAffiliate promise fulfilled!");
+                                        logger.log(affiliate);
+
+                                        return _createPost(content, affiliate._id, createdBy);
+                                    }
+                                );
+
+                            }
+
+                        }
+                    );
+                }
+
+                return _createPost(content, affiliateId, createdBy);
+
+            })()).then(
                 function(newPost){
                     logger.log("postBusiness.js createPost: postDataHandler.createPost promise resolved");
                     logger.log("here is the newPost object");
