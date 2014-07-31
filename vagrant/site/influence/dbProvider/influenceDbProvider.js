@@ -59,8 +59,11 @@ module.exports = function(dbProvider){
         findAdminAuthTokenByToken = function(tokenStr){
             return dbProvider.findAdminAuthTokenByToken(tokenStr);
         },
-        upsertAdminAuthToken = function(token, updateObject){
-            return dbProvider.upsertAdminAuthToken(token, updateObject);
+        createAdminAuthToken = function(token){
+            return dbProvider.createAdminAuthToken(token);
+        },
+        updateAdminAuthToken = function(token, updateDo){
+            return dbProvider.updateAdminAuthToken(token,updateDo);
         },
 
         //Tenant
@@ -149,7 +152,8 @@ module.exports = function(dbProvider){
         upsertAppAccountByAppkey            : upsertAppAccountByAppkey,
 
         findAdminAuthTokenByToken           : findAdminAuthTokenByToken,
-        upsertAdminAuthToken                : upsertAdminAuthToken,
+        createAdminAuthToken                : createAdminAuthToken,
+        updateAdminAuthToken                : updateAdminAuthToken,
 
         findTenantById                      : findTenantById,
         loadTenants                         : loadTenants,

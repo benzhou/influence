@@ -174,14 +174,14 @@ module.exports = function(config, MongoDb, logger){
         findAdminAuthTokenByToken = function(tokenStr){
             return _findOneBy(collections.AdminAuthToken, {token : tokenStr});
         },
-        upsertAdminAuthToken = function(token, updateObj){
-            if(updateObj.createdBy && !(updateObj.createdBy instanceof MongoDb.ObjectID)){
-                updateObj.createdBy = new MongoDb.ObjectID(updateObj.createdBy);
-            }
-            if(updateObj.updatedBy && !(updateObj.updatedBy instanceof MongoDb.ObjectID)){
-                updateObj.updatedBy = new MongoDb.ObjectID(updateObj.updatedBy);
-            }
-            return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token.token}, updateObj || token);
+        createAdminAuthToken = function(token){
+            token.adminId = _covertFieldToObjectId(token.adminId);
+
+            return _insertNew(collections.AdminAuthToken, token);
+        },
+        updateAdminAuthToken = function(token, updateObj){
+
+            return _upsertByMatch(collections.AdminAuthToken, {createdOn:1}, {token:token}, updateObj);
         },
 
         //Admin Permissions
@@ -680,7 +680,8 @@ module.exports = function(config, MongoDb, logger){
 
         //Admin Auth Token
         findAdminAuthTokenByToken           : findAdminAuthTokenByToken,
-        upsertAdminAuthToken                : upsertAdminAuthToken,
+        createAdminAuthToken                : createAdminAuthToken,
+        updateAdminAuthToken                : updateAdminAuthToken,
 
         //Tenant
         findTenantById                      : findTenantById,

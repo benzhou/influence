@@ -2,11 +2,11 @@ module.exports = function(dbProvider){
 
     var
         createAdminAuthToken = function(token){
-            return dbProvider.upsertAdminAuthToken(token);
+            return dbProvider.createAdminAuthToken(token);
         },
 
         invalidateAdminAuthToken = function(tokenStr){
-            return dbProvider.upsertAdminAuthToken({token : tokenStr}, {$set : {isActive : false}});
+            return dbProvider.updateAdminAuthToken(tokenStr, { isActive : false});
         },
 
         findAdminAuthTokenByToken = function(tokenStr){
