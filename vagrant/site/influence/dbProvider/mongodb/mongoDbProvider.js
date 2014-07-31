@@ -2,7 +2,7 @@
 
 var Q = require("q"),
     util = require("util"),
-    constants       = require('../constants/constants');
+    constants       = require('../../constants/constants');
 
 module.exports = function(config, MongoDb, logger){
 
@@ -305,17 +305,9 @@ module.exports = function(config, MongoDb, logger){
 
         //Affiliates
         createAffiliate = function(affiliateDo){
-            if(affiliateDo.tenantId && !(affiliateDo.tenantId instanceof MongoDb.ObjectID)){
-                affiliateDo.tenantId = new MongoDb.ObjectID(affiliateDo.tenantId);
-            }
-
-            if(affiliateDo.createdBy && !(affiliateDo.createdBy instanceof MongoDb.ObjectID)){
-                affiliateDo.createdBy = new MongoDb.ObjectID(affiliateDo.createdBy);
-            }
-
-            if(affiliateDo.updatedBy && !(affiliateDo.updatedBy instanceof MongoDb.ObjectID)){
-                affiliateDo.updatedBy = new MongoDb.ObjectID(affiliateDo.updatedBy);
-            }
+            affiliateDo.tenantId = _covertFieldToObjectId(affiliateDo.tenantId);
+            affiliateDo.createdBy = _covertFieldToObjectId(affiliateDo.createdBy);
+            affiliateDo.updatedBy = _covertFieldToObjectId(affiliateDo.updatedBy);
 
             logger.log("MongoDbProvider.js createAffiliate");
             logger.log(affiliateDo);

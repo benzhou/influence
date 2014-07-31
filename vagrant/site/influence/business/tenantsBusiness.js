@@ -367,6 +367,11 @@ module.exports = function(helpers, logger, tenantsDataHandler) {
                     logger.log("here is the affiliates object");
                     logger.log(affiliates);
 
+                    if(affiliates.length === 0){
+                        df.resolve(affiliates);
+                        return;
+                    }
+
                     //Load Tenants names
                     var tenantIds = [];
                     affiliates.forEach(function(affiliate){

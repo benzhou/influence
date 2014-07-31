@@ -44,6 +44,8 @@ var routes              = {},
     dataObjects         = {},
     errCodes            = require('./error/errorCodes'),
 
+    requestQ            = require('./lib/requestQ');
+
     influenceLogger     = require('./lib/logger')(),
     accountDataObject   = require('./dataHandler/authDataHandler')(dataObjects),
 
@@ -63,8 +65,8 @@ var routes              = {},
     accountBusiness     = require('./business/accountBusiness')(helpers, util, influenceLogger, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(helpers, util, influenceLogger, appConfig.app, accountBusiness, authDataHandler),
     apiLogBusiness      = require('./business/apiLogBusiness')(influenceLogger, apiLogDataHandler),
-    postBusiness        = require('./business/postBusiness')(helpers, influenceLogger, postDataHandler),
-    locationApiBusiness = require('./business/locationApiBusiness')(helpers, influenceLogger, appConfig.locationApi, tenantsBusiness, request),
+    locationApiBusiness = require('./business/locationApiBusiness')(helpers, influenceLogger, appConfig.locationApi, tenantsBusiness, requestQ),
+    postBusiness        = require('./business/postBusiness')(helpers, influenceLogger, postDataHandler,locationApiBusiness, tenantsBusiness),
 
 
     apiController       =  require('./controllers/apiController')(influenceLogger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness, locationApiBusiness),

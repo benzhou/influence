@@ -4,7 +4,7 @@ var Q = require("q"),
     InfluenceError = require('../error/influenceError'),
     constants       = require('../constants/constants');
 
-module.exports = function(helpers, logger, locationApiConfig, tenantsBusiness, request){
+module.exports = function(helpers, logger, locationApiConfig, tenantsBusiness, requestQ){
     //Location
     var searchLocationByCoordinates = function(lan, long){
         var df = Q.defer();
@@ -27,17 +27,13 @@ module.exports = function(helpers, logger, locationApiConfig, tenantsBusiness, r
 
             logger.log("locationApiBusiness, searchLocationByCoordinates: locationApiUrl %s", locationApiUrl);
 
-            request({url: locationApiUrl, method: "GET", timeout: locationApiConfig.timeoutMS, json:true}, function (err, response, body) {
-                if (err){
-                    logger.log("locationApiBusiness request value got an error!");
-                    logger.log(err);
-                    throw new InfluenceError(err);
-                } else {
-                    if(body.meta.code !== 200){
+            return requestQ.makeRequest({url: locationApiUrl, method: "GET", timeout: locationApiConfig.timeoutMS, json:true}).then(
+                function(result){
+                    if(result.body.meta.code !== 200){
                         throw new InfluenceError(errorCodes.C_400_030_002.code);
                     }else{
                         //df.resolve(body.response.venues);
-                        var venues = body.response && body.response.venues;
+                        var venues = result.body && result.body.response && result.body.response.venues;
 
                         if(!venues || !util.isArray(venues)){
                             throw new InfluenceError(errorCodes.C_400_030_003.code);
@@ -50,7 +46,7 @@ module.exports = function(helpers, logger, locationApiConfig, tenantsBusiness, r
 
                         var venueId = [],
                             filter = {};
-                        body.response.venues.forEach(function(venue){
+                        result.body.response.venues.forEach(function(venue){
                             venueId.push(venue.id);
                         });
 
@@ -93,8 +89,7 @@ module.exports = function(helpers, logger, locationApiConfig, tenantsBusiness, r
                         );
                     }
                 }
-            });
-
+            );
         })()).catch(
             function(err){
                 logger.log("locationApiBusiness searchLocationByCoordinates caught an error!");
@@ -140,28 +135,38 @@ module.exports = function(helpers, logger, locationApiConfig, tenantsBusiness, r
                     }else{
                         //Go to locationApi to lookup the venue
                         var locationApiUrl = [
-                            locationApiConfig.URL, locationApiConfig.methods.searchVenue.endPoint,
-                            '/',venueId
+                            locationApiConfig.URL, locationApiConfig.methods.venue.endPoint,
+                            '/',venueId,
+                            "?client_id=", locationApiConfig.clientId,
+                            "&client_secret=", locationApiConfig.clientSecrect,
+                            "&v=", locationApiConfig.version
                         ].join('');
 
-                        request({url: locationApiUrl, method: "GET", timeout: locationApiConfig.timeoutMS, json:true}, function (err, response, body) {
-                            if(err){
-                                throw new InfluenceError(err);
-                            }else{
-                                var venues = body.response && body.response.venues;
+                        logger.log("locationApiBusiness.js findVenueDetailsById: locationApiUrl");
+                        logger.log(locationApiUrl);
 
-                                if(!venues || !util.isArray(venues) || venues.length === 0){
+                        return requestQ.makeRequest({url: locationApiUrl, method: "GET", timeout: locationApiConfig.timeoutMS, json:true}).then(
+                            function(result){
+                                logger.log("locationApiBusiness.js findVenueDetailsById, requestQ.makeRequest fulfilled!");
+                                logger.log(result);
+
+                                if(!result.body || result.body.meta.code !== 200 || !result.body.response || helpers.isEmptyObject(result.body.response)){
+                                    throw new InfluenceError(errorCodes.C_400_031_003.code);
+                                }
+
+                                var venue = result.body.response && result.body.response.venue;
+
+                                if(!venue || helpers.isEmptyObject(venue)){
                                     throw new InfluenceError(errorCodes.C_400_031_002.code);
                                 }
 
                                 df.resolve({
                                     type    : "unlinked",
-                                    venue   : venues[0]
+                                    venue   : venue
                                 });
                             }
-                        });
+                        );
                     }
-
                 }
             ).catch(
                 function(err){

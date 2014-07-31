@@ -15,7 +15,10 @@ module.exports = function(){
             FOURSQUARE : "FOURSQUARE"
         },
         SYSTEM_DEFAULTS : {
-          CREATED_BY : "SYSTEM_CREATED_BY"
+          CREATED_BY : "SYSTEM_CREATED_BY",
+          AFFILIATE_CREATED_FROM : {
+              USER_POST : "UserPost"
+          }
         },
         ACTIONS : {
             VIEW_ADMIN                  : "VIEW_ADMIN",

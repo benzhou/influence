@@ -19,8 +19,8 @@ module.exports = function(){
             methods         : {
                 searchVenue : {
                     endPoint    : "/venues/search",
-                    limit       : 5,
-                    radius      : 30,
+                    limit       : 10,
+                    radius      : 500,
                     categoryId  : "4d4b7105d754a06374d81259"
                 },
                 venue       : {

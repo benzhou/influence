@@ -85,8 +85,24 @@ module.exports = function(helpers, logger, postDataHandler, locationApiBusiness,
 
                                 return _createPost(content, affiliateId, createdBy);
                             }else{
-                                //We don't have an affiliate yet, create it
-                                return tenantsBusiness.createAffiliate(result.venue.name, null, constants.SYSTEM_DEFAULTS.CREATED_BY, {venue : result.venue}).then(
+                                //We don't have an affiliate yet, create it with null tenant
+                                return tenantsBusiness.createAffiliate(
+                                    result.venue.name,
+                                    null,
+                                    constants.SYSTEM_DEFAULTS.CREATED_BY,
+                                    null,
+                                    {
+                                        createdFrom : constants.SYSTEM_DEFAULTS.AFFILIATE_CREATED_FROM.USER_POST,
+                                        venue : {
+                                            id          : result.venue.id,
+                                            name        : result.venue.name,
+                                            contact     : result.venue.contact,
+                                            location    : result.venue.location,
+                                            categories  : result.venue.categories,
+                                            verified    : result.venue.verified
+                                        }
+                                    }
+                                ).then(
                                     function(affiliate){
                                         logger.log("postBusiness.js createPost tenantsBusiness.createAffiliate promise fulfilled!");
                                         logger.log(affiliate);

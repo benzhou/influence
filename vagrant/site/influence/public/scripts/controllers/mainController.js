@@ -75,7 +75,7 @@
 
                 $scope.userPosition = position;
 
-                var ll = "34.037534,-84.567637";//[position.coords.latitude,',', position.coords.longitude].join('');
+                var ll = [position.coords.latitude,',', position.coords.longitude].join('');//"34.037534,-84.567637";//
                 locationApiService.get({ll : ll}).$promise.then(
                     function(result){
                         $log.log("influenceMainCtrl, locationApiService.get fulfilled!");
