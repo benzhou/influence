@@ -16,7 +16,8 @@ module.exports = function(config, MongoDb, logger){
             Actions             : "Actions",
             Affiliates          : "Affiliates",
             Posts               : "Posts",
-            AdminAuthorizations : "AdminAuthorizations"
+            AdminAuthorizations : "AdminAuthorizations",
+            ConsumerPostLog     : "ConsumerPostLog"
         },
         db = null,
         connectionDefer = null,
@@ -78,6 +79,9 @@ module.exports = function(config, MongoDb, logger){
         //API Call Log CURD
         insertApiCallLog = function(apiCallLog){
             return _insertNew(collections.APICallLog, apiCallLog);
+        },
+        createNewConsumerPostLog = function(postLog){
+            return _insertNew(collections.ConsumerPostLog, postLog);
         },
 
         //Admin Account CURD
@@ -657,6 +661,7 @@ module.exports = function(config, MongoDb, logger){
 
         //Api Call log
         insertApiCallLog                    : insertApiCallLog,
+        createNewConsumerPostLog            : createNewConsumerPostLog,
 
         //Admin Account
         loadAdminAccounts                   : loadAdminAccounts,

@@ -11,6 +11,10 @@ module.exports = function(){
                 ACTIVE_ONLY : "ao"
             }
         },
+        REQ_HEADERS : {
+            X_FORWARDED_FOR : "x-forwarded-for",
+            USER_AGENT      : "user-agent"
+        },
         AFFILIATE_EX_LINK_TYPE : {
             FOURSQUARE : "FOURSQUARE"
         },

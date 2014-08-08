@@ -5,6 +5,10 @@ module.exports = function(dbProvider){
         insertApiCallLog = function(apiCallLog){
             return dbProvider.insertApiCallLog(apiCallLog);
         },
+        createNewConsumerPostLog = function(postLog){
+            return dbProvider.createNewConsumerPostLog(postLog);
+        },
+
 
         //Admin Account
         loadAdminAccounts = function(filter, numberOfPage, pageNumber, sort){
@@ -132,6 +136,7 @@ module.exports = function(dbProvider){
 
     return {
         insertApiCallLog                    : insertApiCallLog,
+        createNewConsumerPostLog            : createNewConsumerPostLog,
 
         loadAdminAccounts                   : loadAdminAccounts,
         findAdminAccountById                : findAdminAccountById,

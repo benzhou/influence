@@ -64,7 +64,7 @@ var routes              = {},
     tenantsBusiness     = require('./business/tenantsBusiness')(helpers, influenceLogger, tenantsDataHandler),
     accountBusiness     = require('./business/accountBusiness')(helpers, util, influenceLogger, accountDataHandler),
     authBusiness        = require('./business/authBusiness')(helpers, util, influenceLogger, appConfig.app, accountBusiness, authDataHandler),
-    apiLogBusiness      = require('./business/apiLogBusiness')(influenceLogger, apiLogDataHandler),
+    apiLogBusiness      = require('./business/apiLogBusiness')(helpers, influenceLogger, apiLogDataHandler),
     locationApiBusiness = require('./business/locationApiBusiness')(helpers, influenceLogger, appConfig.locationApi, tenantsBusiness, requestQ),
     postBusiness        = require('./business/postBusiness')(helpers, influenceLogger, postDataHandler,locationApiBusiness, tenantsBusiness),
 

@@ -5,14 +5,22 @@ var
     errorCodes      = require('../error/errorCodes'),
     constants       = require('../constants/constants');
 
-module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness, authorizationHelper, postBusiness, locationApiBusiness){
+module.exports = function(logger, authBusiness, accountBusiness,
+                          tenantsBusiness, authorizationHelper, postBusiness, locationApiBusiness,
+                          apiLogBusiness
+    ){
 
     var test = function(req,res,next){
             logger.log("================");
             logger.log("apiController.js test action called!");
             logger.log("================");
 
-            res.json(400, {result:true});
+            res.json(400, {
+                req : {
+                    headers : req.headers
+                },
+                result:true
+            });
             next();
         },
 
@@ -1215,8 +1223,8 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
             var post = req.body,
                 postId = req.params.postId,
                 userToken = req.query.token,
-                userAgent = req.headers.userAgent,
-                hash = "";
+                xForwardedFor = req.headers[constants.REQ_HEADERS.X_FORWARDED_FOR],
+                userAgent     = req.headers[constants.REQ.HEADERS.USER_AGENT];
 
             Q.when((function(){
                 if(postId){
@@ -1226,7 +1234,10 @@ module.exports = function(logger, authBusiness, accountBusiness, tenantsBusiness
 
                     return postBusiness.updatePost(postId, post.content, userToken);
                 }else{
-                    return postBusiness.createPost(post.affiliateId, post.venueId, post.content,userToken);
+                    //Only log new Post
+                    return apiLogBusiness.logClientConsumerPosts(post.affiliateId || post.venueId, xForwardedFor, userAgent, userToken).then(function(){
+                        return postBusiness.createPost(post.affiliateId, post.venueId, post.content,userToken);
+                    });
                 }
             })()).then(
                 function(newPost){

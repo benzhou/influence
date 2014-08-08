@@ -4,7 +4,7 @@ var
     errorCodes      = require('../error/errorCodes'),
     InfluenceError  = require('../error/influenceError');
 
-module.exports = function(logger, apiLogDataHandler){
+module.exports = function(helper, logger, apiLogDataHandler){
 
     var log = function(tokenStr, req, res){
         var df = Q.defer(),
@@ -45,9 +45,38 @@ module.exports = function(logger, apiLogDataHandler){
         ).done();
 
         return df.promise;
-    };
+    },
+        logClientConsumerPosts = function(venueOrAffiliateId, xForwardedFor, userAgentString, userIdentifier){
+            var df = Q.defer();
+
+            Q.when((function(){
+                var concatStr = [venueOrAffiliateId, '|', xForwardedFor, '|', userAgentString, '|', userIdentifier].join(''),
+                    hash = helper.sha256Hash(concatStr)
+                    postLog = {
+                        venueOrAffiliateId  : venueOrAffiliateId,
+                        xForwardedFor       : xForwardedFor,
+                        userAgentString     : userAgentString,
+                        userIdentifier      : userIdentifier,
+                        allHash             : hash,
+                        createdOn           : new Date()
+                    };
+
+                    return apiLogDataHandler.createNewConsumerPostLog(postLog);
+            })()).then(
+                function(newPostLog){
+                    df.resolve(newPostLog);
+                }
+            ).catch(
+                function(err){
+                    df.reject(err);
+                }
+            ).finally();
+
+            return df.promise;
+        };
 
     return {
-        log     : log
+        log                     : log,
+        logClientConsumerPosts  : logClientConsumerPosts
     };
 };
