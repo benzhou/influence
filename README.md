@@ -177,7 +177,7 @@ Influence Documentations
     
    
 - Unit Test frameworks
-    * [Mocha](http://visionmedia.github.io/mocha/) Test running
+    * [Mocha](http://mochajs.org/) Test running
     * [Sinon.js](http://sinonjs.org/docs) Stub/Spy/Mock library
     * [Chai.js](http://chaijs.com/api/) Assertion syntax
     * [Chai-as-promised](https://github.com/domenic/chai-as-promised/) Chai add-on for promises
